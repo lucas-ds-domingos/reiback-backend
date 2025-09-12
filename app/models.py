@@ -74,6 +74,7 @@ class Proposta(Base):
     premio = Column(Float, nullable=True)                  # Valor total do seguro pago pelo cliente
     comissao = Column(Float, nullable=True)                # Comissão do corretor/tomador
     coberturas_adicionais = Column(Text, nullable=True)    # JSON/string com lista
+    numero_contrato = Column(Integer)
 
     # 🔹 Relações
     tomador_id = Column(Integer, ForeignKey("tomadores.id"))
