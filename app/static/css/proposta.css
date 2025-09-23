@@ -1,0 +1,340 @@
+body {
+  margin: 0;
+  padding: 0;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+
+@page {
+  size: A4;
+  background: url("{{ base_path }}/images/teste.jpeg") no-repeat center top;
+  background-size: cover;
+  width: 100%;
+  height: 100%;
+}
+
+.page {
+  width: 210mm;
+  height: 297mm;
+  min-height: 297mm;
+  background-size: 100% auto;
+  background-repeat: repeat;
+  position: relative;
+}
+.watermark {
+  position: fixed; /* Fixa na tela/impressão */
+  top: 50%;
+  left: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) rotate(-45deg);
+  font-size: 65px;
+  color: rgba(255, 0, 0, 0.3); /* vermelho com transparência */
+  font-weight: bold;
+  pointer-events: none; /* não interfere no conteúdo */
+  z-index: 1000;
+  white-space: nowrap;
+  text-transform: uppercase;
+}
+
+
+
+.page h1,
+.page p {
+  margin: 0;
+  line-height: 1.6;
+  font-family: "Times New Roman", serif;
+  font-size: 12pt;
+  text-align: justify;
+}
+
+/* Para impressão */
+@media print {
+  body {
+    background: none;
+  }
+}
+
+
+
+/* PAGE 1 */
+
+.containerpage1{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.headerText1{
+  display: flex;
+  justify-content: center;
+  margin-top: 60mm;
+
+}
+.headerText1 h1{
+  font-size: 3.2mm;
+  font-weight: bold;
+}
+
+.tableFiador{
+  margin-top: 18mm;
+  border: solid 1px black;
+  width: 94%;
+  margin-left: 6mm;
+  margin-right: 6mm;  
+}
+
+/* titulos */
+.tituloFiador{
+  background: #D9D9D9;
+  border-bottom: solid 1px black;
+}
+
+
+.tituloFiador strong{
+margin: 3.5mm;
+font-size: 3mm;
+}
+
+.tituloTomador{
+  background: #D9D9D9;
+  border-top: solid 1px black;
+}
+.tituloTomador strong{
+  margin: 3.5mm;
+  font-size: 3mm; 
+}
+
+
+/* container de texto/area */ 
+.containerTextFiador{
+  margin: 4mm;
+}
+
+.containerTextFiador p{
+  font-size: 3.2mm;
+  
+  
+}
+
+.containerDados p span{
+  margin-left: 20mm;
+  font-size: 3.5mm;
+  
+}
+.containerDados p{
+  border-bottom: solid 1px black;
+}
+.containerDados {
+  border-top: solid 1px black;
+}
+.cep-cit{
+  display: flex;
+  gap: 50mm;
+  margin-left: 18mm;
+}
+.cep-cit span{
+  font-size: 3.5mm;
+  padding: 1mm;
+}
+
+
+/* CONFIG DE CONDIÇÕES */
+
+.condicoes{
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.Header-condicao{
+  display: flex;
+  justify-content: center;
+  margin-top: 5mm;
+  margin-bottom: 5mm;
+}
+
+.container-condicao{
+  border-left: solid 1px black;
+
+  border-top: solid 1px black;
+  margin-left: 6mm;
+  margin-right: 6mm;  
+  display: flex;
+  width: 100%;
+  height: fit-content;
+  justify-content: space-between;
+}
+
+.tablecondicao1{
+  border-right: solid 1px black;
+  width: 50%;
+  display: flex;
+
+}
+
+.tablecondicao2{
+  width: 50%;
+  display: flex;
+  justify-content: center;
+}
+
+.controleTable {
+  width: 100%;
+}
+
+.controleTable p {
+  border-bottom: solid 1px black;
+}
+
+.controleTable p{
+ text-align: center;
+}
+
+.vigencia{
+  border-left: solid 1px black;
+  border-bottom: solid 1px black;
+  margin-left: 6mm;
+  margin-right: 6mm;  
+  display: flex;
+  justify-content: space-between;
+}
+
+.vigencia p{
+  border-right: solid 1px black;
+  width: 100%;
+  text-align: center;
+}
+
+.textModalidade{
+  margin-left: 6mm;
+  margin-right: 6mm;  
+  margin-top: 7mm;
+}
+
+/* PAGE 2*/
+
+.containerPage2 {
+  display: flex;
+  flex-direction: column; /* força alinhamento em coluna */
+  gap: 5mm; /* espaço entre os blocos */
+  margin: 10mm;
+}
+
+.div1{
+  margin-top: 50mm;
+}
+.containerPage2 div {
+  width: 96%;
+  margin-left: 6mm;
+  margin-right: 6mm;
+}
+
+.containerPage2 p {
+  font-size: 11pt;
+  line-height: 1.5;
+  text-align: justify;
+  margin: 0;
+  display: flex;
+}
+.divAss {
+  display: flex;
+  flex-direction: column;  
+  align-items: center;
+  justify-content: center;
+  margin-top: 30mm;
+}
+
+.divAss p {     
+  font-size: 11pt;
+  font-weight: bold;
+}
+
+
+/* PAGE 3 */
+.containerPage3 {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10mm; 
+  box-sizing: border-box; 
+  padding: 55mm 10mm 10mm 10mm; /* top + outros */
+}
+
+.controle3 {
+  display: flex;
+  flex-direction: column;
+  width: 100%; 
+}
+
+.text1Page3 {
+  width: 100%; 
+}
+
+.text1Page3 p {
+  width: 100%;       
+  margin: 0;          
+  padding: 0;        
+  text-align: justify; 
+  line-height: 1.5;
+  font-size: 3.2mm;
+}
+
+.titulopage3{
+  font-size: 3.3mm;
+  margin-bottom: 4mm;
+}
+
+.CondicoesGeraisp3{
+  font-size: 3.3mm;
+  margin-bottom: 4mm;
+  margin-top: 4mm;
+}
+.obj1{
+  font-size: 3.3mm;
+  margin-bottom: 4mm;
+  margin-top: 4mm;
+}
+.obj2{
+  font-size: 3.3mm;
+  margin-bottom: 4mm;
+  margin-top: 4mm;
+}
+
+.containerfinalp3 p{
+  width: 100%;       
+  margin: 0;          
+  padding: 0;        
+  text-align: justify; 
+  line-height: 2;
+  font-size: 3.2mm;
+}
+
+.divcondgp33{
+  margin-top: 7mm;
+}
+
+.divcondgp3{
+  margin-top: 7mm;
+  margin-bottom: 7mm;
+}
+
+
+
+/*PAGE 4*/
+
+.containerp4{
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 10mm; 
+  box-sizing: border-box; 
+  padding: 55mm 10mm 10mm 10mm; 
+}
+
+.obj33{
+  margin-bottom: 4mm;
+  margin-top: 4mm;
+}

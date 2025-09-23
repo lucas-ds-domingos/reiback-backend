@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Minuta</title>
+  <link rel="stylesheet" href="{{ base_path }}/css/proposta.css">
+  
+</head>
+
+<body>
+  <div class="watermark">SEM VALOR LEGAL</div>
+  <div class="page"  >
+    <div class="containerpage1">
+      <div>
+        <div class="headerText1">
+          <h1>CARTA DE FIANÇA DIGITAL Nº {{ numeroProposta }}</h1>
+        </div>
+        <div class="tableFiador">
+          <p class="tituloFiador"><strong>I – FIADOR/GARANTIDOR</strong></p>
+          <div class="containerTextFiador">
+            <p class="textoFiador">
+              <strong>
+                FINANCE ASSURANCE GARANTIA LTDA,</strong>inscrito no CNPJ/MF sob N.º 13.105.681/0001-02, sociedade anônima de capital fechado,
+                atuando como Garantidor/Fiador, com amparo jurídico/legal e em conformidade com Código Civil/2002: Art. 825, Código Civil Brasileiro
+                (artigos 818 a 839 da Lei 10.406/2002), bem como no Código de Processo Civil (artigo 300 § 1°) e em consonância com os objetivos
+                sociais constantes no Estatuto Social desta Sociedade Anônima e com lastro no Patrimônio Líquido - PL devidamente consolidado,
+                integralizado e classificado como título patrimonial, conforme atos constitutivos arquivados e registrados perante a Junta Comercial do
+                Estado de São Paulo – JUCESP, sob o NIRE nº 3523492805-0, com sede à Avenida Brasília, 2121 - Sala A, Jardim Nova Yorque, Araçatuba
+                – SP, CEP: 16015-450, por seus representantes legais, declara assumir total responsabilidade como Fiador/Garantidor desta frontispício de
+                Carta de Fiança, descritas neste documento.
+              </p>
+          </div>
+
+          <p class="tituloTomador"><strong>II – TOMADOR</strong></p>
+          <div class="containerDados">
+            <p><span>Nome: {{ nomeTomador }}</span></p>
+            <p><span>CPF / CNPJ: {{ cnpjTomador }}</span></p>
+            <p><span>Endereço: {{ enderecoTomador }}</span></p>
+            <div class="cep-cit">
+              <span>CEP: {{ cepTomador }}</span>
+              <span>Cidade - Estado: {{ ufTomador }}</span>
+            </div>
+          </div>
+
+          <p class="tituloTomador"><strong>III – BENEFICIÁRIO</strong></p>
+          <div class="containerDados">
+            <p><span>Nome: {{ nomeBeneficiario }}</span></p>
+            <p><span>CPF / CNPJ: {{ cnpjBeneficiario }}</span></p>
+            <p><span>Endereço: {{ enderecoBeneficiario }}</span></p>
+            <div class="cep-cit">
+              <span>CEP: {{ cepBeneficiario }}</span>
+              <span>Cidade - Estado: {{ ufBeneficiario }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="Header-condicao"><h1>Condições</h1></div>
+
+        <div class="condicoes">
+          <div class="container-condicao">
+            <div class="tablecondicao1">
+              <div class="controleTable">
+                <p><strong>Setor</strong></p>
+                <p><span>PÚBLICO</span></p>
+                <p><strong>Modalidade</strong></p>
+              </div>
+            </div>
+            <div class="tablecondicao1">
+              <div class="controleTable">
+                <p><strong>Limite Máximo de Fiança</strong></p>
+                <p><strong>{{ valor }}</strong></p>
+                <p>{{ subgrupo }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="vigencia">
+          <p><span>Período da Vigência</span></p>
+          <p><span>{{ inicioVigencia }}</span></p>
+          <p><span>{{ terminoVigencia }}</span></p>
+        </div>
+
+        <div class="textModalidade">
+          <p><strong>Objeto da Fiança:</strong> {{ textoCompleto }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div class="containerPage2">
+        <div class="div1">
+        <p>
+          A presente fiança é concedida proporcionalmente ao seu prazo de vigência, ou seja, pelo prazo assinalado ProRata Temporis, estando devidamente contabilizada, ficando acertado que as partes deverão no prazo máximo de
+          72 (setenta e duas) horas após o vencimento de qualquer obrigação não cumprida e até o prazo de validade acima
+          fixada exigir da FINANCE ASSURANCE GARANTIA LTDA, por meio de comunicação por escrito, caso o Afiançado
+          não cumpra suas obrigações, nos termos das exigências contidas nas condições gerais, condições
+          particulares/especiais e contratuais encaminhadas ao tomador juntamente com a CCG.
+        </p>
+      </div>
+      <div>
+        <p>
+          Fica estabelecido que, especificamente para fins indenizatórios, não estarão cobertos pela presente carta fiança
+          quaisquer prejuízos ou demais penalidades decorrentes da rescisão do contrato garantido pela presente carta
+          fiança, causados por ou de qualquer forma relacionados a atos, fatos violadores de normas de anticorrupção,
+          perpetrados pelo beneficiário/credor, tomador ou controladas, controladoras e coligadas, bem como seus
+          respectivos sócios/acionistas, representantes, titulares ou funcionários de qualquer natureza.
+        </p>
+      </div>
+      <div>
+        <p>
+          Esta Carta de Fiança não cobre riscos específicos tais como: multas, obrigações trabalhistas, de seguridade social,
+          inclusive decorrente de acidentes de trabalho, custas e honorários advocatícios e indenizações que envolvam
+          empregados da empresa afiançada ou terceiro. A Fiadora, recebendo a comunicação para honrar esta Fiança,
+          dentro do prazo previsto, efetuará o pagamento do valor devido dentro de 72 ( Setenta e Duas) horas seguintes à
+          excussão dos bens da Afiançada, desde que atendidas as exigências contidas nas condições gerais, condições
+          particulares/especiais e contratuais em anexo. Esta fiança não cobre expectativa de ocorrência de sinistro anterior
+          à data de sua emissão. Para total eficácia da execução desta Carta Fiança, o Favorecido/Beneficiário deverá estar
+          em dia com suas obrigações contratuais, em especial as financeiras, perante o Afiançado. 
+        </p>
+      </div>
+      <div class="divAss">
+          <p>---------------------------------------------------------------</p>
+          <p>FINANCE ASSURANCE GRANTIA LTDA</p>
+          <p>CNPJ: 13.105.681/0001-02</p>
+      </div>
+    </div>
+  </div>
+  <div class="page">
+      <div class="containerPage3">
+          <div class="controle3">
+            <strong class="titulopage3">
+              CONTRATO DE GARANTIA
+            </strong>
+            <div class="text1Page3">
+              <p>
+              Este contrato refere-se tão somente a garantia de produtos e serviços contratados ou adquiridos entre o tomador e o
+              Beneficiário/Credor considerando as condições gerais e o contrato de prestação de serviço em carta fiança são parte
+              integrante deste documento, não abrangendo: práticas criminosas de lavagem de dinheiro ou praticas fraudulentas,
+              pirâmide financeira, indenizações trabalhistas de qualquer espécie, recolhimento previdenciário do FGTS,
+              indenizações a fornecedores, exceto se o fornecedor for o próprio Beneficiário/Credor ou quaisquer credores e
+              recolhimento de impostos de qualquer natureza, de obrigação do afiançado neste contrato.
+              A presente Fiança não assegura riscos originados em data anterior à presente, ou originários de outras modalidades
+              e de outros ramos de seguro, de atos terroristas ou sabotagem, não assegurado, ainda, o pagamento de tributos,
+              obrigações de sigilo e de respeito à propriedade intelectual, custas e honorários advocatícios, danos ambientais, danos
+              líquidos, danos acordados (acordos feitos entre afiançado e Beneficiário/Credor sem a prévia anuência do
+              fiador/garantidor), riscos de natureza política, riscos hidrológicos e/ou geológicos e indenizações que envolvam
+              empregados do afiançado ou terceiros.
+              Esta carta não terá nenhum valor legal se o tomador cumprir de forma irrevogável todas as condições descritas no
+              contrato de prestação de serviço em carta fiança, que deverá ser assinado pelos seus representantes legais.
+            </p>
+            </div>
+          </div>
+          <div class="containerfinalp3">
+            <div class="divcondgp33">
+              <strong class="CondicoesGeraisp3">
+              CONDIÇÕES GERAIS
+            </strong>
+            </div>
+            <div class="divcondgp3">
+              <strong class="obj1">
+                1.Objeto
+              </strong>
+            </div>
+            <p>
+              Este contrato de garantia, garante o fiel cumprimento das obrigações assumidas pelo tomador perante o
+              beneficiário/credor, conforme os termos do contrato de prestação de serviço referente as cartas fianças emitidas para
+              o tomador até o limite disponibilizado pela FINANCE ASSURANCE GARANTIA LTDA ao Tomador.
+            </p>
+            <div class="divcondgp3">
+              <strong class="obj2">
+              2.Definições
+              </strong>
+            </div>
+            <p>
+              Aplicam-se as cartas fianças e ao contrato as seguintes definições: 
+            </p>
+            <p>
+              2.1. Carta Fiança: Documento, emitido pelo fiador/garantidor, que representa formalmente o contrato de prestação de
+              serviço em carta fiança. 
+            </p>
+            <p>
+              2.2. Condições Gerais: Conjunto das cláusulas comuns a todas as modalidades e/ou coberturas de um contrato de
+              garantia, que estabelecem as obrigações e os direitos das partes contratantes. 
+            </p>
+            <p>
+              2.3. Condições Especiais: Conjunto das disposições específicas relativas a cada modalidade e/ou cobertura de um
+              contrato de garantia, que alteram as disposições estabelecidas nas condições gerais. 
+            </p>
+            <p>
+              2.4. Condições Particulares: Conjunto de cláusulas que alteram, de alguma forma, as condições gerais e/ou condições
+              especiais, de acordo com cada beneficiário/credor. 
+            </p>
+            <p>
+              2.5. Contrato Principal: Todo e qualquer ajuste entre órgãos ou entidades da administração pública
+              (beneficiário/credor) e particulares (tomadores), em que haja um acordo de vontades para formação de vínculos e a
+              estipulação de obrigações recíprocas, seja qual for a denominação utilizada. 
+            </p>
+            <p>
+              2.6. Endosso: Instrumento formal, assinado pelo fiador/garantidor, que introduz modificações na carta fiança, mediante
+              solicitação e anuência expressa das partes. 
+            </p>
+          </div>
+      </div>
+  </div>
+  <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                <p>
+                  2.7. Indenização: Pagamento dos prejuízos e/ou multas resultantes do inadimplemento das obrigações cobertas pela
+                  carta fiança. 
+                </p>
+                <p>
+                  2.8. Limite Máximo de Garantia: Valor máximo que o fiador/garantidor se responsabilizará perante o beneficiário/credor
+                  em função do pagamento de indenização.
+                </p>
+                <p>
+                  2.9. Custo de Emissão: Importância devida pelo tomador ao fiador/garantidor, em função da cobertura desde contrato
+                  de garantia e que deverá constar no contrato de prestação de serviço em carta fiança, carta Fiança ou endosso.  
+                </p>
+                <p>
+                  2.10. Processo de Regulamentação de Sinistro: Procedimento pelo qual a Fiador/Garantidor constará ou não a
+                  procedência da reclamação de sinistro, bem como a apuração dos prejuízos cobertos pela Carta Fiança. 
+                </p>
+                <p>
+                  2.11. Proposta de Garantia: Instrumento formal de pedido de emissão de Carta Fiança.  
+                </p>
+                <p>
+                  2.12. Relatório Final de Regulação: Documento emitido pela Fiador/Garantidor no qual se transmite o posicionamento
+                  acerca da caracterização ou não do sinistro reclamado, bem como os possíveis valores a serem indenizados.
+                </p>
+                <p>
+                  2.13. Beneficiário/Credor: A administração pública e/ou o contratante privado.  
+                </p>
+                <p>
+                  2.14. Fiador/Garantidor: A empresa a garantir as obrigações assumidas pelo Tomador perante o Beneficiário/ Credor
+                  nos termos desta Carta Fiança. 
+                </p>
+                <p>
+                  2.15. Garantia: Documento que garante o fiel cumprimento das obrigações assumidas pelo tomador perante o
+                  Beneficiário/Credor, conforme os termos da Carta Fiança. 
+                </p>
+                <p>
+                  2.16. Sinistro: O inadimplemento das obrigações do Tomador coberto pelo contrato de garantia. 
+                </p>
+                <p>
+                  2.17. Tomador: Devedor das obrigações por ele assumidas perante o Beneficiário/Credor. 
+                </p>
+                <p>
+                  2.18. Contrato de Prestação de Serviço em Carta Fiança: Um contrato de prestação de serviço em Carta Fiança
+                  firmado entre o tomador e a FINANCE ASSURANCE GARANTIA LTDA, que define um conjunto das cláusulas, onde
+                  o tomador deve cumprir de forma irrevogável todas as condições e as obrigações e os direitos das partes contratantes.
+                </p>
+                <div>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  3. Aceitação: 
+                  </strong>
+                  </div>
+                  <p>
+                    3.1. A contratação/alteração do contrato de garantia somente poderá ser feita mediante proposta assinada pelo
+                    proponente, seu representante ou corretor habilitado. A proposta escrita deverá conter os elementos essenciais ao
+                    exame e aceitação do risco. 
+                  </p>
+                  <p>
+                    3.2. O Fiador/Garantidor fornecerá, obrigatoriamente, ao proponente, protocolo que identifique a proposta por ela
+                    recepcionada, com a indicação da data e da hora de seu recebimento. 
+                  </p>
+                  <p>
+                    3.3. O Fiador/Garantidor terá prazo de 15 (quinze) dias para se manifestar sobre a aceitação ou não da proposta,
+                    contados da data de seu recebimento, seja para garantias novas ou renovações, bem como alterações que impliquem
+                    modificação do risco. 
+                  </p>
+                  <p>
+                    3.3.1. Caso o proponente da garantia seja pessoa física, a solicitação de documentos complementares, para análise
+                    e aceitação do risco, ou da alteração proposta, poderá ser feita apenas uma vez, durante o prazo previsto no item 3.3. 
+                  </p>
+                  <p>
+                    3.3.2. Se o proponente for pessoa jurídica, a solicitação de documentos complementares poderá ocorrer mais de uma
+                    vez, durante o prazo previsto no item 3.3., desde que o Fiador/Garantidor indique os fundamentos do pedido de novos
+                    elementos, para avaliação da proposta ou taxação de risco. 
+                  </p>
+                  <p>
+                    3.3.3. No caso de solicitação de documentos complementares, para análise e aceitação do risco, ou da alteração
+                    proposta, o prazo de 15 (quinze) dias previsto no item 3.3. ficará suspenso, voltando a correr a partir da data em que
+                    se der a entrega de documentação. 
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+  <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                <p>
+                  3.4. No caso de não aceitação da proposta, o Fiador/Garantidor comunicará o fato, por escrito, ao proponente,
+                  especificando os motivos da recusa.  
+                </p>
+                <p>
+                  3.5. A ausência de manifestação, por escrito do Fiador/Garantidor no prazo acima aludido, caracterizará a aceitação
+                  tácita do contrato de garantia.
+                </p>
+                <p>
+                  3.6. Caso a aceitação da proposta dependa de contratação ou alteração de renovações facultativa, o prazo aludido no
+                  item 3.3. será suspenso até que o beneficiário/credor se manifeste formalmente, comunicando o Fiador/Garantidor,
+                  por escrito, ao proponente tal eventualidade, ressaltando a consequente inexistência de cobertura enquanto perdurar
+                  a suspensão. 
+                <p>
+                  3.7. A emissão da Carta Fiança ou do endosso será feita em até 15 (quinze) dias, a partir da data de aceitação da
+                  proposta.
+                </p>
+                <div>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  4. Valor da Garantia: 
+                  </strong>
+                  </div>
+                  <p>
+                    4.1. O valor da garantia desta Carta Fiança é o valor máximo nominal por ela garantido.  
+                  </p>
+                  <p>
+                    4.2. Quando efetuadas alterações previamente estabelecidas no Contrato Principal ou no documento que serviu de
+                    base para a aceitação do risco, o valor da garantia deverá acompanhar tais modificações, em virtude de que se faça
+                    necessária a modificação do valor contratual. O valor da garantia poderá acompanhar tais modificações, desde que
+                    solicitado e haja o respectivo aceite pelo Fiador/Garantidor, por meio da emissão de endosso. 
+                  </p>
+                  <p>
+                    4.3. Para alterações posteriores efetuadas no contrato principal ou no documento que serviu de base para a aceitação
+                    do risco, em virtude das quais se faça necessárias a modificação do valor contratual, o valor da garantia poderá
+                    acompanhar tais modificações, desde que solicitado e haja o respectivo aceite pelo Fiador/Garantidor, por meio da
+                    emissão de endosso.
+                  </p>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  5. Custo da Emissão da Garantia: 
+                  </strong>
+                  </div>
+                  <p>
+                    5.1. O Tomador é responsável pelo pagamento do custo da emissão ao Fiador/Garantidor por todo o prazo de vigência
+                    da Carta fiança, anualmente. 
+                  </p>
+                  <p>
+                    5.1.1. Fica entendido e acordado que a Carta Fiança só continuará em vigor se o Tomador tiver pagado o custo da
+                    emissão nas datas convencionadas, anualmente. 
+                  </p>
+                  <p>
+                    5.1.2. Não pagamento por parte do Tomador, na data fixada, qualquer do custo da emissão devido, sendo da emissão
+                    e/ou dos reajustes pelo IGPM e/ou do pagamento anual poderá o Fiador/Garantidor recorrer à execução do Contrato
+                    de Prestação de Serviço em Carta Fiança sob pena de nulidade e/ou rescisão por falta de pagamento. 
+                  </p>
+                  <p>
+                    5.2. Em caso de parcelamento do custo da emissão, não será permitida a cobrança de nenhum valor adicional, a título
+                    de custo administrativo de fracionamento, devendo ser garantido ao Tomador, quando houver parcelamento com juros,
+                    a possibilidade de antecipar o pagamento de qualquer uma das parcelas, com a consequente redução proporcional
+                    dos juros pactuados. 
+                  </p>
+                  <p>
+                    5.3. Se a data limite para o pagamento do custo da emissão a vista ou de qualquer uma de suas parcelas coincidir
+                    com dia em que não haja expediente bancário, o pagamento poderá ser efetuado no primeiro dia útil em que houver
+                    expediente bancário.
+                  </p>
+                  <p>
+                    5.4. O Fiador/Garantidor encaminhará o documento de cobrança diretamente ao tomador ou seu Corretor e/ou
+                    representante, observada a antecedência mínima de 3 (três) dias úteis, em relação à data do respectivo vencimento.
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+  <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                  <div class="obj33">
+                  <strong class="obj2">
+                  6. Vigência:  
+                  </strong>
+                  </div>
+                  <p>
+                    6.1. Para as modalidades do Contrato de Prestação de Serviço em Carta Fiança nas quais haja vinculação da Carta
+                    Fiança a um contrato principal, a vigência da Carta Fiança será igual ao prazo estabelecido no contrato principal,
+                    respeitadas as particularidades previstas nas Condições Especiais de cada modalidade contratada. 
+                  </p>
+                  <p>
+                    6.2. Para as demais modalidades, a vigência Carta Fiança será igual ao prazo informado na mesma, estabelecido de
+                    acordo com as disposições previstas nas Condições Especiais da respectiva modalidade. 
+                  <p>
+                    6.3. Quando efetuadas alterações de prazo previamente estabelecidas no contrato principal ou no documento que
+                    serviu de base para a aceitação do risco pelo Fiador/Garantidor, a vigência da Carta Fiança acompanhará tais
+                    modificações, devendo o Fiador/Garantidor emitir o respectivo endosso. 
+                  </p>
+                  <p>
+                    6.4. Para alterações posteriores efetuadas no contrato principal ou no documento que serviu de base para aceitação
+                    do risco pelo Fiador/Garantidor solicitado e haja o respectivo aceite pelo Fiador/Garantidor, por meio da emissão de
+                    endosso
+                  </p>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  7. Expectativa, Reclamação e Caracterização do Sinistro:
+                  </strong>
+                  </div>
+                  <p>
+                    7.1. A Expectativa, Reclamação e Caracterização do Sinistro serão especificadas para cada modalidade nas
+                    Condições Especiais, quando couberem.
+                  </p>
+                  <p>
+                    7.2. O Fiador/Garantidor descreverá nas Condições Especiais os documentos que deverão ser apresentados para a
+                    efetivação da Reclamação de Sinistro. 
+                  </p>
+                  <p>
+                    7.3. Com base em dúvida fundada e justificável, o Fiador/Garantidor poderá solicitar documentação e/ou informação
+                    complementar.
+                  </p>
+                  <p>
+                    7.4. A Reclamação de Sinistros amparados pela presente Carta Fiança poderá ser realizada durante o prazo
+                    prescricional, nos termos da Cláusula 18 destas Condições Gerais; 
+                  </p>
+                  <p>
+                    7.5. Caso o Fiador/Garantidor conclua pela não caracterização do sinistro, comunicará formalmente ao
+                    Beneficiário/Credor, por escrito, sua negativa de indenização, apresentando, conjuntamente, as razões que
+                    embasaram sua conclusão, de forma detalhada. 
+                  </p>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  8. Indenização:
+                  </strong>
+                  </div>
+                  <p>
+                    8.1. Caracterizado o sinistro, o Fiador/Garantidor cumprirá a obrigação descrita na Carta Fiança, até o limite máximo
+                    de garantia da mesma, mas antes que isso venha se realizar o Tomador deve primeiro seguir o procedimento abaixo
+                    se for uma Carta Fiança de uma “Garantia de Pagamento”, caso não seja deverá seguir uma das formas abaixo,
+                    conforme for acordado entre as partes:
+                  </p>
+                  <p>
+                    8.1.2 Se for uma “Garantia de Pagamento” o tomador deve primeiro enviar todos os extratos bancários referente aos
+                    valores garantidos por esta Carta Fiança para o Fiador/Garantidor, sendo assim será feito uma análise, para identificar
+                    o que houve com os fundos do beneficiário/credor e como eles foram perdidos, essa garantia não cobre uso indevido
+                    do dinheiro do cliente, fraude ou pirâmide financeira, essa carta garante apenas sob comprovação que os fundos foram
+                    destinados em mercado regulado pela CVM Comissão de Valores Mobiliários.
+                  </p>
+                  <p>
+                    8.1.2. O Fiador/Garantidor, recebendo a comunicação para honrar esta Fiança, dentro do prazo previsto, efetuará o
+                    pagamento do valor devido dentro de 72 (Setenta e Duas) horas seguintes à excussão dos bens da Afiançada,
+                    desde que atendidas as exigências contidas nas condições gerais, condições particulares/especiais e contratuais em
+                    anexo. Esta fiança não cobre expectativa de ocorrência de sinistro anterior à data de sua emissão. Para total eficácia
+                    da execução desta Carta Fiança, o Favorecido/Beneficiário deverá estar em dia com suas obrigações contratuais,
+                    em especial as financeiras, perante o Afiançado.
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+      <div class="page">
+          <div class="containerp4">
+              <div class="containerfinalp3">
+                    <p>
+                      8.1.3. Esta Carta de Fiança não assegurará, qualquer que seja a modalidade escolhida, o pagamento de: obrigações
+                      trabalhistas e previdenciárias de qualquer natureza e para com o FGTS, não adimplidas pelo contratado, quando
+                      couber.
+                    </p>
+                    <p>
+                      8.1.4. Fica acertado que as partes deverão no prazo máximo de 72 (setenta e duas) horas após o vencimento de
+                      qualquer obrigação não cumprida e até o prazo de validade acima fixada comunicar a FINANCE ASSURANCE
+                      GARANTIA LTDA, por meio de comunicação por escrita, caso o Afiançado não cumpra suas obrigações, nos termos
+                      das exigências contidas nas condições gerais, condições particulares/especiais e contratuais
+                    <div class="obj33">
+                    <strong class="obj2">
+                    9. Do prazo para o cumprimento da obrigação: 
+                    </strong>
+                    </div>
+                    <p>
+                      9.1. O pagamento da indenização ou o início da realização do objeto do contrato principal deverá ocorrer dentro do
+                      prazo máximo de 30 (trinta) dias, contados da data de recebimento do último documento solicitado durante o processo
+                      de regulação do sinistro. 
+                    </p>
+                    <p>
+                      9.2. Na hipótese de solicitação de documentos de que trata o item 7.3 o prazo de 30 (trinta) dias será suspenso,
+                      reiniciando sua contagem a partir do dia útil subsequente àquele em que forem completamente atendidas as
+                      exigências.  
+                    </p>
+                    <p>
+                        9.3. No caso de decisão judicial ou decisão arbitral, que suspenda os efeitos de reclamação da Carta Fiança, o prazo
+                        de 30 (dias) será suspenso, reiniciando sua contagem a partir do primeiro dia útil subsequente a revogação da decisão.
+                    </p>
+                    <p>
+                      9.4. Nos casos em que haja vinculação da Carta Fiança a um contrato principal, todos os saldos de créditos do
+                        Tomador no contrato principal serão utilizados na amortização do prejuízo e/ou da multa objeto da reclamação do
+                        sinistro, sem prejuízo do pagamento da indenização no prazo devido. 
+                    </p>
+                    <p>
+                      9.4.1. Caso o pagamento da indenização já tiver ocorrido quando da conclusão da apuração dos saldos de créditos
+                      do tomador no contrato principal, o Beneficiário/Credor obriga-se a devolver ao Fiador/Garantidor qualquer excesso
+                      que lhe tenha sido pago 
+                    </p>
+                    <div class="obj33">
+                    <strong class="obj2">
+                    10. Atualização de Valores:
+                    </strong>
+                    </div>
+                    <p>
+                      10.1. O não pagamento das obrigações pecuniárias do Fiador/Garantidor, inclusive da indenização nos termos da
+                      Cláusula 8 destas Condições Gerais, dentro do prazo para pagamento da respectiva obrigação, acarretará: 
+                    </p>
+                    <p>
+                      a) Atualização monetária, a partir da data de exigibilidade da obrigação, sendo, no caso se indenização, a data de
+                      caracterização de sinistro; e 
+                    </p>
+                    <p>
+                      b) Incidência de juros moratórios calculados “pro rata temporis”, contados a partir do primeiro dia posterior ao término
+                      do prazo fixado.
+                    </p>
+                    <p>
+                      10.2. O índice utilizado para atualização monetária será o IPCA/IBGE – Índice de Preços ao Consumidor Amplo – ou
+                      índice que vier a substituí-lo, (no caso de inexistência de outro disposto nas condições particulares) sendo
+                      calculado com base na variação positiva apurada entre o último índice publicado antes da data de obrigação de
+                      pagamento e aquele publicado imediatamente anterior à data de sua efetiva liquidação
+                    </p>
+                    <p>
+                      10.3. Os juros moratórios, contados a partir do primeiro dia posterior ao término do prazo fixado para pagamento da
+                      obrigação, serão equivalentes à taxa que estiver em vigor para a mora do pagamento de impostos devidos à Fazenda
+                      Nacional. 
+                    </p>
+                    <p>
+                      10.4. O pagamento de valores relativos à atualização monetária e juros de mora será feito independente de qualquer
+                      interpelação judicial ou extrajudicial, de uma só vez juntamente com os demais valores devidos no contrato.
+                    </p>
+                  </div>
+              </div>
+          </div>
+    </div>
+        <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                  <div class="obj33">
+                  <strong class="obj2">
+                  11. Sub-Rogação:
+                  </strong>
+                  </div>
+                  <p>
+                    11.1. Paga a indenização ou iniciado o cumprimento das obrigações inadimplidas pelo Tomador, o Fiador/Garantidor
+                    sub-rogar-se-á nos direitos e privilégios do Beneficiário/Credor contra o tomador, ou contra terceiros cujos atos ou
+                    fatos tenham dado causa ao sinistro. 
+                  </p>
+                  <p>
+                    11.2. É ineficaz qualquer ato do Beneficiário/Credor que diminua ou extinga, em prejuízo do Afiançador, os direitos a
+                    que se refere este item.  
+                  </p>
+                  <div class="obj33">
+                  <strong class="obj2">
+                  12. Perda de Direitos: 
+                  </strong>
+                  </div>
+                  <p>
+                     O beneficiário/credor perderá o direito à indenização na ocorrência de uma ou mais das seguintes hipóteses: 
+                  </p>
+                  <p>
+                    I. Casos fortuitos ou de força maior, nos termos do Código Civil Brasileiro;
+                  </p>
+                  <p>
+                    II. Descumprimento das obrigações do tomador decorrente de atos ou fatos de responsabilidade do
+                    Beneficiário/Credor; 
+                  </p>
+                  <p>
+                    III. Alteração das obrigações contratuais garantidas por esta Carta Fiança, que tenham sido acordadas entre
+                    Beneficiário/Credor e Tomador, sem prévia anuência do Fiador/Garantidor;
+                  </p>
+                  <p>
+                    IV. Se o Tomador estiver praticando pirâmide financeira; e ou sistema ponzi; e ou transferir recursos do beneficiário
+                    para contas dos sócios ou terceiros e ou para uso particular ou indevido; 
+                  </p>
+                  <p>
+                    V. Atos ilícitos dolosos ou por culpa grave equiparável ao dolo praticados pelo Tomador, pelo beneficiário ou pelo
+                    representante, de um ou de outro, desde que comprovada a culpa ou o dolo pelo Fiador/Garantidor; 
+                  </p>
+                  <p>
+                    VI. Se o beneficiário/credor ou seu representante legal fizer declarações inexatas ou omitir de má fé circunstâncias de
+                    seu conhecimento que configurem agravação de risco de inadimplência do tomador ou que possam influenciar na
+                    aceitação da proposta, desde que comprovado pelo Fiador/Garantidor; 
+                  </p>
+                  <p>
+                    VII. Se o Beneficiário/Credor agravar intencionalmente o risco, desde que comprovado pelo Fiador/Garantidor
+                  </p>
+                  <p>
+                    VIII. Descumprimento por parte do Afiançado, a que título for, das obrigações constantes do objeto da carta de
+                    fiança, tomando ineficaz a responsabilidade do Fiador para com o Favorecido/Beneficiário, em qualquer hipótese; 
+                  </p>
+                  <p>
+                    IX. O desfazimento, arrependimento ou rescisão de contrato entre as partes e terceiros, que deu origem à Carta
+                    Fiança, é motivo para imediata e automática rescisão dela, tornando-a ineficaz perante as partes e terceiros,
+                    independentemente de qualquer interpelação jurídica ou extrajudicial; 
+                  </p>
+                  <p>
+                    X. Em caso de insolvência do afiançado no prazo de vigência da Carta Fiança. 
+                  </p>
+                  <p>
+                    XI. Praticar atos que contribuam para aumentar o risco do sinistro; 
+                  </p>
+                  <p>
+                    XII. O afiançado praticar atos caracterizados como simulação, má-fé ou fraude na obtenção (no ato de contratação)
+                    e utilização (período de vigência) da Carta Fiança; 
+                  </p>
+                  <p>
+                    12.1. Excluem-se, expressamente, da responsabilidade do Fiador, todas e quaisquer multas que tenham caráter
+                    punitivo, salvo pela contratação da cobertura adicional de multas. 
+                  </p>
+                  <p>
+                    12.2. Excluem-se expressamente, da responsabilidade do Fiador, todas e quaisquer obrigações trabalhistas e/ou
+                    previdenciárias de responsabilidade do Afiançado, salvo pela contratação adicional de garantia trabalhista
+                    previdenciária.
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+  <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                  <div class="obj33">
+                  <strong class="obj2">
+                  13. Coberturas / Modalidade
+                  </strong>
+                  </div>
+                  <p>
+                    13.1. As Garantias para o(s) Favorecido(s) /Beneficiários(s) dos setores público e privado são estabelecidas
+                    segundo as Modalidades e Coberturas Adicionais da Carta Fiança a seguir, todas mais bem definidas e
+                    caracterizadas nas Condições Especiais, quando devidamente contratadas:
+                  </p>
+                  <p>
+                    13.1.1. Modalidade para garantia de <strong>“OPERAÇÃO FINANCERIA”</strong> 
+                  </p>
+                  <p>
+                    Garantir ao Favorecido/Beneficiário, até o valor fixado na Carta Fiança, de eventuais prejuízos que possa sofrer em
+                    consequência de falta de pagamento das parcelas a ele devidas e não pagas pelo Afiançado, em virtude de contrato
+                    celebrado pelas partes. 
+                  </p>
+                  <p>
+                    13.1.2. Modalidade para Garantia de <strong>“LICITANTE / CONCORRENTE”</strong> 
+                  </p>
+                  <p>
+                    Garantir a indenização até o valor da garantia fixada na Carta Fiança, se o Afiançado adjudicatário se recusar a
+                    assinar o contrato principal, nas condições propostas e dentro do prazo estabelecido no edital de licitação. 
+                  </p>
+                  <p>
+                    13.1.3. Modalidade para Garantia de <strong>“CONSTRUÇÃO, DO FORNECEDOR E DO PRESTADOR DE SERVIÇOS</strong>
+                  </p>
+                  <p>
+                    Garantirem a indenização, até o valor da garantia fixado na Carta Fiança, pelo prejuízo decorrente do
+                    inadimplemento das obrigações assumidas pelo Afiançado, em contrato de construção, fornecimento ou prestação
+                    de serviços, firmado entre ele e o Favorecido/Beneficiário, e coberto pela Carta Fiança. 
+                  </p>
+                  <p>
+                    13.1.4. Modalidade para Garantia de <strong>“RETENÇÃO DE PAGAMENTO”</strong>
+                  </p>
+                  <p>
+                    Garantir a indenização, até o valor da garantia fixado na Carta Fiança, dos prejuízos causados em razão do
+                    inadimplemento das obrigações assumidas pelo afiançado, decorrentes da substituição de retenções de pagamento
+                    prevista no contrato principal firmado com o Favorecido/Beneficiário. 
+                  </p>
+                  <p>
+                    13.1.5. Modalidade para Garantia de <strong>“ADIANTAMENTO DE PAGAMENTO”</strong>
+                  </p>
+                  <p>
+                    Garantir a indenização, até o valor da garantia fixado na Carta Fiança, pelos prejuízos decorrentes do
+                    inadimplemento das obrigações assumidas pelo Afiançado em relação aos adiantamentos de pagamentos,
+                    concedidos pelo Favorecido/Beneficiário, que não tenham sido liquidados na forma prevista no contrato principal. 
+                  </p>
+                  <p>
+                    13.1.6. Modalidade para Garantia de <strong>“PERFEITO FUNCIONAMENTO”</strong> 
+                  </p>
+                  <p>
+                    Garantir a indenização, até o valor da garantia fixado na Carta Fiança e durante a vigência, pelos prejuízos
+                    decorrentes de disfunção de equipamento fornecido ou executado pelo Afiançado ou Favorecido/Beneficiário, na
+                    forma prevista no contrato principal.
+                  </p>
+                  <p>
+                    13.1.7. Modalidade para Garantia <strong>“JUDICIAL”</strong>
+                  </p>
+                  <p>
+                    Garantir o pagamento, até o valor correspondente aos depósitos em juízo que o Afiançado necessita realizar no
+                    trâmite de procedimentos judiciais. A cobertura desta Carta Fiança, limitada ao valor da garantia, somente terá efeito
+                    depois de transitada em julgado a decisão ou acordo judicial favorável ao Favorecido/Beneficiário, cujo valor da
+                    condenação ou da quantia acordada não haja sido pago pelo Afiançado. Na hipótese de sub- rogação, o Fiador
+                    assume a responsabilidade pelo Depósito Judicial do valor apurado na ação judicial discriminada na carta fiança. 
+                  </p>
+                  <p>
+                    13.1.8. Modalidade para Garantia <strong>“ADUANEIRO”</strong>
+                  </p>
+                  <p>
+                    Garantir ao Favorecido/Beneficiário, até o valor da garantia fixada na Carta Fiança, o cumprimento das obrigações do
+                    Afiançado vinculadas ao Termo de Responsabilidade a que se referente ao decreto n° 4.543, de 26 de dezembro de
+                    2002, em conformidade com as instituições normativas da Secretaria da Receita Federal, sobre o assunto.
+                  </p>
+                </div>
+            </div>
+      </div>
+  </div>
+    <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                  <p>
+                    13.1.9. Modalidade para Garantia <strong>“IMOBILIÁRIO”</strong> 
+                  </p>
+                  <p>
+                    Garantir a indenização, até o valor fixado na Carta Fiança, pelos prejuízos decorrentes do inadimplemento do
+                    Afiançado em relação às obrigações assumidas de construção de edificações ou conjunto de edificações de
+                    unidades autônomas alienadas durante a execução da obra.
+                    A cobertura desta Carta Fiança garante o ressarcimento dos prejuízos causados pelo acréscimo do custo de
+                    construção da obra projetada, seja ele fixo ou reajustável, no caso de regime de empreitada, ou integral, em se
+                    tratando de regime de administração.
+                  </p>
+                  <p>
+                    13.1.10. Modalidade para Garantia <strong>“ADMINISTRATIVO”</strong> 
+                  </p>
+                  <p>
+                    Constitui objeto deste fiança prestação de garantia pelo Afiançado para atestar a veracidade de crédito tributário e
+                    para a interpretação de recurso voluntário em processo administrativo, no âmbito Federal, Estadual e/ou Municipal,
+                    na forma da legislação em vigor. 
+                  </p>
+                  <p>
+                   13.1.11. Modalidade para Garantia <strong>“TRABALHISTA E PREVIDENCIÁRIA”</strong>
+                  </p>
+                  <p>
+                    Tem por objetivo, baseado no contrato principal, garantir exclusivamente ao Favorecido/Beneficiário até o valor fixado
+                    na Carta Fiança, o reembolso ou o pagamento dos prejuízos que venha a sofrer em virtude de obrigação trabalhista e
+                    previdenciária de responsabilidade do Afiançado na ocasião de condenação subsidiária, em que proceda ao
+                    pagamento da quantia fixada pelo juízo, por razão de sentença transitada em julgado.
+                  </p>
+                  <p>
+                    13.1.12. Cobertura adicional de <strong>GARANTIA DAS MULTAS</strong>
+                  </p>
+                  <p>
+                    Tem por objetivo a garantia do valor das multas de caráter punitivo relacionadas ao Contrato Principal. 
+                  </p>
+                  <p>
+                    13.2. Todas as modalidades descritas deverão ser contratadas isoladamente, exceto as coberturas adicionais que
+                    somente poderão ser contratadas em conjunto com uma das modalidades 
+                  </p>
+                  <p>
+                    13.3. A somatória das garantias cobertas pela fiança para um mesmo contrato não poderá ultrapassar os 100% (cem
+                    por cento) do valor da garantia ou valor do contrato principal. 
+                  </p>
+                  <p>
+                    14. <strong>Concorrência de Garantias:</strong>
+                  </p>
+                  <p>
+                    No caso de existirem duas ou mais formas de garantia distintas, cobrindo cada uma dela desta Carta Fiança, em
+                    benefício do mesmo Beneficiário/Credor, o Fiador/Garantidor responderá, de forma proporcional ao risco assumido,
+                    com os demais participantes, relativamente ao prejuízo comum.
+                  </p>
+                  <p>
+                    15. <strong>Concorrência da Carta Fiança:</strong> 
+                  </p>
+                  <p>
+                    É vedada a utilização de mais de um Contrato de Garantia na mesma modalidade para cobrir o objeto deste contrato,
+                    salvo no caso de Carta de Fiança Fidejussória Judicial (Contracautela) complementares. 
+                  </p>
+                  <p>
+                    16. <strong>Extinção da Garantia:</strong>
+                  </p>
+                  <p>
+                    16.1. A garantia expressa por esta Carta Fiança extinguir-se-á na ocorrência de um dos seguintes eventos, o que
+                    ocorrer primeiro, sem prejuízo do prazo para reclamação do sinistro conforme item: 
+                  </p>
+                  <p>
+                    16.2. Quando o objeto do contrato principal garantido pela Carta Fiança for definitivamente realizado mediante termo
+                    ou declaração assinada pelo Beneficiário/Credor ou devolução da Carta Fiança; 
+                  </p>
+                  <p>
+                    16.3. Quando o Beneficiário/Credor e o Fiador/Garantidor assim o acordarem. 
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+      <div class="page">
+        <div class="containerp4">
+            <div class="containerfinalp3">
+                  <p>
+                    16.4. Quando o pagamento da indenização ao Beneficiário/Credor atingir o limite máximo de garantia da Carta Fiança;
+                  </p>
+                  <p>
+                    16.5. Quando o contrato principal for extinto, para as modalidades nas quais haja vinculação da Carta Fiança ao
+                    contrato principal, ou quando a obrigação garantida for extinta, para os demais casos, ou; 
+                  </p>
+                  <p>
+                    16.6. Quando do término de vigência previsto na Carta Fiança, salvo se estabelecido em contrário nas Condições
+                    Especiais.
+                  </p>
+                  <p>
+                    <strong>17. Controvérsias:</strong>
+                  </p>
+                  <p>
+                   17.1. As controvérsias surgidas na aplicação destas Condições Contratuais poderão ser resolvidas:
+                  </p>
+                  <p>
+                   I. Por arbitragem; ou 
+                  </p>
+                  <p>
+                    II. Por medida de caráter judicial
+                  </p>
+                  <p>
+                    <strong>18. Prescrição:</strong>
+                  </p>
+                  <p>
+                    Os prazos prescricionais são aqueles determinados pelo código civil brasileiro, bem como as legislações específicas
+                    acerca do assunto.  
+                  </p>
+                  <p>
+                    <strong>19. Foro:</strong> 
+                  </p>
+                  <p>
+                    As questões judiciais entre o Fiador/Garantidor e Beneficiário/Credor serão processadas no foro do domicílio da
+                    FINANCE ASSURANCE GARANTIA LTDA. 
+                  </p>
+                  <p>
+                    <strong>20. Disposições Finais</strong>
+                  </p>
+                  <p>
+                    20.1. A aceitação da garantia estará sujeita à análise do risco.  
+                  </p>
+                </div>
+            </div>
+        </div>
+  </div>
+</body>
+</html>
