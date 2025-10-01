@@ -1,7 +1,7 @@
 # Usar Python 3.11 slim
 FROM python:3.11-slim
 
-# Instalar dependências do sistema necessárias para Playwright e psycopg2
+# Instalar dependências do sistema
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libatk-bridge2.0-0 \
@@ -39,8 +39,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Instalar navegadores do Playwright
 RUN python -m playwright install --with-deps
 
-# Copiar o restante do código
+# Copiar todo o código da pasta backend para /app
 COPY . .
 
-# Comando padrão para rodar a aplicação
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Comando para rodar FastAPI via Uvicorn
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
