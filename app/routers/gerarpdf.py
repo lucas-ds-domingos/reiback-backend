@@ -14,8 +14,8 @@ router = APIRouter()
 
 # Caminhos corrigidos para Railway
 current_dir = Path(__file__).parent
-templates_path = current_dir.parent.parent / "/app/templates"
-static_path = current_dir.parent.parent / "/app/static"
+templates_path = current_dir.parent.parent / "/templates"
+static_path = current_dir.parent.parent / "/static"
 
 # Jinja2
 env = Environment(
