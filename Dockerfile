@@ -1,5 +1,7 @@
+# Usar Python 3.11 slim
 FROM python:3.11-slim
-# Instalar dependências do sistema
+
+# Instalar dependências do sistema necessárias para Playwright e psycopg2
 RUN apt-get update && apt-get install -y \
     libnss3 \
     libatk-bridge2.0-0 \
@@ -20,17 +22,25 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     unzip \
+    libpq-dev \
+    gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar arquivos e definir diretório
+# Definir diretório de trabalho
 WORKDIR /app
-COPY . .
+
+# Copiar requirements
+COPY requirements.txt .
 
 # Instalar dependências Python
+RUN pip install --no-cache-dir --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Instalar navegadores do Playwright
 RUN python -m playwright install --with-deps
 
-# Rodar FastAPI
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Copiar o restante do código
+COPY . .
+
+# Comando padrão para rodar a aplicação
+CMD ["python", "main.py"]
