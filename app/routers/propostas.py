@@ -1,13 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Proposta
 from ..schemas.proposta import PropostaCreate, PropostaResponse
 import xml.etree.ElementTree as ET
 from io import BytesIO
 from decimal import Decimal, ROUND_HALF_UP
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import List
+import os
+import requests
+from ..models import Proposta, ClienteAsaas, Tomador  
 
 router = APIRouter()
 
@@ -15,6 +17,19 @@ router = APIRouter()
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id or 1
 
+    # Busca o tomador para validação de limite
+    tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
+    if not tomador:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Tomador não encontrado")
+
+    # Regra nova: não permitir valor maior que o limite disponível
+    if payload.importancia_segurada > (tomador.limite_disponivel or 0):
+        raise HTTPException(
+        status_code=status.HTTP_400_BAD_REQUEST,
+        detail=f"Importância segurada ({payload.importancia_segurada}) excede o limite disponível do tomador ({tomador.limite_disponivel})"
+    )
+
+    # Cria a proposta
     nova = Proposta(
         numero=payload.numero,
         grupo=payload.grupo,
@@ -24,20 +39,25 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         inicio_vigencia=payload.inicio_vigencia,
         termino_vigencia=payload.termino_vigencia,
         dias_vigencia=payload.dias_vigencia,
-        premio=Decimal(str(payload.premio)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
-        comissao_percentual=Decimal(str(payload.comissao_percentual)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
-        comissao_valor=Decimal(str(payload.comissao_valor)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
-        taxa_percentual=Decimal(str(payload.taxa_percentual)).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP),
+        premio=Decimal(str(payload.premio)).quantize(Decimal("0.01")),
+        comissao_percentual=Decimal(str(payload.comissao_percentual)).quantize(Decimal("0.01")),
+        comissao_valor=Decimal(str(payload.comissao_valor)).quantize(Decimal("0.01")),
+        taxa_percentual=Decimal(str(payload.taxa_percentual)).quantize(Decimal("0.01")),
         numero_contrato=payload.numero_contrato,
         edital_processo=payload.edital_processo,
         percentual=payload.percentual,
         tomador_id=payload.tomador_id,
         segurado_id=payload.segurado_id,
         usuario_id=usuario_id,
-        text_modelo= payload.text_modelo,
+        text_modelo=payload.text_modelo,
     )
 
-    # Gerar XML automaticamente
+    # Atualiza limite disponível do tomador
+    tomador.limite_disponivel -= payload.importancia_segurada
+    if tomador.limite_disponivel < 0:
+        tomador.limite_disponivel = 0
+
+    # Gerar XML
     root = ET.Element("Proposta")
     payload_dict = payload.dict(exclude_unset=True, exclude={"xml"})
     for key, value in payload_dict.items():
@@ -48,10 +68,13 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     nova.xml = f.getvalue().decode()
 
     db.add(nova)
+    db.add(tomador)
     db.commit()
     db.refresh(nova)
+    db.refresh(tomador)
 
     return nova
+
 
 
 @router.patch("/propostas/{proposta_id}/cancelar", response_model=PropostaResponse)
@@ -73,26 +96,113 @@ def cancelar_proposta(proposta_id: int, db: Session = Depends(get_db)):
     return proposta
 
 
-@router.patch("/propostas/{proposta_id}/emitir", response_model=PropostaResponse)
+ASAAS_API_KEY = os.getenv("ASAAS_API_KEY")
+ASAAS_BASE_URL = "https://sandbox.asaas.com/api/v3" 
+@router.patch("/propostas/{proposta_id}/emitir")
 def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
+    # Busca a proposta
     proposta = db.query(Proposta).filter(Proposta.id == proposta_id).first()
     if not proposta:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Proposta não encontrada")
+        raise HTTPException(404, "Proposta não encontrada")
 
-    if proposta.status == "emitida":
-        return proposta
+    # Se já estiver emitida, retorna o link existente
+    if proposta.status in ["emitida - pendente pagamento", "paga"]:
+        return {
+            "proposta_id": proposta.id,
+            "status": proposta.status,
+            "link_pagamento": proposta.link_pagamento
+        }
 
-    if proposta.status == "cancelada":
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, detail="Não é possível emitir proposta cancelada")
+    # Busca cliente Asaas vinculado ao tomador
+    cliente_asaas = db.query(ClienteAsaas).filter(ClienteAsaas.tomador_id == proposta.tomador_id).first()
+    if not cliente_asaas:
+        raise HTTPException(400, "Cliente Asaas não encontrado para este tomador")
 
-    # Vai para pre-emissao
+    # Atualiza status para pré-emissão
     proposta.status = "pre-emissao"
-    db.commit() 
+    db.commit()
     db.refresh(proposta)
-    return proposta
 
+    # Só gera link se não existir
+    if not proposta.link_pagamento:
+        data = {
+            "customer": cliente_asaas.customer_id,
+            "billingType": "PIX",
+            "dueDate": (datetime.utcnow().date() + timedelta(days=5)).isoformat(),  # vencimento 5 dias
+            "value": float(proposta.premio),
+            "description": f"Pagamento da proposta {proposta.numero}",
+            "externalReference": str(proposta.id)
+        }
+        headers = {
+            "access_token": ASAAS_API_KEY,
+            "Content-Type": "application/json"
+        }
 
-@router.get("/", response_model=List[PropostaResponse])
+        response = requests.post(f"{ASAAS_BASE_URL}/payments", json=data, headers=headers)
+
+        if response.status_code not in (200, 201):
+            try:
+                detail = response.json()
+            except ValueError:
+                detail = response.text
+            raise HTTPException(status_code=400, detail=detail)
+
+        pagamento = response.json()
+        proposta.link_pagamento = pagamento.get("invoiceUrl")
+
+    # Atualiza status para emitida - pendente pagamento
+    proposta.status = "emitida - pendente pagamento"
+    db.commit()
+    db.refresh(proposta)
+
+    return {
+        "proposta_id": proposta.id,
+        "status": proposta.status,
+        "link_pagamento": proposta.link_pagamento
+    }
+
+@router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(db: Session = Depends(get_db)):
     propostas = db.query(Proposta).all()
     return propostas
+
+
+
+
+@router.get("/propostas/{proposta_id}", response_model=PropostaResponse)
+def obter_proposta(proposta_id: int, db: Session = Depends(get_db)):
+    proposta = db.query(Proposta).filter(Proposta.id == proposta_id).first()
+    if not proposta:
+        raise HTTPException(404, "Proposta não encontrada")
+    return proposta
+
+
+
+@router.get("/propostas/{proposta_id}/link-pagamento")
+def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
+    proposta = db.query(Proposta).filter(Proposta.id == proposta_id).first()
+    if not proposta:
+        raise HTTPException(404, "Proposta não encontrada")
+    
+    # Buscar cliente Asaas
+    cliente_asaas = db.query(ClienteAsaas).filter(ClienteAsaas.tomador_id == proposta.tomador_id).first()
+    if not cliente_asaas:
+        raise HTTPException(400, "Cliente Asaas não encontrado")
+
+    data = {
+        "customer": cliente_asaas.customer_id,
+        "billingType": "PIX",
+        "dueDate": datetime.utcnow().date().isoformat(),
+        "value": float(proposta.premio),
+        "description": f"Pagamento da proposta {proposta.id}",
+        "externalReference": str(proposta.id)
+    }
+    headers = {"access_token": ASAAS_API_KEY, "Content-Type": "application/json"}
+    response = requests.post(f"{ASAAS_BASE_URL}/payments", json=data, headers=headers)
+    if response.status_code not in (200, 201):
+        raise HTTPException(400, "Erro ao gerar link de pagamento")
+
+    pagamento = response.json()
+    return {"link_pagamento": pagamento.get("invoiceUrl")}
+
+    

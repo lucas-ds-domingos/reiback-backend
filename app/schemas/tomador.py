@@ -13,7 +13,8 @@ class TomadorBase(BaseModel):
     uf: Optional[str]
     cep: Optional[str]
     capital_social: Optional[float]
-    limite_taxa: float
+    limite_aprovado: float   # 🔹 novo campo
+    limite_disponivel: float # 🔹 novo campo
 
     model_config = {
         "from_attributes": True

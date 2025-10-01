@@ -1,7 +1,6 @@
 from pydantic import BaseModel, Field, condecimal
 from datetime import datetime, date
 from typing import Optional
-from datetime import date
 from decimal import Decimal
 from .segurado import SeguradoBase
 from .tomador import TomadorBase
@@ -35,8 +34,9 @@ class PropostaCreate(BaseModel):
     segurado_id: Optional[int]
     usuario_id: Optional[int]
 
-    class Config:
-        orm_mode = True
+    model_config = {
+        "from_attributes": True  
+    }
 
 
 class PropostaResponse(BaseModel):
@@ -51,5 +51,11 @@ class PropostaResponse(BaseModel):
     status: Optional[str]
     importancia_segurada: Optional[condecimal(max_digits=12, decimal_places=2)] = None
 
-    class Config:
-        orm_mode = True
+    # 🔹 novos campos
+    link_pagamento: Optional[str] = None
+    pago_em: Optional[datetime] = None
+    valor_pago: Optional[condecimal(max_digits=12, decimal_places=2)] = None
+
+    model_config = {
+        "from_attributes": True 
+    }

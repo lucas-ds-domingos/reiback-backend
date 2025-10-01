@@ -1,9 +1,8 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric, LargeBinary
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
 from decimal import Decimal
-
 
 
 class Usuario(Base):
@@ -12,12 +11,21 @@ class Usuario(Base):
     id = Column(Integer, primary_key=True, index=True)
     nome = Column(String(100), nullable=False)
     email = Column(String(120), unique=True, index=True, nullable=False)
-    senha_hash = Column(String(255), nullable=False)  # senha criptografada
+    senha_hash = Column(String(255), nullable=False)
     ativo = Column(Boolean, default=True)
-    role = Column(String(50), default="corretor")  # admin, corretor, segurado
+    role = Column(String(50), default="corretora")  # master, corretor, corretora
     criado_em = Column(DateTime, default=datetime.utcnow)
 
+    finance_id = Column(Integer, ForeignKey("finances.id"), nullable=True)
+    corretora_id = Column(Integer, ForeignKey("corretoras.id"), nullable=True)
+    assessoria_id = Column(Integer, ForeignKey("assessorias.id"), nullable=True)
+
+    finance = relationship("Finance", back_populates="usuarios")
+    corretora = relationship("Corretora", back_populates="usuarios")
+    assessoria = relationship("Assessoria", back_populates="usuarios")
+
     propostas = relationship("Proposta", back_populates="usuario")
+    tomadores = relationship("Tomador", back_populates="usuario")
 
 
 class Tomador(Base):
@@ -34,10 +42,13 @@ class Tomador(Base):
     uf = Column(String(2), nullable=True)
     cep = Column(String(20), nullable=True)
     capital_social = Column(Float, nullable=True)
-
-    limite_taxa = Column(Float, nullable=False, default=0.0)
+    limite_aprovado = Column(Numeric(12, 2), nullable=True, default=1000000.0) 
+    limite_disponivel = Column(Numeric(12, 2), nullable=True, default=1000000.0)
+    usuario_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    usuario = relationship("Usuario", back_populates="tomadores")
 
     propostas = relationship("Proposta", back_populates="tomador")
+    asaas_cliente = relationship("ClienteAsaas", back_populates="tomador", uselist=False)
 
 
 class Segurado(Base):
@@ -91,7 +102,10 @@ class Proposta(Base):
     numero_contrato = Column(String(50), nullable=True)
     edital_processo = Column(String(100), nullable=True)
     percentual = Column(Numeric(5, 2), nullable=True)
-    text_modelo = Column(String(250), nullable=True)
+    text_modelo = Column(String(700), nullable=True)
+    link_pagamento = Column(String, nullable=True)  
+    pago_em = Column(DateTime, nullable=True) 
+    valor_pago = Column(Numeric(10, 2), nullable=True) 
 
     xml = Column(Text, nullable=True)
 
@@ -107,11 +121,152 @@ class Proposta(Base):
 
 class Apolice(Base):
     __tablename__ = "apolices"
-
+    
     id = Column(Integer, primary_key=True, index=True)
     numero = Column(String(50), unique=True, nullable=False)
     data_criacao = Column(Date, default=datetime.utcnow)
-    pdf_path = Column(String(255), nullable=True)
+    
+    # PDF final assinado (em bytes)
+    pdf_assinado = Column(LargeBinary, nullable=True)
 
+    # ID do documento no D4Sign
+    d4sign_document_id = Column(String(100), nullable=True)
+    status_assinatura = Column(String(20), default="pendente")  
+
+    # Relacionamento com proposta
     proposta_id = Column(Integer, ForeignKey("propostas.id"))
     proposta = relationship("Proposta", back_populates="apolice")
+
+
+
+class ClienteAsaas(Base):
+    __tablename__ = "clientes_asaas"
+
+    id = Column(Integer, primary_key=True, index=True)
+    customer_id = Column(String, unique=True, nullable=False)  # ID retornado pelo Asaas
+    tomador_id = Column(Integer, ForeignKey("tomadores.id"), nullable=False)
+
+    # Relacionamento
+    tomador = relationship("Tomador", back_populates="asaas_cliente")
+
+
+class Finance(Base):
+    __tablename__ = "finances"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nome = Column(String(255), nullable=False)
+    cnpj = Column(String(18), unique=True, nullable=True)
+    criado_em = Column(DateTime, default=datetime.utcnow)
+
+    usuarios = relationship("Usuario", back_populates="finance")
+    corretoras = relationship("Corretora", back_populates="finance")
+    assessorias = relationship("Assessoria", back_populates="finance")
+
+
+class Corretora(Base):
+    __tablename__ = "corretoras"
+
+    id = Column(Integer, primary_key=True, index=True)
+    finance_id = Column(Integer, ForeignKey("finances.id"), nullable=False)
+
+    cnpj = Column(String(18), unique=True, nullable=False)
+    razao_social = Column(String(255), nullable=False)
+    inscricao_municipal = Column(String(50), nullable=True)
+    comissao = Column(Numeric(5, 2), default=0.0)
+    situacao_cnpj = Column(String(50), nullable=True)
+    codigo_cnae = Column(String(20), nullable=True)
+    ramo = Column(String(100), nullable=True)
+    data_registro = Column(Date, nullable=True)
+    data_recadastro = Column(Date, nullable=True)
+    data_expiracao = Column(Date, nullable=True)
+    telefone = Column(String(20), nullable=True)
+
+    # Endereço
+    cep = Column(String(20), nullable=True)
+    endereco = Column(String(255), nullable=True)
+    numero = Column(String(20), nullable=True)
+    complemento = Column(String(255), nullable=True)
+    bairro = Column(String(100), nullable=True)
+    uf = Column(String(2), nullable=True)
+    cidade = Column(String(100), nullable=True)
+
+    # Dados bancários
+    banco = Column(String(100), nullable=True)
+    tipo_conta = Column(String(50), nullable=True)
+    agencia = Column(String(20), nullable=True)
+    digito_agencia = Column(String(5), nullable=True)
+    conta = Column(String(20), nullable=True)
+    digito_conta = Column(String(5), nullable=True)
+
+    # Relacionamentos
+    finance = relationship("Finance", back_populates="corretoras")
+    usuarios = relationship("Usuario", back_populates="corretora")
+    socios = relationship("SocioCorretora", back_populates="corretora")
+    responsavel = relationship("ResponsavelFinanceiroCorretora", back_populates="corretora", uselist=False)
+    documentos = relationship("DocumentoCorretora", back_populates="corretora")
+
+
+
+class Assessoria(Base):
+    __tablename__ = "assessorias"
+
+    id = Column(Integer, primary_key=True, index=True)
+    finance_id = Column(Integer, ForeignKey("finances.id"), nullable=False)
+
+    cnpj = Column(String(18), unique=True, nullable=False)
+    razao_social = Column(String(255), nullable=False)
+    comissao = Column(Numeric(5, 2), default=0.0)  # % sobre produção dos corretores
+    telefone = Column(String(20), nullable=True)
+
+    # Endereço
+    cep = Column(String(20), nullable=True)
+    endereco = Column(String(255), nullable=True)
+    numero = Column(String(20), nullable=True)
+    complemento = Column(String(255), nullable=True)
+    bairro = Column(String(100), nullable=True)
+    uf = Column(String(2), nullable=True)
+    cidade = Column(String(100), nullable=True)
+
+    # Relacionamentos
+    finance = relationship("Finance", back_populates="assessorias")
+    usuarios = relationship("Usuario", back_populates="assessoria")
+    documentos = relationship("DocumentoAssessoria", back_populates="assessoria")
+
+
+class SocioCorretora(Base):
+    __tablename__ = "socios_corretora"
+    id = Column(Integer, primary_key=True, index=True)
+    corretora_id = Column(Integer, ForeignKey("corretoras.id"))
+    nome = Column(String(100), nullable=False)
+    cpf = Column(String(14), nullable=False)
+    corretora = relationship("Corretora", back_populates="socios")
+
+class DocumentoAssessoria(Base):
+    __tablename__ = "documentos_assessoria"
+    id = Column(Integer, primary_key=True, index=True)
+    assessoria_id = Column(Integer, ForeignKey("assessorias.id"))
+    nome_arquivo = Column(String(255), nullable=False)
+    caminho = Column(String(500), nullable=True)
+    enviado_em = Column(DateTime, default=datetime.utcnow)
+    assessoria = relationship("Assessoria", back_populates="documentos")
+
+
+class ResponsavelFinanceiroCorretora(Base):
+    __tablename__ = "responsaveis_financeiros_corretora"
+    id = Column(Integer, primary_key=True, index=True)
+    corretora_id = Column(Integer, ForeignKey("corretoras.id"))
+    nome = Column(String(100), nullable=False)
+    cpf = Column(String(14), nullable=False)
+    email = Column(String(120), nullable=False)
+    telefone = Column(String(20), nullable=True)
+    corretora = relationship("Corretora", back_populates="responsavel")
+
+
+class DocumentoCorretora(Base):
+    __tablename__ = "documentos_corretora"
+    id = Column(Integer, primary_key=True, index=True)
+    corretora_id = Column(Integer, ForeignKey("corretoras.id"))
+    nome_arquivo = Column(String(255), nullable=False)
+    caminho = Column(String(500), nullable=True)
+    enviado_em = Column(DateTime, default=datetime.utcnow)
+    corretora = relationship("Corretora", back_populates="documentos")
