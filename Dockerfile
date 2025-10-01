@@ -43,4 +43,4 @@ RUN python -m playwright install --with-deps
 COPY . .
 
 # Comando padrão para rodar a aplicação
-CMD ["python", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
