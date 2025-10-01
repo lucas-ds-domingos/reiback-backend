@@ -8,13 +8,14 @@ from ..database import get_db
 from ..models import Proposta
 from playwright.sync_api import sync_playwright
 import base64
+import traceback
 
 router = APIRouter()
 
-# Caminhos
+# Caminhos corrigidos para Railway
 current_dir = Path(__file__).parent
-templates_path = current_dir.parent / "templates"
-static_path = current_dir.parent / "static"
+templates_path = current_dir.parent.parent / "templates"
+static_path = current_dir.parent.parent / "static"
 
 # Jinja2
 env = Environment(
@@ -75,13 +76,21 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
 
     # CSS
     css_path = static_path / "css" / "proposta.css"
-    with open(css_path, "r", encoding="utf-8") as f:
-        css_content = f.read()
+    try:
+        with open(css_path, "r", encoding="utf-8") as f:
+            css_content = f.read()
+    except Exception as e:
+        print(f"Erro ao ler CSS: {e}")
+        css_content = ""
 
     # Imagem de fundo
     fundo_path = static_path / "images" / "teste.jpeg"
-    with open(fundo_path, "rb") as f:
-        fundo_b64 = base64.b64encode(f.read()).decode()
+    try:
+        with open(fundo_path, "rb") as f:
+            fundo_b64 = base64.b64encode(f.read()).decode()
+    except Exception as e:
+        print(f"Erro ao ler imagem de fundo: {e}")
+        fundo_b64 = ""
 
     body_html = template.render(**pdf_data)
 
@@ -93,7 +102,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
                 size: A4;
                 background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top;
                 background-size: cover;
-            }},
+            }} 
             .watermark {{ 
                 position: absolute;
                 top: 50%;
@@ -124,12 +133,16 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
     if not proposta:
         raise HTTPException(status_code=404, detail="Proposta não encontrada")
 
-    html_content = preparar_html(proposta, payload.textoCompleto)
+    try:
+        html_content = preparar_html(proposta, payload.textoCompleto)
+        pdf_bytes = await run_in_threadpool(gerar_pdf_playwright, html_content)
+    except Exception as e:
+        print("Erro ao gerar PDF:", e)
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {e}")
 
-    # Gera PDF em memória
-    pdf_bytes = await run_in_threadpool(gerar_pdf_playwright, html_content)
-
-    # Retorna PDF direto para o cliente
-    return Response(content=pdf_bytes, media_type="application/pdf", headers={
-        "Content-Disposition": f'attachment; filename="proposta_{proposta.numero}.pdf"'
-    })
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="proposta_{proposta.numero}.pdf"'}
+    )
