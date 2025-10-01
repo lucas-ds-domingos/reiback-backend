@@ -31,9 +31,9 @@ class PropostaPayload(BaseModel):
 
 
 def gerar_pdf_playwright(html_content: str) -> bytes:
-    """Gera PDF usando Playwright Síncrono."""
+    """Gera PDF em memória usando Playwright."""
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
+        browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
         page = browser.new_page()
         page.set_content(html_content, wait_until="networkidle")
         pdf_bytes = page.pdf(format="A4", print_background=True)
@@ -41,12 +41,8 @@ def gerar_pdf_playwright(html_content: str) -> bytes:
         return pdf_bytes
 
 
-@router.post("/", response_class=Response)
-async def gerar_pdf(payload: PropostaPayload, request: Request, db: Session = Depends(get_db)):
-    proposta = db.query(Proposta).filter(Proposta.id == payload.propostaId).first()
-    if not proposta:
-        raise HTTPException(status_code=404, detail="Proposta não encontrada")
-
+def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
+    """Prepara HTML com CSS e imagem de fundo em base64."""
     def format_money(valor):
         return f"R$ {float(valor or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -74,23 +70,21 @@ async def gerar_pdf(payload: PropostaPayload, request: Request, db: Session = De
         "cepBeneficiario": proposta.segurado.cep or "",
         "usuarioNome": proposta.usuario.nome,
         "usuarioEmail": proposta.usuario.email,
-        "textoCompleto": payload.textoCompleto or proposta.text_modelo or "",
+        "textoCompleto": texto_completo or proposta.text_modelo or "",
     }
 
-    # Lê o CSS
+    # CSS
     css_path = static_path / "css" / "proposta.css"
     with open(css_path, "r", encoding="utf-8") as f:
         css_content = f.read()
 
-    # Lê a imagem de fundo e converte para base64
+    # Imagem de fundo
     fundo_path = static_path / "images" / "teste.jpeg"
     with open(fundo_path, "rb") as f:
         fundo_b64 = base64.b64encode(f.read()).decode()
 
-    # Renderiza HTML do template
-    body_html = template.render(request=request, **pdf_data)
+    body_html = template.render(**pdf_data)
 
-    # Monta HTML completo com CSS e imagem de fundo embutidos
     html_content = f"""
     <html>
         <head>
@@ -101,17 +95,18 @@ async def gerar_pdf(payload: PropostaPayload, request: Request, db: Session = De
                 background-size: cover;
             }},
             .watermark {{ 
-                    position: absolute;
+                position: absolute;
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%) rotate(-45deg);
                 font-size: 60px;
-                color: rgba(255, 0, 0, 0.3); /* vermelho com transparência */
+                color: rgba(255, 0, 0, 0.3);
                 font-weight: bold;
-                pointer-events: none; /* não interfere no conteúdo */
+                pointer-events: none;
                 z-index: 1000;
                 white-space: nowrap;
-                text-transform: uppercase;}}
+                text-transform: uppercase;
+            }}
             {css_content}
             </style>
         </head>
@@ -120,8 +115,21 @@ async def gerar_pdf(payload: PropostaPayload, request: Request, db: Session = De
         </body>
     </html>
     """
+    return html_content
 
-    # Gera PDF em thread pool para não travar o loop async
+
+@router.post("/", response_class=Response)
+async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):
+    proposta = db.query(Proposta).filter(Proposta.id == payload.propostaId).first()
+    if not proposta:
+        raise HTTPException(status_code=404, detail="Proposta não encontrada")
+
+    html_content = preparar_html(proposta, payload.textoCompleto)
+
+    # Gera PDF em memória
     pdf_bytes = await run_in_threadpool(gerar_pdf_playwright, html_content)
 
-    return Response(content=pdf_bytes, media_type="application/pdf")
+    # Retorna PDF direto para o cliente
+    return Response(content=pdf_bytes, media_type="application/pdf", headers={
+        "Content-Disposition": f'attachment; filename="proposta_{proposta.numero}.pdf"'
+    })

@@ -5,14 +5,14 @@ from fastapi.staticfiles import StaticFiles
 import asyncio
 import sys
 
-if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
-
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "https://reiback-front-production.up.railway.app/",  # seu front deployado
+        "http://localhost:3000",  # localhost para teste
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
