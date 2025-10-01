@@ -15,8 +15,9 @@ class SeguradoBase(BaseModel):
     email: Optional[str] = None
     telefone: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = {
+    "from_attributes": True
+}
 
 class SeguradoCreate(SeguradoBase):
     pass
