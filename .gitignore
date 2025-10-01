@@ -1,0 +1,23 @@
+# Ambiente virtual
+venv/
+.env
+*.env
+
+# Cache e arquivos temporários
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+
+# Configurações de IDE/Editor
+.vscode/
+.idea/
+*.swp
+
+# Logs
+*.log
+
+# Arquivos de build
+dist/
+build/

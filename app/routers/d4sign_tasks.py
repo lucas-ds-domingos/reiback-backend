@@ -38,7 +38,6 @@ def enviar_para_d4sign_e_salvar(apolice_id: int, timeout=300, interval=5):
         pdf_bytes = gerar_pdf_playwright(html)
         print(f"✅ PDF gerado para apólice {ap.numero} ({len(pdf_bytes)} bytes)")
         
-        print(f"💾 PDF salvo localmente como {nome_arquivo}")
 
         if not D4SIGN_TOKEN_API or not D4SIGN_CRYPT_KEY or not D4SIGN_SAFE_UUID:
             print("❌ TokenAPI, CryptKey ou uuid_safe não configurados")
