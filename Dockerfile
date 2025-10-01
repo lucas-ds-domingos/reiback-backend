@@ -15,7 +15,7 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copiar todo o código da aplicação
-COPY . .
+COPY backend/ ./
 
 # Instalar dependências Python
 RUN pip install --no-cache-dir --upgrade pip
