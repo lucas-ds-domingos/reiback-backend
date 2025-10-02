@@ -7,19 +7,13 @@ from ..models import Proposta
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import base64
 import traceback
-from playwright.sync_api import sync_playwright
+from weasyprint import HTML, CSS
 
 router = APIRouter()
 
 BASE_DIR = Path(__file__).resolve().parent.parent  # /app
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
-
-# Debug
-print("Templates exist?", TEMPLATES_DIR.exists())
-print("proposta.html exists?", (TEMPLATES_DIR / "proposta.html").exists())
-print("CSS exists?", (STATIC_DIR / "css/proposta.css").exists())
-print("Fundo existe?", (STATIC_DIR / "images/teste.jpeg").exists())
 
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
@@ -66,21 +60,17 @@ def preparar_html(proposta, texto_completo: str | None) -> str:
 
     # CSS
     css_path = STATIC_DIR / "css/proposta.css"
-    try:
+    css_content = ""
+    if css_path.exists():
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
-    except Exception as e:
-        print(f"Erro ao ler CSS: {e}")
-        css_content = ""
 
     # Imagem de fundo
     fundo_path = STATIC_DIR / "images/teste.jpeg"
-    try:
+    fundo_b64 = ""
+    if fundo_path.exists():
         with open(fundo_path, "rb") as f:
             fundo_b64 = base64.b64encode(f.read()).decode()
-    except Exception as e:
-        print(f"Erro ao ler imagem de fundo: {e}")
-        fundo_b64 = ""
 
     body_html = template.render(**pdf_data)
 
@@ -88,8 +78,9 @@ def preparar_html(proposta, texto_completo: str | None) -> str:
     <html>
         <head>
             <style>
+            @page {{ size: A4; margin: 2cm; }}
             .page {{
-                size: A4;
+                page-break-after: always;
                 background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top;
                 background-size: cover;
             }}
@@ -103,19 +94,6 @@ def preparar_html(proposta, texto_completo: str | None) -> str:
     """
     return html_content
 
-def gerar_pdf_playwright(html_content: str) -> bytes:
-    with sync_playwright() as p:
-        browser = p.chromium.launch(
-            headless=True,
-            args=["--no-sandbox", "--disable-setuid-sandbox"]
-        )
-        page = browser.new_page()
-        page.set_content(html_content)
-        pdf_bytes = page.pdf(format="A4")
-        browser.close()
-    return pdf_bytes
-
-
 @router.post("/", response_class=Response)
 async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):
     proposta = db.query(Proposta).filter(Proposta.id == payload.propostaId).first()
@@ -124,8 +102,10 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
 
     try:
         html_content = preparar_html(proposta, payload.textoCompleto)
-        pdf_bytes = gerar_pdf_playwright(html_content)
-        print("PDF gerado com Playwright")
+        css_path = STATIC_DIR / "css/proposta.css"
+        css = CSS(filename=str(css_path)) if css_path.exists() else None
+        pdf_bytes = HTML(string=html_content).write_pdf(stylesheets=[css] if css else None)
+        print("PDF gerado com WeasyPrint")
     except Exception as e:
         print("Erro ao gerar PDF:", e)
         traceback.print_exc()
