@@ -12,22 +12,20 @@ import traceback
 
 router = APIRouter()
 
-# Caminhos corrigidos para Railway
-current_dir = Path(__file__).parent
-base_dir = current_dir.parent.parent  # sobe dois níveis
-
-templates_path = base_dir / "templates"
-static_path = base_dir / "static"
+# Caminhos corretos
+BASE_DIR = Path(__file__).resolve().parent.parent  # /backend/app
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
 
 # Jinja2
 env = Environment(
-    loader=FileSystemLoader(str(templates_path)),
+    loader=FileSystemLoader(str(TEMPLATES_DIR)),
     autoescape=select_autoescape(['html', 'xml']),
     cache_size=50
 )
 
-template = env.get_template("proposta.html")
-
+# Template carregado dinamicamente dentro da função
+# template = env.get_template("proposta.html")  # NÃO precisa carregar globalmente
 
 class PropostaPayload(BaseModel):
     propostaId: int
@@ -47,6 +45,7 @@ def gerar_pdf_playwright(html_content: str) -> bytes:
 
 def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
     template = env.get_template("proposta.html")
+
     def format_money(valor):
         return f"R$ {float(valor or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
@@ -78,7 +77,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
     }
 
     # CSS
-    css_path = static_path / "css" / "proposta.css"
+    css_path = STATIC_DIR / "css" / "proposta.css"
     try:
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
@@ -87,7 +86,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
         css_content = ""
 
     # Imagem de fundo
-    fundo_path = static_path / "images" / "teste.jpeg"
+    fundo_path = STATIC_DIR / "images" / "teste.jpeg"
     try:
         with open(fundo_path, "rb") as f:
             fundo_b64 = base64.b64encode(f.read()).decode()

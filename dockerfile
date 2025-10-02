@@ -2,7 +2,7 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-COPY requirements.txt /app/
+COPY . .
 
 # Instala dependências do sistema necessárias para rodar Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
