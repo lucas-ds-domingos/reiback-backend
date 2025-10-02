@@ -1,12 +1,10 @@
-from fastapi import APIRouter, Request, Response, HTTPException, Depends
-from fastapi.concurrency import run_in_threadpool
+from fastapi import APIRouter, Response, HTTPException, Depends
 from sqlalchemy.orm import Session
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pydantic import BaseModel
 from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
-from playwright.sync_api import sync_playwright
+import pdfkit
 import base64
 import traceback
 
@@ -16,49 +14,25 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # /app
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 
-# Verificações de debug (opcional, remove depois)
+# Verificações de debug (opcional)
 print("Templates exist?", TEMPLATES_DIR.exists())
 print("proposta.html exists?", (TEMPLATES_DIR / "proposta.html").exists())
 print("CSS exists?", (STATIC_DIR / "css/proposta.css").exists())
 print("Fundo existe?", (STATIC_DIR / "images/teste.jpeg").exists())
 
-# Jinja2
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
     autoescape=select_autoescape(['html', 'xml']),
     cache_size=50
 )
 
-# Template carregado dinamicamente dentro da função
-# template = env.get_template("proposta.html")  # NÃO precisa carregar globalmente
-
 class PropostaPayload(BaseModel):
     propostaId: int
     textoCompleto: str | None = None
 
-
-def gerar_pdf_playwright(html_content: str) -> bytes:
-    try:
-        from playwright.sync_api import sync_playwright
-        with sync_playwright() as p:
-            browser = p.chromium.launch(
-                headless=True,
-                args=["--no-sandbox", "--disable-dev-shm-usage"]
-            )
-            page = browser.new_page()
-            page.set_content(html_content, wait_until="networkidle")
-            pdf_bytes = page.pdf(format="A4", print_background=True)
-            browser.close()
-            print("PDF gerado com sucesso")
-            return pdf_bytes
-    except Exception as e:
-        import traceback
-        traceback.print_exc()  # <--- aqui você verá o erro real nos logs do Railway
-        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {e}")
-
-
-
-def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
+def preparar_html(proposta, texto_completo: str | None) -> str:
     template = env.get_template("proposta.html")
 
     def format_money(valor):
@@ -92,7 +66,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
     }
 
     # CSS
-    css_path = STATIC_DIR / "css" / "proposta.css"
+    css_path = STATIC_DIR / "css/proposta.css"
     try:
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
@@ -101,7 +75,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
         css_content = ""
 
     # Imagem de fundo
-    fundo_path = STATIC_DIR / "images" / "teste.jpeg"
+    fundo_path = STATIC_DIR / "images/teste.jpeg"
     try:
         with open(fundo_path, "rb") as f:
             fundo_b64 = base64.b64encode(f.read()).decode()
@@ -120,19 +94,6 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
                 background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top;
                 background-size: cover;
             }} 
-            .watermark {{ 
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-45deg);
-                font-size: 60px;
-                color: rgba(255, 0, 0, 0.3);
-                font-weight: bold;
-                pointer-events: none;
-                z-index: 1000;
-                white-space: nowrap;
-                text-transform: uppercase;
-            }}
             {css_content}
             </style>
         </head>
@@ -152,7 +113,8 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
 
     try:
         html_content = preparar_html(proposta, payload.textoCompleto)
-        pdf_bytes = await run_in_threadpool(gerar_pdf_playwright, html_content)
+        pdf_bytes = pdfkit.from_string(html_content, False)
+        print("PDF gerado com PDFKit")
     except Exception as e:
         print("Erro ao gerar PDF:", e)
         traceback.print_exc()
