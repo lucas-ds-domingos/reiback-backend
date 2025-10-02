@@ -1,7 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
-from fastapi.responses import FileResponse
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
 from reportlab.lib.pagesizes import A4
@@ -59,13 +58,12 @@ def gerar_pdf(dados: dict) -> bytes:
     buffer.close()
     return pdf_bytes
 
-@router.post("/", response_class=FileResponse)
+@router.post("/", response_class=StreamingResponse)
 async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):
     proposta = db.query(Proposta).filter(Proposta.id == payload.propostaId).first()
     if not proposta:
         raise HTTPException(status_code=404, detail="Proposta não encontrada")
 
-    # Monta os dados igual você já tinha
     dados = {
         "Número da Proposta": proposta.numero,
         "Início Vigência": proposta.inicio_vigencia.strftime("%d/%m/%Y") if proposta.inicio_vigencia else "",
@@ -88,14 +86,11 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
     }
 
     pdf_bytes = gerar_pdf(dados)
+    buffer = io.BytesIO(pdf_bytes)
+    buffer.seek(0)
 
-    # Salva temporário e retorna
-    output_path = Path(f"/tmp/proposta_{proposta.numero}.pdf")
-    with open(output_path, "wb") as f:
-        f.write(pdf_bytes)
-
-    return FileResponse(
-        output_path,
+    return StreamingResponse(
+        buffer,
         media_type="application/pdf",
-        filename=f"proposta_{proposta.numero}.pdf"
+        headers={"Content-Disposition": f"attachment; filename=proposta_{proposta.numero}.pdf"}
     )
