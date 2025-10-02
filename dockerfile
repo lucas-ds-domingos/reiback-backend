@@ -1,7 +1,7 @@
 FROM python:3.11-slim
 
-# Instala libs do sistema para WeasyPrint (Cairo, Pango, fontes, etc.) - resolve "cairo not found"
 RUN apt-get update && apt-get install -y \
+    build-essential \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf2.0-dev \
@@ -11,6 +11,9 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libfreetype6-dev \
     libfontconfig1-dev \
+    libglib2.0-dev \         
+    libgobject2.0-0 \         
+    shared-mime-info \        
     fonts-liberation \
     fonts-dejavu-core \
     libpng-dev \
@@ -18,7 +21,7 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     libharfbuzz-dev \
     libfribidi-dev \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/*  # Limpa cache para imagem menor
 
 # Diretório de trabalho
 WORKDIR /app
@@ -28,14 +31,14 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Instala browser para Playwright (se usado em outras rotas)
+# Instala browser para Playwright (se usado em outras rotas) - faça após apt para evitar conflitos
 RUN playwright install --with-deps chromium
 
 # Copia o código (inclui templates e static)
 COPY . .
 
-# Expõe porta (Railway usa $PORT)
-EXPOSE $PORT
+# Expõe porta padrão (Railway usa $PORT em runtime; isso é opcional)
+EXPOSE 8080
 
-# Start command - ajuste 'main:app' para o seu (ex: app:app se arquivo for app.py)
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
+# Start command - usa $PORT da Railway (fallback para 8000 se não setado)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT:-8000}"]
