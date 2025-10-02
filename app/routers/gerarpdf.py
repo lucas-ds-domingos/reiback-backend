@@ -38,14 +38,24 @@ class PropostaPayload(BaseModel):
 
 
 def gerar_pdf_playwright(html_content: str) -> bytes:
-    """Gera PDF em memória usando Playwright."""
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
-        page = browser.new_page()
-        page.set_content(html_content, wait_until="networkidle")
-        pdf_bytes = page.pdf(format="A4", print_background=True)
-        browser.close()
-        return pdf_bytes
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage"]
+            )
+            page = browser.new_page()
+            page.set_content(html_content, wait_until="networkidle")
+            pdf_bytes = page.pdf(format="A4", print_background=True)
+            browser.close()
+            print("PDF gerado com sucesso")
+            return pdf_bytes
+    except Exception as e:
+        import traceback
+        traceback.print_exc()  # <--- aqui você verá o erro real nos logs do Railway
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {e}")
+
 
 
 def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:

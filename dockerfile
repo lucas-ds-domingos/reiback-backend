@@ -1,33 +1,18 @@
-# --- Imagem base com Python 3.11 ---
+# --- Imagem base Python 3.11 ---
 FROM python:3.11-slim
 
 # --- Dependências do sistema para Chromium/Playwright ---
 RUN apt-get update && apt-get install -y \
-    curl \
-    gnupg \
-    libnss3 \
-    libatk-bridge2.0-0 \
-    libx11-xcb1 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libgbm1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libatk1.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxss1 \
-    fonts-liberation \
-    libappindicator3-1 \
-    xdg-utils \
-    wget \
+    curl gnupg libnss3 libatk-bridge2.0-0 libx11-xcb1 libxcomposite1 \
+    libxdamage1 libxrandr2 libgbm1 libasound2 libpangocairo-1.0-0 \
+    libatk1.0-0 libcups2 libdrm2 libxss1 fonts-liberation libappindicator3-1 \
+    xdg-utils wget \
     && rm -rf /var/lib/apt/lists/*
 
 # --- Diretório da aplicação ---
 WORKDIR /app
 
-# --- Copia requirements e instala ---
+# --- Copia requirements e instala venv ---
 COPY requirements.txt .
 RUN python -m venv /app/venv311
 ENV PATH="/app/venv311/bin:$PATH"
@@ -37,11 +22,11 @@ RUN pip install -r requirements.txt
 # --- Copia todo o backend ---
 COPY . .
 
-# --- Instala Playwright e Chromium ---
+# --- Instala Playwright + Chromium com dependências ---
 RUN pip install playwright
 RUN playwright install --with-deps chromium
 
-# --- Expõe a porta que Railway usa ---
+# --- Expõe a porta padrão Railway ---
 EXPOSE 8080
 
 # --- Comando para rodar ---
