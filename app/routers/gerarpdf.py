@@ -4,10 +4,10 @@ from pydantic import BaseModel
 from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
+import pdfkit
 import base64
 import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from weasyprint import HTML, CSS
 
 router = APIRouter()
 
@@ -21,11 +21,15 @@ print("proposta.html exists?", (TEMPLATES_DIR / "proposta.html").exists())
 print("CSS exists?", (STATIC_DIR / "css/proposta.css").exists())
 print("Fundo existe?", (STATIC_DIR / "images/teste.jpeg").exists())
 
+# Configuração do Jinja2
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
     autoescape=select_autoescape(['html', 'xml']),
     cache_size=50
 )
+
+# Configuração explícita do pdfkit
+pdfkit_config = pdfkit.configuration(wkhtmltopdf="/usr/bin/wkhtmltopdf")
 
 class PropostaPayload(BaseModel):
     propostaId: int
@@ -112,8 +116,8 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
 
     try:
         html_content = preparar_html(proposta, payload.textoCompleto)
-        pdf_bytes = HTML(string=html_content).write_pdf(stylesheets=[])
-        print("PDF gerado com WeasyPrint")
+        pdf_bytes = pdfkit.from_string(html_content, False, configuration=pdfkit_config)
+        print("PDF gerado com PDFKit + wkhtmltopdf")
     except Exception as e:
         print("Erro ao gerar PDF:", e)
         traceback.print_exc()
