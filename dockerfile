@@ -5,16 +5,16 @@ FROM python:3.11-slim
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Atualiza pacotes e instala dependências de build
+# Dependências do Chromium
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    curl \
-    git \
-    libpq-dev \
-    libffi-dev \
-    libssl-dev \
-    python3-dev \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+    fonts-liberation libnss3 libatk1.0-0 libatk-bridge2.0-0 libcups2 \
+    libx11-xcb1 libxcomposite1 libxrandr2 libxdamage1 libxkbcommon0 \
+    libgbm1 libpango1.0-0 libasound2 libpangocairo-1.0-0 libgtk-3-0 \
+    libdrm2 libepoxy0 libcurl4 libstdc++6 && rm -rf /var/lib/apt/lists/*
+
+# Instala o Chromium do Playwright
+RUN python -m playwright install chromium
+
 
 # Cria diretório do app
 WORKDIR /app

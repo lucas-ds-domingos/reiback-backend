@@ -105,12 +105,16 @@ def preparar_html(proposta, texto_completo: str | None) -> str:
 
 def gerar_pdf_playwright(html_content: str) -> bytes:
     with sync_playwright() as p:
-        browser = p.chromium.launch()
+        browser = p.chromium.launch(
+            headless=True,
+            args=["--no-sandbox", "--disable-setuid-sandbox"]
+        )
         page = browser.new_page()
         page.set_content(html_content)
         pdf_bytes = page.pdf(format="A4")
         browser.close()
     return pdf_bytes
+
 
 @router.post("/", response_class=Response)
 async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):

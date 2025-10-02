@@ -3,6 +3,7 @@ venv/
 .env
 *.env
 
+.venv
 # Cache e arquivos temporários
 __pycache__/
 *.pyc
