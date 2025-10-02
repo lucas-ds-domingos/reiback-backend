@@ -1,73 +1,36 @@
-# ==========================
-# Base Python 3.11 slim
-# ==========================
+# Use Python 3.11 oficial
 FROM python:3.11-slim
 
-# ==========================
-# Variáveis de ambiente
-# ==========================
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+# Evita prompts interativos durante instalações
+ENV DEBIAN_FRONTEND=noninteractive
 
-# ==========================
-# Dependências do sistema
-# ==========================
-RUN apt-get update && apt-get install -y \
+# Atualiza pacotes e instala dependências de build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     curl \
     git \
-    build-essential \
-    libnss3 \
-    libatk1.0-0 \
-    libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
-    libgbm1 \
-    libasound2 \
-    libpangocairo-1.0-0 \
-    libxcomposite1 \
-    libxdamage1 \
-    libxrandr2 \
-    libpango-1.0-0 \
-    libgtk-3-0 \
-    libwayland-client0 \
-    libwayland-cursor0 \
-    libwayland-egl1 \
-    libxshmfence1 \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+    libpq-dev \
+    libffi-dev \
+    libssl-dev \
+    python3-dev \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
 
-# ==========================
-# Criar diretório da aplicação
-# ==========================
+# Cria diretório do app
 WORKDIR /app
 
-# ==========================
-# Copiar requirements
-# ==========================
+# Copia apenas requirements para cache
 COPY requirements.txt .
 
-# ==========================
-# Instalar dependências Python
-# ==========================
-RUN pip install --upgrade pip
-RUN pip install -r requirements.txt
+# Instala as dependências
+RUN pip install --upgrade pip wheel setuptools
+RUN pip install --no-cache-dir -r requirements.txt
 
-# ==========================
-# Copiar código da aplicação
-# ==========================
+# Copia o restante do projeto
 COPY . .
 
-# ==========================
-# Instalar browsers do Playwright
-# ==========================
-RUN python -m playwright install
+# Expõe a porta do FastAPI
+EXPOSE 8000
 
-# ==========================
-# Porta padrão do Railway
-# ==========================
-EXPOSE 8080
-
-# ==========================
-# Rodar servidor FastAPI
-# ==========================
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Comando para rodar a aplicação
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
