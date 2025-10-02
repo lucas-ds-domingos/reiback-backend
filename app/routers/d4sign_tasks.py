@@ -8,6 +8,7 @@ from ..services.pdf_service import montar_html_apolice, gerar_pdf_playwright
 from dotenv import load_dotenv
 import os
 import json
+import asyncio
 
 load_dotenv()
 
@@ -35,7 +36,7 @@ def enviar_para_d4sign_e_salvar(apolice_id: int, timeout=300, interval=5):
 
         # ---------------------- GERAR PDF ----------------------
         html = montar_html_apolice(proposta)
-        pdf_bytes = gerar_pdf_playwright(html)
+        pdf_bytes = asyncio.run(gerar_pdf_playwright(html))
         print(f"✅ PDF gerado para apólice {ap.numero} ({len(pdf_bytes)} bytes)")
         
 

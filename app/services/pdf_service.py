@@ -1,7 +1,10 @@
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import base64
-from playwright.sync_api import sync_playwright
+import os
+from playwright.async_api import async_playwright
+
+BROWSERLESS_URL = os.environ.get("BROWSER_WS_ENDPOINT")
 
 current_dir = Path(__file__).parent.parent
 templates_path = current_dir / "templates"
@@ -14,13 +17,14 @@ env = Environment(
 template = env.get_template("apolice.html")
 
 
-def gerar_pdf_playwright(html_content: str) -> bytes:
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        page = browser.new_page()
-        page.set_content(html_content, wait_until="networkidle")
-        pdf_bytes = page.pdf(format="A4", print_background=True)
-        browser.close()
+async def gerar_pdf_playwright(html_content: str) -> bytes:
+    """Gera PDF usando Browserless remoto."""
+    async with async_playwright() as p:
+        browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
+        page = await browser.new_page()
+        await page.set_content(html_content, wait_until="networkidle")
+        pdf_bytes = await page.pdf(format="A4", print_background=True)
+        await browser.close()
         return pdf_bytes
 
 
