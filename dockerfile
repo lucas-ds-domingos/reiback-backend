@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y \
     libglib2.0-dev \
     libgobject-2.0-0 \
     libgtk-3-0 \
-    libgirepository1.0-1 \
     libgirepository1.0-dev \
+    libgirepository1.0-0 \
     shared-mime-info \
     fonts-liberation \
     fonts-dejavu-core \
+    fonts-noto-color-emoji \
     libpng-dev \
     libjpeg62-turbo-dev \
     libwebp-dev \
@@ -27,7 +28,7 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Variável para garantir que Python encontre as libs
+# Garantir que Python encontre libs nativas
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
 
 # Diretório de trabalho
@@ -38,7 +39,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
-# Instala Chromium para Playwright
+# Instala Chromium para Playwright (se usado)
 RUN pip install --no-cache-dir playwright
 RUN playwright install --with-deps chromium
 
