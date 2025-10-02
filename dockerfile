@@ -1,4 +1,4 @@
-FROM python:3.11
+FROM python:3.11-bullseye
 
 # Instala dependências do sistema para WeasyPrint e Playwright
 RUN apt-get update && apt-get install -y \
@@ -14,11 +14,9 @@ RUN apt-get update && apt-get install -y \
     libgobject-2.0-0 \
     libgtk-3-0 \
     libgirepository1.0-dev \
-    libgirepository1.0-0 \
     shared-mime-info \
     fonts-liberation \
     fonts-dejavu-core \
-    fonts-noto-color-emoji \
     libpng-dev \
     libjpeg62-turbo-dev \
     libwebp-dev \
@@ -27,6 +25,7 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libffi-dev \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Garantir que Python encontre libs nativas
 ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
