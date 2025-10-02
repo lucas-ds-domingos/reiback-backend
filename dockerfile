@@ -3,20 +3,17 @@ FROM python:3.11-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Dependências de build + bibliotecas do WeasyPrint
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
-    git \
-    libpq-dev \
-    libffi-dev \
-    libssl-dev \
-    python3-dev \
+    libpango-1.0-0 \
+    libpangoft2-1.0-0 \
     libcairo2 \
-    pango1.0 \
     libgdk-pixbuf2.0-0 \
-    wget \
+    libffi-dev \
+    libgobject-2.0-0 \
+    shared-mime-info \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Diretório do app
 WORKDIR /app
