@@ -6,11 +6,14 @@ from pydantic import BaseModel
 from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
-from playwright.sync_api import sync_playwright
+from playwright.async_api import async_playwright
 import base64
 import traceback
+import os
 
 router = APIRouter()
+
+BROWSERLESS_URL = os.environ.get("BROWSER_WS_ENDPOINT")
 
 # Caminhos corretos
 BASE_DIR = Path(__file__).resolve().parent.parent  # /backend/app
@@ -32,16 +35,16 @@ class PropostaPayload(BaseModel):
     textoCompleto: str | None = None
 
 
-def gerar_pdf_playwright(html_content: str) -> bytes:
-    """Gera PDF em memória usando Playwright."""
-    with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True, args=["--no-sandbox", "--disable-dev-shm-usage"])
-        page = browser.new_page()
-        page.set_content(html_content, wait_until="networkidle")
-        pdf_bytes = page.pdf(format="A4", print_background=True)
-        browser.close()
+async def gerar_pdf_playwright(html_content: str) -> bytes:
+    """Gera PDF em memória usando Browserless remoto."""
+    async with async_playwright() as p:
+        # Conecta ao Chromium remoto
+        browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
+        page = await browser.new_page()
+        await page.set_content(html_content, wait_until="networkidle")
+        pdf_bytes = await page.pdf(format="A4", print_background=True)
+        await browser.close()
         return pdf_bytes
-
 
 def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
     template = env.get_template("proposta.html")
@@ -137,7 +140,7 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
 
     try:
         html_content = preparar_html(proposta, payload.textoCompleto)
-        pdf_bytes = await run_in_threadpool(gerar_pdf_playwright, html_content)
+        pdf_bytes = await gerar_pdf_playwright(html_content)
     except Exception as e:
         print("Erro ao gerar PDF:", e)
         traceback.print_exc()
