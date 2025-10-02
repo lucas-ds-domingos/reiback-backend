@@ -1,9 +1,7 @@
-FROM python:3.11-bookworm
+FROM python:3.11-slim
 
-# Deps do sistema para WeasyPrint (Cairo, fontes, etc.)
+# Instala libs do sistema para WeasyPrint (Cairo, Pango, fontes, etc.) - resolve "cairo not found"
 RUN apt-get update && apt-get install -y \
-    build-essential \
-    python3-dev \
     libcairo2-dev \
     libpango1.0-dev \
     libgdk-pixbuf2.0-dev \
@@ -17,20 +15,27 @@ RUN apt-get update && apt-get install -y \
     fonts-dejavu-core \
     libpng-dev \
     libjpeg62-turbo-dev \
+    libwebp-dev \
+    libharfbuzz-dev \
+    libfribidi-dev \
     && rm -rf /var/lib/apt/lists/*
 
+# Diretório de trabalho
 WORKDIR /app
 
-# Instala Python deps
+# Copia e instala Python deps (sem cache para evitar issues)
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Instala browsers para Playwright (se usado)
+# Instala browser para Playwright (se usado em outras rotas)
 RUN playwright install --with-deps chromium
 
-# Copia código, templates e static
+# Copia o código (inclui templates e static)
 COPY . .
 
+# Expõe porta (Railway usa $PORT)
 EXPOSE $PORT
 
-CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT} --reload"]
+# Start command - ajuste 'main:app' para o seu (ex: app:app se arquivo for app.py)
+CMD ["sh", "-c", "uvicorn main:app --host 0.0.0.0 --port ${PORT}"]
