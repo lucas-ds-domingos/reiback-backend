@@ -4,9 +4,10 @@ from pydantic import BaseModel
 from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
-import pdfkit
 import base64
 import traceback
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from weasyprint import HTML, CSS
 
 router = APIRouter()
 
@@ -14,13 +15,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent  # /app
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 
-# Verificações de debug (opcional)
+# Debug
 print("Templates exist?", TEMPLATES_DIR.exists())
 print("proposta.html exists?", (TEMPLATES_DIR / "proposta.html").exists())
 print("CSS exists?", (STATIC_DIR / "css/proposta.css").exists())
 print("Fundo existe?", (STATIC_DIR / "images/teste.jpeg").exists())
-
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
@@ -89,11 +88,11 @@ def preparar_html(proposta, texto_completo: str | None) -> str:
     <html>
         <head>
             <style>
-            .page{{
+            .page {{
                 size: A4;
                 background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top;
                 background-size: cover;
-            }} 
+            }}
             {css_content}
             </style>
         </head>
@@ -113,8 +112,8 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
 
     try:
         html_content = preparar_html(proposta, payload.textoCompleto)
-        pdf_bytes = pdfkit.from_string(html_content, False)
-        print("PDF gerado com PDFKit")
+        pdf_bytes = HTML(string=html_content).write_pdf(stylesheets=[])
+        print("PDF gerado com WeasyPrint")
     except Exception as e:
         print("Erro ao gerar PDF:", e)
         traceback.print_exc()

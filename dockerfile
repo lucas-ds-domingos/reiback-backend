@@ -7,13 +7,19 @@ ENV PYTHONUNBUFFERED 1
 
 # Dependências de sistema para wkhtmltopdf e PostgreSQL
 RUN apt-get update && apt-get install -y \
-    wkhtmltopdf \
+    libpango-1.0-0 \
+    libcairo2 \
+    libgdk-pixbuf2.0-0 \
+    libffi-dev \
+    python3-cffi \
+    libjpeg-dev \
     libpq-dev \
     build-essential \
     curl \
     git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
 
 # Criar diretório da aplicação
 WORKDIR /app

@@ -75,7 +75,8 @@ ujson==5.11.0
 urllib3==2.5.0
 uvicorn==0.35.0
 watchfiles==1.1.0
-weasyprint==66.0
 webencodings==0.5.1
 websockets==15.0.1
 zopfli==0.2.3.post1
+weasyprint==59.0
+cairocffi==1.4.0
