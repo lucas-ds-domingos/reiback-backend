@@ -12,10 +12,15 @@ import traceback
 
 router = APIRouter()
 
-# Caminhos corretos
-BASE_DIR = Path(__file__).resolve().parent.parent  # /backend/app
+BASE_DIR = Path(__file__).resolve().parent.parent  # /app
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
+
+# Verificações de debug (opcional, remove depois)
+print("Templates exist?", TEMPLATES_DIR.exists())
+print("proposta.html exists?", (TEMPLATES_DIR / "proposta.html").exists())
+print("CSS exists?", (STATIC_DIR / "css/proposta.css").exists())
+print("Fundo existe?", (STATIC_DIR / "images/teste.jpeg").exists())
 
 # Jinja2
 env = Environment(

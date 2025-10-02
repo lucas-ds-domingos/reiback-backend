@@ -1,36 +1,48 @@
+# --- Imagem base com Python 3.11 ---
 FROM python:3.11-slim
 
-WORKDIR /app
-
-COPY . .
-
-# Instala dependências do sistema necessárias para rodar Chromium
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    wget \
+# --- Dependências do sistema para Chromium/Playwright ---
+RUN apt-get update && apt-get install -y \
+    curl \
+    gnupg \
     libnss3 \
-    libatk1.0-0 \
     libatk-bridge2.0-0 \
-    libcups2 \
-    libdrm2 \
-    libxkbcommon0 \
+    libx11-xcb1 \
     libxcomposite1 \
     libxdamage1 \
     libxrandr2 \
+    libgbm1 \
     libasound2 \
     libpangocairo-1.0-0 \
-    libgtk-3-0 \
-    libgbm1 \
+    libatk1.0-0 \
+    libcups2 \
+    libdrm2 \
+    libxss1 \
     fonts-liberation \
-    libxcb1 \
+    libappindicator3-1 \
+    xdg-utils \
+    wget \
     && rm -rf /var/lib/apt/lists/*
 
-RUN pip install --no-cache-dir -r requirements.txt
+# --- Diretório da aplicação ---
+WORKDIR /app
 
-# Instala Chromium para o Playwright
-RUN python -m playwright install --with-deps chromium
+# --- Copia requirements e instala ---
+COPY requirements.txt .
+RUN python -m venv /app/venv311
+ENV PATH="/app/venv311/bin:$PATH"
+RUN pip install --upgrade pip
+RUN pip install -r requirements.txt
 
-COPY . /app
+# --- Copia todo o backend ---
+COPY . .
 
-EXPOSE 8000
+# --- Instala Playwright e Chromium ---
+RUN pip install playwright
+RUN playwright install --with-deps chromium
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# --- Expõe a porta que Railway usa ---
+EXPOSE 8080
+
+# --- Comando para rodar ---
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
