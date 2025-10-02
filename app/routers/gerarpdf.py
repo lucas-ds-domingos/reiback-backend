@@ -14,8 +14,10 @@ router = APIRouter()
 
 # Caminhos corrigidos para Railway
 current_dir = Path(__file__).parent
-templates_path = current_dir.parent.parent / "/templates"
-static_path = current_dir.parent.parent / "/static"
+base_dir = current_dir.parent.parent  # sobe dois níveis
+
+templates_path = base_dir / "templates"
+static_path = base_dir / "static"
 
 # Jinja2
 env = Environment(
@@ -23,6 +25,7 @@ env = Environment(
     autoescape=select_autoescape(['html', 'xml']),
     cache_size=50
 )
+
 template = env.get_template("proposta.html")
 
 
@@ -43,7 +46,7 @@ def gerar_pdf_playwright(html_content: str) -> bytes:
 
 
 def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
-    """Prepara HTML com CSS e imagem de fundo em base64."""
+    template = env.get_template("proposta.html")
     def format_money(valor):
         return f"R$ {float(valor or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
