@@ -1,12 +1,12 @@
 annotated-types==0.7.0
 anyio==4.11.0
-bcrypt==4.1.0              # mais estável para Python 3.11
+bcrypt==4.1.0
 certifi==2025.8.3
-cffi==1.15.1               # versão compatível e mais estável
+cffi==1.15.1
 charset-normalizer==3.4.3
 click==8.3.0
 colorama==0.4.6
-cryptography==41.0.3       # compatível com cffi 1.15.1
+cryptography==41.0.3
 dnspython==2.8.0
 ecdsa==0.19.1
 email-validator==2.3.0
@@ -50,4 +50,4 @@ urllib3==2.5.0
 uvicorn==0.24.0
 watchfiles==1.1.0
 websockets==15.0.1
-reportlab
+reportlab==4.0.0
