@@ -21,6 +21,8 @@ RUN apt-get update && apt-get install -y \
     libwebp-dev \
     libharfbuzz-dev \
     libfribidi-dev \
+    libgtk-3-0 \
+    libgirepository1.0-dev \
     && rm -rf /var/lib/apt/lists/*  # Limpa cache para imagem menor
 
 # Diretório de trabalho
@@ -33,6 +35,8 @@ RUN pip install --no-cache-dir --upgrade pip && \
 
 # Instala browser para Playwright (se usado em outras rotas) - faça após apt para evitar conflitos
 RUN playwright install --with-deps chromium
+ENV LD_LIBRARY_PATH=/usr/lib/x86_64-linux-gnu:$LD_LIBRARY_PATH
+
 
 # Copia o código (inclui templates e static)
 COPY . .
