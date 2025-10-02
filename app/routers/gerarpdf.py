@@ -1,62 +1,121 @@
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
+from pathlib import Path
+import io
+import base64
+import traceback
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+from weasyprint import HTML, CSS
 from ..database import get_db
 from ..models import Proposta
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.styles import getSampleStyleSheet
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
-from reportlab.lib import colors
-from pydantic import BaseModel
-import io
 
 router = APIRouter()
+
+# Paths absolutos (funciona em local e container/Docker)
+BASE_DIR = Path(__file__).resolve().parent.parent  # Raiz do app (ex: /app)
+TEMPLATES_DIR = BASE_DIR / "templates"
+STATIC_DIR = BASE_DIR / "static"
+
+# Config Jinja2
+env = Environment(
+    loader=FileSystemLoader(str(TEMPLATES_DIR)),
+    autoescape=select_autoescape(['html', 'xml']),
+    cache_size=50  # Cache pequeno para dev
+)
 
 class PropostaPayload(BaseModel):
     propostaId: int
     textoCompleto: str | None = None
 
-def gerar_pdf(dados: dict) -> bytes:
-    buffer = io.BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
-    story = []
+def preparar_html(proposta, texto_completo: str | None) -> str:
+    # Carrega template
+    try:
+        template = env.get_template("proposta.html")
+    except Exception as e:
+        raise ValueError(f"Erro ao carregar template proposta.html: {e}")
 
-    styles = getSampleStyleSheet()
-    style_normal = styles["Normal"]
-    style_title = styles["Title"]
+    def format_money(valor):
+        # Formatação BR para dinheiro (fallback se locale não disponível)
+        try:
+            return f"R$ {float(valor or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        except:
+            return f"R$ {valor or 0}"
 
-    # Título
-    story.append(Paragraph("📄 Proposta de Seguro", style_title))
-    story.append(Spacer(1, 20))
+    pdf_data = {
+        "numeroProposta": proposta.numero,
+        "inicioVigencia": proposta.inicio_vigencia.strftime("%d/%m/%Y") if proposta.inicio_vigencia else "",
+        "terminoVigencia": proposta.termino_vigencia.strftime("%d/%m/%Y") if proposta.termino_vigencia else "",
+        "diasVigencia": proposta.dias_vigencia,
+        "valor": format_money(proposta.importancia_segurada),
+        "premio": format_money(proposta.premio),
+        "modalidade": proposta.modalidade,
+        "subgrupo": proposta.subgrupo,
+        "numero_contrato": proposta.numero_contrato,
+        "edital_processo": proposta.edital_processo,
+        "percentual": float(proposta.percentual or 0),
+        "nomeTomador": getattr(proposta.tomador, 'nome', ''),
+        "cnpjTomador": getattr(proposta.tomador, 'cnpj', ''),
+        "enderecoTomador": getattr(proposta.tomador, 'endereco', ''),
+        "ufTomador": f"{getattr(proposta.tomador, 'uf', '')} {getattr(proposta.tomador, 'municipio', '')}".strip(),
+        "cepTomador": getattr(proposta.tomador, 'cep', ''),
+        "nomeBeneficiario": getattr(proposta.segurado, 'nome', ''),
+        "cnpjBeneficiario": getattr(proposta.segurado, 'cpf_cnpj', ''),
+        "enderecoBeneficiario": f"{getattr(proposta.segurado, 'logradouro', '')}, {getattr(proposta.segurado, 'numero', '')} {getattr(proposta.segurado, 'complemento', '')} - {getattr(proposta.segurado, 'bairro', '')}".strip(),
+        "ufBeneficiario": f"{getattr(proposta.segurado, 'municipio', '')}, {getattr(proposta.segurado, 'uf', '')}".strip(),
+        "cepBeneficiario": getattr(proposta.segurado, 'cep', ''),
+        "usuarioNome": getattr(proposta.usuario, 'nome', ''),
+        "usuarioEmail": getattr(proposta.usuario, 'email', ''),
+        "textoCompleto": texto_completo or getattr(proposta, 'text_modelo', ''),
+    }
 
-    # Dados em tabela
-    tabela_dados = []
-    for chave, valor in dados.items():
-        tabela_dados.append([Paragraph(f"<b>{chave}</b>", style_normal), Paragraph(str(valor), style_normal)])
+    # Carrega CSS como string (fallback vazio se não existir)
+    css_content = ""
+    css_path = STATIC_DIR / "css/proposta.css"
+    if css_path.exists():
+        try:
+            with open(css_path, "r", encoding="utf-8") as f:
+                css_content = f.read()
+        except Exception as e:
+            print(f"Erro ao carregar CSS: {e}")
 
-    tabela = Table(tabela_dados, colWidths=[150, 350])
-    tabela.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
-        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
-        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-        ('FONTSIZE', (0, 0), (-1, -1), 10),
-        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
-        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
-        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
-    ]))
-    story.append(tabela)
+    # Carrega imagem de fundo como base64 (fallback vazio se não existir)
+    fundo_b64 = ""
+    fundo_path = STATIC_DIR / "images/teste.jpeg"
+    if fundo_path.exists():
+        try:
+            with open(fundo_path, "rb") as f:
+                fundo_b64 = base64.b64encode(f.read()).decode()
+        except Exception as e:
+            print(f"Erro ao carregar imagem de fundo: {e}")
 
-    story.append(Spacer(1, 20))
+    # Renderiza o body do template
+    body_html = template.render(**pdf_data)
 
-    if "textoCompleto" in dados and dados["textoCompleto"]:
-        story.append(Paragraph("<b>Texto Completo:</b>", style_normal))
-        story.append(Paragraph(dados["textoCompleto"], style_normal))
-
-    doc.build(story)
-    pdf_bytes = buffer.getvalue()
-    buffer.close()
-    return pdf_bytes
+    # Monta HTML completo com CSS e background inline
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+        <head>
+            <meta charset="utf-8">
+            <style>
+                @page {{ size: A4; margin: 2cm; }}
+                body {{ font-family: Arial, sans-serif; }}
+                .page {{ page-break-after: always; }}
+                .background {{ 
+                    background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top; 
+                    background-size: cover; 
+                }}
+                {css_content}
+            </style>
+        </head>
+        <body class="background">
+            {body_html}
+        </body>
+    </html>
+    """
+    return html_content
 
 @router.post("/", response_class=StreamingResponse)
 async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):
@@ -64,33 +123,35 @@ async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get
     if not proposta:
         raise HTTPException(status_code=404, detail="Proposta não encontrada")
 
-    dados = {
-        "Número da Proposta": proposta.numero,
-        "Início Vigência": proposta.inicio_vigencia.strftime("%d/%m/%Y") if proposta.inicio_vigencia else "",
-        "Término Vigência": proposta.termino_vigencia.strftime("%d/%m/%Y") if proposta.termino_vigencia else "",
-        "Dias Vigência": proposta.dias_vigencia,
-        "Valor": proposta.importancia_segurada,
-        "Prêmio": proposta.premio,
-        "Modalidade": proposta.modalidade,
-        "Subgrupo": proposta.subgrupo,
-        "Contrato": proposta.numero_contrato,
-        "Edital Processo": proposta.edital_processo,
-        "Percentual": proposta.percentual,
-        "Tomador": proposta.tomador.nome if proposta.tomador else "",
-        "CNPJ Tomador": proposta.tomador.cnpj if proposta.tomador else "",
-        "Segurado": proposta.segurado.nome if proposta.segurado else "",
-        "CNPJ Segurado": proposta.segurado.cpf_cnpj if proposta.segurado else "",
-        "Usuário": proposta.usuario.nome if proposta.usuario else "",
-        "E-mail Usuário": proposta.usuario.email if proposta.usuario else "",
-        "textoCompleto": payload.textoCompleto or proposta.text_modelo or "",
-    }
+    try:
+        html_content = preparar_html(proposta, payload.textoCompleto)
+        
+        # Cria CSS object (se content vazio, usa None)
+        css_content = ""
+        css_path = STATIC_DIR / "css/proposta.css"
+        if css_path.exists():
+            with open(css_path, "r", encoding="utf-8") as f:
+                css_content = f.read()
+        css = CSS(string=css_content) if css_content else None
+        
+        # Gera PDF com WeasyPrint
+        pdf_bytes = HTML(string=html_content).write_pdf(stylesheets=[css] if css else None)
+        print("PDF gerado com WeasyPrint com sucesso")
+        
+    except Exception as e:
+        print("Erro ao gerar PDF:", str(e))
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {str(e)}")
 
-    pdf_bytes = gerar_pdf(dados)
+    # Buffer para streaming
     buffer = io.BytesIO(pdf_bytes)
     buffer.seek(0)
 
     return StreamingResponse(
         buffer,
         media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=proposta_{proposta.numero}.pdf"}
+        headers={
+            "Content-Disposition": f'attachment; filename="proposta_{proposta.numero}.pdf"',
+            "Content-Length": str(len(pdf_bytes))
+        }
     )
