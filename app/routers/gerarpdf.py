@@ -1,118 +1,101 @@
-from fastapi import APIRouter, Response, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from pydantic import BaseModel
 from pathlib import Path
 from ..database import get_db
 from ..models import Proposta
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-import base64
-import traceback
-from weasyprint import HTML, CSS
+from reportlab.lib.pagesizes import A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+from reportlab.lib import colors
+from pydantic import BaseModel
+import io
 
 router = APIRouter()
-
-BASE_DIR = Path(__file__).resolve().parent.parent  # /app
-TEMPLATES_DIR = BASE_DIR / "templates"
-STATIC_DIR = BASE_DIR / "static"
-
-env = Environment(
-    loader=FileSystemLoader(str(TEMPLATES_DIR)),
-    autoescape=select_autoescape(['html', 'xml']),
-    cache_size=50
-)
 
 class PropostaPayload(BaseModel):
     propostaId: int
     textoCompleto: str | None = None
 
-def preparar_html(proposta, texto_completo: str | None) -> str:
-    template = env.get_template("proposta.html")
+def gerar_pdf(dados: dict) -> bytes:
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    story = []
 
-    def format_money(valor):
-        return f"R$ {float(valor or 0):,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    styles = getSampleStyleSheet()
+    style_normal = styles["Normal"]
+    style_title = styles["Title"]
 
-    pdf_data = {
-        "numeroProposta": proposta.numero,
-        "inicioVigencia": proposta.inicio_vigencia.strftime("%d/%m/%Y") if proposta.inicio_vigencia else "",
-        "terminoVigencia": proposta.termino_vigencia.strftime("%d/%m/%Y") if proposta.termino_vigencia else "",
-        "diasVigencia": proposta.dias_vigencia,
-        "valor": format_money(proposta.importancia_segurada),
-        "premio": format_money(proposta.premio),
-        "modalidade": proposta.modalidade,
-        "subgrupo": proposta.subgrupo,
-        "numero_contrato": proposta.numero_contrato,
-        "edital_processo": proposta.edital_processo,
-        "percentual": float(proposta.percentual or 0),
-        "nomeTomador": proposta.tomador.nome,
-        "cnpjTomador": proposta.tomador.cnpj,
-        "enderecoTomador": proposta.tomador.endereco or '',
-        "ufTomador": f"{proposta.tomador.uf or ''} {proposta.tomador.municipio or ''}".strip(),
-        "cepTomador": proposta.tomador.cep or "",
-        "nomeBeneficiario": proposta.segurado.nome,
-        "cnpjBeneficiario": proposta.segurado.cpf_cnpj,
-        "enderecoBeneficiario": f"{proposta.segurado.logradouro or ''}, {proposta.segurado.numero or ''} {proposta.segurado.complemento or ''} - {proposta.segurado.bairro or ''}".strip(),
-        "ufBeneficiario": f"{proposta.segurado.municipio or ''}, {proposta.segurado.uf or ''}".strip(),
-        "cepBeneficiario": proposta.segurado.cep or "",
-        "usuarioNome": proposta.usuario.nome,
-        "usuarioEmail": proposta.usuario.email,
-        "textoCompleto": texto_completo or proposta.text_modelo or "",
-    }
+    # Título
+    story.append(Paragraph("📄 Proposta de Seguro", style_title))
+    story.append(Spacer(1, 20))
 
-    # CSS
-    css_path = STATIC_DIR / "css/proposta.css"
-    css_content = ""
-    if css_path.exists():
-        with open(css_path, "r", encoding="utf-8") as f:
-            css_content = f.read()
+    # Dados em tabela
+    tabela_dados = []
+    for chave, valor in dados.items():
+        tabela_dados.append([Paragraph(f"<b>{chave}</b>", style_normal), Paragraph(str(valor), style_normal)])
 
-    # Imagem de fundo
-    fundo_path = STATIC_DIR / "images/teste.jpeg"
-    fundo_b64 = ""
-    if fundo_path.exists():
-        with open(fundo_path, "rb") as f:
-            fundo_b64 = base64.b64encode(f.read()).decode()
+    tabela = Table(tabela_dados, colWidths=[150, 350])
+    tabela.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.grey),
+        ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+        ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+        ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+        ('FONTSIZE', (0, 0), (-1, -1), 10),
+        ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+        ('BACKGROUND', (0, 1), (-1, -1), colors.beige),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.black),
+    ]))
+    story.append(tabela)
 
-    body_html = template.render(**pdf_data)
+    story.append(Spacer(1, 20))
 
-    html_content = f"""
-    <html>
-        <head>
-            <style>
-            @page {{ size: A4; margin: 2cm; }}
-            .page {{
-                page-break-after: always;
-                background: url("data:image/jpeg;base64,{fundo_b64}") no-repeat center top;
-                background-size: cover;
-            }}
-            {css_content}
-            </style>
-        </head>
-        <body>
-            {body_html}
-        </body>
-    </html>
-    """
-    return html_content
+    if "textoCompleto" in dados and dados["textoCompleto"]:
+        story.append(Paragraph("<b>Texto Completo:</b>", style_normal))
+        story.append(Paragraph(dados["textoCompleto"], style_normal))
 
-@router.post("/", response_class=Response)
+    doc.build(story)
+    pdf_bytes = buffer.getvalue()
+    buffer.close()
+    return pdf_bytes
+
+@router.post("/", response_class=FileResponse)
 async def gerar_pdf_endpoint(payload: PropostaPayload, db: Session = Depends(get_db)):
     proposta = db.query(Proposta).filter(Proposta.id == payload.propostaId).first()
     if not proposta:
         raise HTTPException(status_code=404, detail="Proposta não encontrada")
 
-    try:
-        html_content = preparar_html(proposta, payload.textoCompleto)
-        css_path = STATIC_DIR / "css/proposta.css"
-        css = CSS(filename=str(css_path)) if css_path.exists() else None
-        pdf_bytes = HTML(string=html_content).write_pdf(stylesheets=[css] if css else None)
-        print("PDF gerado com WeasyPrint")
-    except Exception as e:
-        print("Erro ao gerar PDF:", e)
-        traceback.print_exc()
-        raise HTTPException(status_code=500, detail=f"Erro ao gerar PDF: {e}")
+    # Monta os dados igual você já tinha
+    dados = {
+        "Número da Proposta": proposta.numero,
+        "Início Vigência": proposta.inicio_vigencia.strftime("%d/%m/%Y") if proposta.inicio_vigencia else "",
+        "Término Vigência": proposta.termino_vigencia.strftime("%d/%m/%Y") if proposta.termino_vigencia else "",
+        "Dias Vigência": proposta.dias_vigencia,
+        "Valor": proposta.importancia_segurada,
+        "Prêmio": proposta.premio,
+        "Modalidade": proposta.modalidade,
+        "Subgrupo": proposta.subgrupo,
+        "Contrato": proposta.numero_contrato,
+        "Edital Processo": proposta.edital_processo,
+        "Percentual": proposta.percentual,
+        "Tomador": proposta.tomador.nome if proposta.tomador else "",
+        "CNPJ Tomador": proposta.tomador.cnpj if proposta.tomador else "",
+        "Segurado": proposta.segurado.nome if proposta.segurado else "",
+        "CNPJ Segurado": proposta.segurado.cpf_cnpj if proposta.segurado else "",
+        "Usuário": proposta.usuario.nome if proposta.usuario else "",
+        "E-mail Usuário": proposta.usuario.email if proposta.usuario else "",
+        "textoCompleto": payload.textoCompleto or proposta.text_modelo or "",
+    }
 
-    return Response(
-        content=pdf_bytes,
+    pdf_bytes = gerar_pdf(dados)
+
+    # Salva temporário e retorna
+    output_path = Path(f"/tmp/proposta_{proposta.numero}.pdf")
+    with open(output_path, "wb") as f:
+        f.write(pdf_bytes)
+
+    return FileResponse(
+        output_path,
         media_type="application/pdf",
-        headers={"Content-Disposition": f'attachment; filename="proposta_{proposta.numero}.pdf"'}
+        filename=f"proposta_{proposta.numero}.pdf"
     )
