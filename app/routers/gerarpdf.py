@@ -77,6 +77,7 @@ def preparar_html(proposta: Proposta, texto_completo: str | None) -> str:
         "usuarioNome": proposta.usuario.nome,
         "usuarioEmail": proposta.usuario.email,
         "textoCompleto": texto_completo or proposta.text_modelo or "",
+        "tipo_emp": proposta.tipo_emp,
     }
 
     # CSS

@@ -57,6 +57,7 @@ def montar_html_apolice(proposta, textoCompleto: str | None = None) -> str:
         "usuarioNome": proposta.usuario.nome,
         "usuarioEmail": proposta.usuario.email,
         "textoCompleto": textoCompleto or proposta.text_modelo or "",
+        "tipo_emp": proposta.tipo_emp,
     }
 
     # CSS + imagem de fundo
