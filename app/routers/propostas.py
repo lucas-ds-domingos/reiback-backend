@@ -17,19 +17,6 @@ router = APIRouter()
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id or 1
 
-    # Busca o tomador para validação de limite
-    tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
-    if not tomador:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail="Tomador não encontrado")
-
-    # Regra nova: não permitir valor maior que o limite disponível
-    if payload.importancia_segurada > (tomador.limite_disponivel or 0):
-        raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST,
-        detail=f"Importância segurada ({payload.importancia_segurada}) excede o limite disponível do tomador ({tomador.limite_disponivel})"
-    )
-
-    # Cria a proposta
     nova = Proposta(
         numero=payload.numero,
         grupo=payload.grupo,
@@ -52,12 +39,16 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         text_modelo=payload.text_modelo,
     )
 
-    # Atualiza limite disponível do tomador
-    tomador.limite_disponivel -= payload.importancia_segurada
-    if tomador.limite_disponivel < 0:
-        tomador.limite_disponivel = 0
+    tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
+    if tomador:
+        tomador.limite_disponivel = (tomador.limite_disponivel or 0) - (payload.importancia_segurada or 0)
+        if tomador.limite_disponivel < 0:
+            tomador.limite_disponivel = 0  
+        db.add(tomador)
 
-    # Gerar XML
+    # Gerar XML automaticamente
+    import xml.etree.ElementTree as ET
+    from io import BytesIO
     root = ET.Element("Proposta")
     payload_dict = payload.dict(exclude_unset=True, exclude={"xml"})
     for key, value in payload_dict.items():
@@ -68,7 +59,6 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     nova.xml = f.getvalue().decode()
 
     db.add(nova)
-    db.add(tomador)
     db.commit()
     db.refresh(nova)
     db.refresh(tomador)
