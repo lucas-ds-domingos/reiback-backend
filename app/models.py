@@ -91,6 +91,7 @@ class Proposta(Base):
     dias_vigencia = Column(Integer, nullable=True)
     emitida_em = Column(DateTime, nullable=True)
     cancelada_em = Column(DateTime, nullable=True)
+    tipo_emp = Column(String(50))
 
     # Financeiro
     taxa_percentual = Column(Numeric(5, 2), nullable=False, default=Decimal("5.00"))

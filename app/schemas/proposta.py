@@ -28,6 +28,7 @@ class PropostaCreate(BaseModel):
     edital_processo: Optional[str] = None
     text_modelo: Optional[str] = None
     xml: Optional[str] = None
+    tipo_emp: Optional[str]
 
     # Relações
     tomador_id: Optional[int]
@@ -55,7 +56,7 @@ class PropostaResponse(BaseModel):
     link_pagamento: Optional[str] = None
     pago_em: Optional[datetime] = None
     valor_pago: Optional[condecimal(max_digits=12, decimal_places=2)] = None
-
+    tipo_emp: Optional[str]
     model_config = {
         "from_attributes": True 
     }
