@@ -80,6 +80,11 @@ def get_tomador(
     # 1️⃣ Busca no banco primeiro
     tomador = db.query(Tomador).filter(Tomador.cnpj == cnpj).first()
     if tomador:
+        if tomador.usuario_id and tomador.usuario_id != current_user.id:
+         raise HTTPException(
+            status_code=403, 
+            detail="❌ Este tomador já está vinculado a outro usuário."
+        )
         # Se já existe, cria cliente no Asaas se ainda não tiver
         if not tomador.asaas_cliente:
             criar_cliente_asaas(tomador, db)
