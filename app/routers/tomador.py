@@ -68,6 +68,7 @@ def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
     db.refresh(cliente)
     return cliente
 
+# ... (importações e configurações continuam iguais)
 
 @router.get("/{cnpj}", response_model=TomadorBase)
 def get_tomador(
@@ -81,12 +82,12 @@ def get_tomador(
     tomador = db.query(Tomador).filter(Tomador.cnpj == cnpj).first()
     if tomador:
         if tomador.usuario_id and tomador.usuario_id != current_user.id:
-         raise HTTPException(
-            status_code=403, 
-            detail="❌ Este tomador já está vinculado a outro usuário."
-        )
-        # Se já existe, cria cliente no Asaas se ainda não tiver
+            raise HTTPException(
+                status_code=403, 
+                detail="❌ Este tomador já está vinculado a outro usuário."
+            )
         if not tomador.asaas_cliente:
+            db.commit()  # 🔹 garante que Tomador tenha ID antes de criar cliente Asaas
             criar_cliente_asaas(tomador, db)
         db.refresh(tomador)
         return tomador
@@ -97,7 +98,7 @@ def get_tomador(
         raise HTTPException(status_code=404, detail="Tomador não encontrado na Receita")
     data = response.json()
 
-    # 3️⃣ Cria novo tomador com limite_aprovado e limite_disponivel = 1 milhão
+    # 3️⃣ Cria novo tomador
     novo_tomador = Tomador(
         cnpj=cnpj,
         nome=data.get("nome") or data.get("fantasia") or "Nome Teste",
@@ -109,16 +110,16 @@ def get_tomador(
         email=data.get("email") or "teste@teste.com",
         telefone=data.get("telefone") or "11999999999",
         capital_social=float(data.get("capital_social", 0)),
-        limite_aprovado=Decimal("1000000.00"),   # 🔹 Limite inicial
-        limite_disponivel=Decimal("1000000.00"), # 🔹 Limite inicial disponível
+        limite_aprovado=Decimal("1000000.00"),
+        limite_disponivel=Decimal("1000000.00"),
         usuario_id=current_user.id
     )
 
     db.add(novo_tomador)
-    db.commit()
+    db.commit()      # 🔹 salva no banco e gera ID
     db.refresh(novo_tomador)
 
-    criar_cliente_asaas(novo_tomador, db)
+    criar_cliente_asaas(novo_tomador, db)  # 🔹 agora ID já existe
     db.refresh(novo_tomador)
     return novo_tomador
 
@@ -149,9 +150,12 @@ def atualizar_tomador(
     tomador.telefone = data.get("telefone") or "11999999999"
     tomador.capital_social = float(data.get("capital_social", 0))
     tomador.usuario_id = current_user.id
-    db.commit()
+
+    db.commit()      # 🔹 salva alterações
     db.refresh(tomador)
 
-    criar_cliente_asaas(tomador, db)
+    if not tomador.asaas_cliente:
+        criar_cliente_asaas(tomador, db)
     db.refresh(tomador)
     return tomador
+
