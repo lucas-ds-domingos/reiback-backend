@@ -2,6 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class SeguradoBase(BaseModel):
+    id: int
     cpf_cnpj: str
     nome: str
     fantasia: Optional[str] = None
@@ -20,4 +21,5 @@ class SeguradoBase(BaseModel):
 }
 
 class SeguradoCreate(SeguradoBase):
+    id: Optional[int] = None
     pass
