@@ -181,7 +181,7 @@ class Corretora(Base):
     data_recadastro = Column(Date, nullable=True)
     data_expiracao = Column(Date, nullable=True)
     telefone = Column(String(20), nullable=True)
-
+    susep = Column(Integer, nullable=True)
     # Endereço
     cep = Column(String(20), nullable=True)
     endereco = Column(String(255), nullable=True)
