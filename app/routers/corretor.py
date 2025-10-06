@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-
-from database import get_db
+from ..database import get_db
 from schemas.corretor import CorretoraCreate, CorretoraResponse
 from services.corretora_service import create_corretora
 
