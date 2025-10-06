@@ -22,7 +22,7 @@ app.include_router(gerarpdf.router, prefix="/api/gerar-pdf", tags=["gerar-pdf"])
 app.include_router(webhokassas.router, prefix="/api")
 app.include_router(apolices.router)
 app.include_router(usuarios.router, prefix="/api")
-app.include_router(corretor.router)
+app.include_router(corretor.router, prefix="/api")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
