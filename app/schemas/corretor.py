@@ -16,6 +16,7 @@ class CorretoraBase(BaseModel):
     data_expiracao: Optional[date] = None
     telefone: Optional[str] = None
     susep: Optional[int] = None
+    data_registro: Optional[date] = None
 
     cep: Optional[str] = None
     endereco: Optional[str] = None

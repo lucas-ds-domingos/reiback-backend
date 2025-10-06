@@ -1,23 +1,31 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Corretora
-from ..schemas.corretor import CorretoraCreate, CorretoraResponse
+from ..models import Corretora, Usuario
+from ..schemas.corretor import CorretorCreate
 from passlib.hash import bcrypt
+from datetime import datetime
+from decimal import Decimal
 
 router = APIRouter()
 
-@router.post("/corretores", response_model=CorretoraResponse)
-def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
+@router.post("/corretores")
+def criar_corretor(payload: CorretorCreate, db: Session = Depends(get_db)):
     # Verifica se o CNPJ já existe
-    corretor_existente = db.query(Corretora).filter(Corretora.cnpj == payload.cnpj).first()
-    if corretor_existente:
+    existente = db.query(Corretora).filter(Corretora.cnpj == payload.cnpj).first()
+    if existente:
         raise HTTPException(status_code=400, detail="CNPJ já cadastrado.")
 
-    # Criptografa a senha antes de salvar
-    hashed_password = bcrypt.hash(payload.password)
+    # Tratamento de tipos
+    try:
+        susep = int(payload.susep) if payload.susep else None
+        comissao = Decimal(payload.comissao or 0).quantize(Decimal("0.01"))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Erro ao processar números: {e}")
 
-    novo_corretor = Corretora(
+    # Cria a corretora
+    nova_corretora = Corretora(
+        finance_id=1,
         cnpj=payload.cnpj,
         razao_social=payload.razao_social,
         inscricao_municipal=payload.inscricao_municipal,
@@ -29,14 +37,41 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
         bairro=payload.bairro,
         uf=payload.uf,
         cidade=payload.cidade,
-        comissao=payload.comissao or 0,
-        email=payload.email,
-        password=hashed_password,
-        susep=payload.susep or None, 
+        susep=susep,
+        situacao_cnpj="ativo",
+        data_registro=datetime.utcnow(),
     )
-
-    db.add(novo_corretor)
+    db.add(nova_corretora)
     db.commit()
-    db.refresh(novo_corretor)
+    db.refresh(nova_corretora)
 
-    return novo_corretor
+    # Criptografa a senha do usuário
+    hashed_password = bcrypt.hash(payload.password)
+
+    # Cria o usuário vinculado à corretora
+    novo_usuario = Usuario(
+        nome=payload.razao_social,
+        email=payload.email,
+        senha_hash=hashed_password,
+        role="corretor",
+        ativo=True,
+        corretora_id=nova_corretora.id,
+        criado_em=datetime.utcnow()
+    )
+    db.add(novo_usuario)
+    db.commit()
+    db.refresh(novo_usuario)
+
+    return {
+        "corretora": {
+            "id": nova_corretora.id,
+            "cnpj": nova_corretora.cnpj,
+            "razao_social": nova_corretora.razao_social
+        },
+        "usuario": {
+            "id": novo_usuario.id,
+            "nome": novo_usuario.nome,
+            "email": novo_usuario.email,
+            "role": novo_usuario.role
+        }
+    }
