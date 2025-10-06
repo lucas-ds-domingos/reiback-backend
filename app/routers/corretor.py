@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import corretoras
+from ..models import Corretora
 from ..schemas.corretor import CorretoraCreate, CorretoraResponse
 from passlib.hash import bcrypt
 
@@ -10,14 +10,14 @@ router = APIRouter()
 @router.post("/corretores", response_model=CorretoraResponse)
 def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
     # Verifica se o CNPJ já existe
-    corretor_existente = db.query(corretoras).filter(corretoras.cnpj == payload.cnpj).first()
+    corretor_existente = db.query(Corretora).filter(Corretora.cnpj == payload.cnpj).first()
     if corretor_existente:
         raise HTTPException(status_code=400, detail="CNPJ já cadastrado.")
 
     # Criptografa a senha antes de salvar
     hashed_password = bcrypt.hash(payload.password)
 
-    novo_corretor = corretoras(
+    novo_corretor = Corretora(
         cnpj=payload.cnpj,
         razao_social=payload.razao_social,
         inscricao_municipal=payload.inscricao_municipal,
