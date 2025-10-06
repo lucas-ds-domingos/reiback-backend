@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from typing import Optional
 from datetime import date
 
@@ -16,7 +16,6 @@ class CorretoraBase(BaseModel):
     data_expiracao: Optional[date] = None
     telefone: Optional[str] = None
     susep: Optional[int] = None
-    data_registro: Optional[date] = None
 
     cep: Optional[str] = None
     endereco: Optional[str] = None
@@ -27,11 +26,18 @@ class CorretoraBase(BaseModel):
     cidade: Optional[str] = None
 
 class CorretoraCreate(CorretoraBase):
-    pass
+    email: str
+    password: str
+    
+    @validator("susep", pre=True)
+    def str_to_int(cls, v):
+        if v is None or v == "":
+            return None
+        return int(v)
 
 class CorretoraResponse(CorretoraBase):
     id: int
 
     model_config = {
-    "from_attributes": True
-}
+        "from_attributes": True
+    }
