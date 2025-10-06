@@ -3,7 +3,6 @@ from typing import Optional
 from datetime import date
 
 class CorretoraBase(BaseModel):
-    finance_id: int
     cnpj: str
     razao_social: str
     inscricao_municipal: Optional[str] = None
