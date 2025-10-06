@@ -103,7 +103,7 @@ def get_tomador(
         cnpj=cnpj,
         nome=data.get("nome") or data.get("fantasia") or "Nome Teste",
         fantasia=data.get("fantasia"),
-        endereco=data.get("logradouro") or "Endereço Teste",
+        endereco=f"{data.get('logradouro', '')} {data.get('bairro', '')}".strip() or "Endereço Teste",
         municipio=data.get("municipio") or "SP",
         uf=data.get("uf") or "SP",
         cep=data.get("cep") or "01001000",
@@ -142,7 +142,7 @@ def atualizar_tomador(
 
     tomador.nome = data.get("nome") or data.get("fantasia") or "Nome Teste"
     tomador.fantasia = data.get("fantasia")
-    tomador.endereco = data.get("logradouro") or "Endereço Teste"
+    tomador.endereco = f"{data.get('logradouro', '')} {data.get('bairro', '')}".strip() or "Endereço Teste"
     tomador.municipio = data.get("municipio") or "SP"
     tomador.uf = data.get("uf") or "SP"
     tomador.cep = data.get("cep") or "01001000"
