@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Corretora, Usuario
-from ..schemas.corretor import CorretorCreate
+from ..schemas.corretor import CorretoraCreate
 from passlib.hash import bcrypt
 from datetime import datetime
 from decimal import Decimal
@@ -10,7 +10,7 @@ from decimal import Decimal
 router = APIRouter()
 
 @router.post("/corretores")
-def criar_corretor(payload: CorretorCreate, db: Session = Depends(get_db)):
+def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
     # Verifica se o CNPJ já existe
     existente = db.query(Corretora).filter(Corretora.cnpj == payload.cnpj).first()
     if existente:
