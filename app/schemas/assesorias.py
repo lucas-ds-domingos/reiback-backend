@@ -7,7 +7,6 @@ class AssesoriaBase(BaseModel):
     razao_social: str
     inscricao_municipal: Optional[str] = None
     comissao: Optional[float] = 0.0
-    situacao_cnpj: Optional[str] = None
     ramo: Optional[str] = None
     data_registro: Optional[date] = None
     data_recadastro: Optional[date] = None

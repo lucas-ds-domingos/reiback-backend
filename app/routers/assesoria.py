@@ -28,7 +28,6 @@ def criar_corretor(payload: AssesoriaCreate, db: Session = Depends(get_db)):
         bairro=payload.bairro,
         uf=payload.uf,
         cidade=payload.cidade,
-        situacao_cnpj="ativo",
         data_registro=datetime.utcnow(),
     )
     db.add(nova_corretora)
