@@ -44,7 +44,7 @@ def criar_corretor(payload: AssesoriaCreate, db: Session = Depends(get_db)):
         senha_hash=hashed_password,
         role="assessoria",
         ativo=True,
-        corretora_id=nova_corretora.id,
+        assessoria_id=nova_corretora.id,
         criado_em=datetime.utcnow()
     )
     db.add(novo_usuario)
