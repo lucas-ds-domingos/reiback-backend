@@ -160,6 +160,7 @@ def atualizar_tomador(
     db.refresh(tomador)
     return tomador
 
+
 @router.get("/list-tomador", response_model=List[TomadorBase])
 def listar_tomador(
     db: Session = Depends(get_db),
