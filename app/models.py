@@ -168,7 +168,7 @@ class Corretora(Base):
     __tablename__ = "corretoras"
 
     id = Column(Integer, primary_key=True, index=True)
-    finance_id = Column(Integer, ForeignKey("finances.id"), nullable=False)
+    finance_id = Column(Integer, ForeignKey("finances.id"), nullable=True)
 
     cnpj = Column(String(18), unique=True, nullable=False)
     razao_social = Column(String(255), nullable=False)
