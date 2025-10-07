@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from decimal import Decimal
 
 class TomadorBase(BaseModel):
     id: Optional[int]
@@ -17,5 +18,8 @@ class TomadorBase(BaseModel):
     limite_disponivel: float # 🔹 novo campo
 
     model_config = {
-        "from_attributes": True
+        "from_attributes": True,
+        "json_encoders": {
+            Decimal: float  # 🔹 converte Decimal para float na resposta
+        }
     }

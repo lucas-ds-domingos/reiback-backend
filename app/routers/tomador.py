@@ -166,10 +166,4 @@ def listar_tomador(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # Retorna apenas os tomadores do usuário logado
-    tomadores = (
-        db.query(Tomador)
-        .filter(Tomador.usuario_id == current_user.id)
-        .all()
-    )
-    return tomadores
+    return db.query(Tomador).filter(Tomador.usuario_id == current_user.id).all()
