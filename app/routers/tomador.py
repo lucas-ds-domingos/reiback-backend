@@ -161,7 +161,8 @@ def atualizar_tomador(
     return tomador
 
 @router.get("/list-tomador", response_model=List[TomadorBase])
-def listar_tomador(db: Session = Depends(get_db)):
-    tomadorList = db.query(Tomador).all()
-    return tomadorList
-
+def listar_tomador(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)  # exige login
+):
+    return db.query(Tomador).all()
