@@ -218,6 +218,9 @@ class Assessoria(Base):
     razao_social = Column(String(255), nullable=False)
     comissao = Column(Numeric(5, 2), default=0.0)  # % sobre produção dos corretores
     telefone = Column(String(20), nullable=True)
+    data_registro = Column(Date, nullable=True)
+    data_recadastro = Column(Date, nullable=True)
+    data_expiracao = Column(Date, nullable=True)
 
     # Endereço
     cep = Column(String(20), nullable=True)
