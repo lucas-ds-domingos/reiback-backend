@@ -25,7 +25,6 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
 
     # Cria a corretora
     nova_corretora = Corretora(
-        finance_id=1,
         cnpj=payload.cnpj,
         razao_social=payload.razao_social,
         inscricao_municipal=payload.inscricao_municipal,
@@ -41,6 +40,11 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
         situacao_cnpj="ativo",
         data_registro=datetime.utcnow(),
     )
+    if payload.assessoria_id:
+        nova_corretora.assessoria_id = payload.assessoria_id
+    else:
+        nova_corretora.finance_id = 1
+        
     db.add(nova_corretora)
     db.commit()
     db.refresh(nova_corretora)
