@@ -9,6 +9,7 @@ from ..utils.get_current_user import get_current_user
 import os
 from dotenv import load_dotenv
 from decimal import Decimal
+from typing import List
 
 load_dotenv()
 
@@ -158,4 +159,9 @@ def atualizar_tomador(
         criar_cliente_asaas(tomador, db)
     db.refresh(tomador)
     return tomador
+
+@router.get("/list-tomador", response_model=List[TomadorBase])
+def listar_tomador(db: Session = Depends(get_db)):
+    tomadorList = db.query(Tomador).all()
+    return tomadorList
 
