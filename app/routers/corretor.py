@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Corretora, Usuario
@@ -10,7 +10,18 @@ from decimal import Decimal
 router = APIRouter()
 
 @router.post("/corretores")
-def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
+def criar_corretor(
+    payload: CorretoraCreate,
+    db: Session = Depends(get_db),
+    assessoria_id: int | None = Query(default=None)
+):
+    """
+    Cria uma corretora e um usuário corretor vinculado.
+    Se 'assessoria_id' vier via query string (?assessoria_id=1),
+    o usuário será vinculado àquela assessoria.
+    Caso contrário, será uma corretora vinculada à finance_id padrão (1).
+    """
+
     # Verifica se o CNPJ já existe
     existente = db.query(Corretora).filter(Corretora.cnpj == payload.cnpj).first()
     if existente:
@@ -39,12 +50,9 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
         susep=susep,
         situacao_cnpj="ativo",
         data_registro=datetime.utcnow(),
+        finance_id=1  # mantém o padrão
     )
-    if payload.assessoria_id:
-        nova_corretora.assessoria_id = payload.assessoria_id
-    else:
-        nova_corretora.finance_id = 1
-        
+
     db.add(nova_corretora)
     db.commit()
     db.refresh(nova_corretora)
@@ -52,7 +60,7 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
     # Criptografa a senha do usuário
     hashed_password = bcrypt.hash(payload.password)
 
-    # Cria o usuário vinculado à corretora
+    # Cria o usuário vinculado à corretora e (opcionalmente) à assessoria
     novo_usuario = Usuario(
         nome=payload.razao_social,
         email=payload.email,
@@ -60,8 +68,10 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
         role="corretor",
         ativo=True,
         corretora_id=nova_corretora.id,
-        criado_em=datetime.utcnow()
+        criado_em=datetime.utcnow(),
+        assessoria_id=assessoria_id  # <-- vincula o usuário à assessoria recebida
     )
+
     db.add(novo_usuario)
     db.commit()
     db.refresh(novo_usuario)
@@ -76,6 +86,7 @@ def criar_corretor(payload: CorretoraCreate, db: Session = Depends(get_db)):
             "id": novo_usuario.id,
             "nome": novo_usuario.nome,
             "email": novo_usuario.email,
-            "role": novo_usuario.role
+            "role": novo_usuario.role,
+            "assessoria_id": novo_usuario.assessoria_id
         }
     }
