@@ -81,7 +81,7 @@ def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
 # =========================================
 # endpoints
 # =========================================
-@router.get("/{cnpj}", response_model=TomadorBase)
+@router.get("/cnpj/{cnpj}", response_model=TomadorBase)
 def get_tomador(
     cnpj: str, 
     db: Session = Depends(get_db), 
@@ -134,7 +134,7 @@ def get_tomador(
     db.refresh(novo_tomador)
     return novo_tomador
 
-@router.put("/{cnpj}/atualizar", response_model=TomadorBase)
+@router.put("/cnpj/{cnpj}/atualizar", response_model=TomadorBase)
 def atualizar_tomador(
     cnpj: str,
     db: Session = Depends(get_db),
