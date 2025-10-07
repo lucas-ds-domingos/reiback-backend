@@ -1,19 +1,27 @@
-import requests
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from ..database import get_db
-from ..models import Tomador, ClienteAsaas
-from ..schemas.tomador import TomadorBase
-from ..models import Usuario  
-from ..utils.get_current_user import get_current_user  
+# =========================================
+# imports
+# =========================================
 import os
-from dotenv import load_dotenv
 from decimal import Decimal
 from typing import List
 
+import requests
+from dotenv import load_dotenv
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.orm import Session
+
+from ..database import get_db
+from ..models import Tomador, ClienteAsaas, Usuario
+from ..schemas.tomador import TomadorBase
+from ..utils.get_current_user import get_current_user
+
+# =========================================
+# configuração inicial
+# =========================================
 load_dotenv()
 
 router = APIRouter()
+
 RECEITA_API = "https://www.receitaws.com.br/v1/cnpj/"
 ASAAS_API = "https://sandbox.asaas.com/api/v3/customers"
 ASAAS_KEY = os.getenv("ASAAS_API_KEY")
@@ -21,7 +29,9 @@ ASAAS_KEY = os.getenv("ASAAS_API_KEY")
 if not ASAAS_KEY:
     raise RuntimeError("Variável de ambiente ASAAS_API_KEY não encontrada")
 
-
+# =========================================
+# funções auxiliares
+# =========================================
 def normalizar_cnpj(cnpj: str) -> str:
     """Remove pontos, barras e traços do CNPJ"""
     return cnpj.replace(".", "").replace("/", "").replace("-", "")
@@ -29,7 +39,6 @@ def normalizar_cnpj(cnpj: str) -> str:
 def normalizar_telefone(numero: str) -> str:
     """Remove tudo que não for dígito"""
     return "".join(filter(str.isdigit, numero or "")) or "11999999999"
-
 
 def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
     """Cria cliente no Asaas sandbox e salva referência no banco"""
@@ -69,8 +78,9 @@ def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
     db.refresh(cliente)
     return cliente
 
-# ... (importações e configurações continuam iguais)
-
+# =========================================
+# endpoints
+# =========================================
 @router.get("/{cnpj}", response_model=TomadorBase)
 def get_tomador(
     cnpj: str, 
@@ -79,27 +89,27 @@ def get_tomador(
 ):
     cnpj = normalizar_cnpj(cnpj)
 
-    # 1️⃣ Busca no banco primeiro
+    # busca no banco
     tomador = db.query(Tomador).filter(Tomador.cnpj == cnpj).first()
     if tomador:
         if tomador.usuario_id and tomador.usuario_id != current_user.id:
-            raise HTTPException(
-                status_code=403, 
-                detail="❌ Este tomador já está vinculado a outro usuário."
-            )
+            raise HTTPException(status_code=403, detail="❌ Este tomador já está vinculado a outro usuário.")
+        
+        # criar cliente Asaas apenas se for chamado diretamente
         if not tomador.asaas_cliente:
-            db.commit()  # 🔹 garante que Tomador tenha ID antes de criar cliente Asaas
+            db.commit()  # garante que Tomador tenha ID antes de criar cliente Asaas
             criar_cliente_asaas(tomador, db)
+        
         db.refresh(tomador)
         return tomador
 
-    # 2️⃣ Se não existe, busca na Receita
+    # busca na Receita
     response = requests.get(f"{RECEITA_API}{cnpj}")
     if response.status_code != 200:
         raise HTTPException(status_code=404, detail="Tomador não encontrado na Receita")
     data = response.json()
 
-    # 3️⃣ Cria novo tomador
+    # cria novo tomador
     novo_tomador = Tomador(
         cnpj=cnpj,
         nome=data.get("nome") or data.get("fantasia") or "Nome Teste",
@@ -117,13 +127,12 @@ def get_tomador(
     )
 
     db.add(novo_tomador)
-    db.commit()      # 🔹 salva no banco e gera ID
+    db.commit()
     db.refresh(novo_tomador)
 
-    criar_cliente_asaas(novo_tomador, db)  # 🔹 agora ID já existe
+    criar_cliente_asaas(novo_tomador, db)
     db.refresh(novo_tomador)
     return novo_tomador
-
 
 @router.put("/{cnpj}/atualizar", response_model=TomadorBase)
 def atualizar_tomador(
@@ -152,18 +161,19 @@ def atualizar_tomador(
     tomador.capital_social = float(data.get("capital_social", 0))
     tomador.usuario_id = current_user.id
 
-    db.commit()      # 🔹 salva alterações
+    db.commit()
     db.refresh(tomador)
 
     if not tomador.asaas_cliente:
         criar_cliente_asaas(tomador, db)
+    
     db.refresh(tomador)
     return tomador
-
 
 @router.get("/list-tomador", response_model=List[TomadorBase])
 def listar_tomador(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
+    # ⚡ Apenas lista os tomadores do usuário logado
     return db.query(Tomador).filter(Tomador.usuario_id == current_user.id).all()
