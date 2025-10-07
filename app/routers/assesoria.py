@@ -2,10 +2,11 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Assessoria, Usuario
-from ..schemas.assesorias import AssesoriaCreate
+from ..schemas.assesorias import AssesoriaCreate, AssesoriaBase
 from passlib.hash import bcrypt
 from datetime import datetime
 from decimal import Decimal
+from typing import List
 
 router = APIRouter()
 
@@ -64,3 +65,13 @@ def criar_corretor(payload: AssesoriaCreate, db: Session = Depends(get_db)):
             "role": novo_usuario.role
         }
     }
+
+
+
+@router.get("/list-assesoria", response_model=List[AssesoriaBase])
+def listar_assessorias(db: Session = Depends(get_db)):
+    """
+    Retorna todas as assessorias cadastradas.
+    """
+    assessorais = db.query(Assessoria).all()
+    return assessorais
