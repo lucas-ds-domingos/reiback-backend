@@ -34,8 +34,8 @@ def criar_corretor(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erro ao processar números: {e}")
 
-    # Cria a corretora
-    nova_corretora = Corretora(
+    # Define os campos da corretora
+    corretora_data = dict(
         cnpj=payload.cnpj,
         razao_social=payload.razao_social,
         inscricao_municipal=payload.inscricao_municipal,
@@ -49,10 +49,15 @@ def criar_corretor(
         cidade=payload.cidade,
         susep=susep,
         situacao_cnpj="ativo",
-        data_registro=datetime.utcnow(),
-        finance_id=1  # mantém o padrão
+        data_registro=datetime.utcnow()
     )
 
+    # Adiciona finance_id somente se assessoria_id não for informado
+    if not assessoria_id:
+        corretora_data["finance_id"] = 1
+
+    # Cria a corretora
+    nova_corretora = Corretora(**corretora_data)
     db.add(nova_corretora)
     db.commit()
     db.refresh(nova_corretora)
@@ -69,7 +74,7 @@ def criar_corretor(
         ativo=True,
         corretora_id=nova_corretora.id,
         criado_em=datetime.utcnow(),
-        assessoria_id=assessoria_id  # <-- vincula o usuário à assessoria recebida
+        assessoria_id=assessoria_id  # vincula ao usuário
     )
 
     db.add(novo_usuario)
