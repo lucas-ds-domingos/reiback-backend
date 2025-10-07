@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Corretora, Usuario
+from ..models import Corretora, Usuario, Assessoria
 from ..schemas.corretor import CorretoraCreate
 from passlib.hash import bcrypt
 from datetime import datetime
@@ -17,9 +17,9 @@ def criar_corretor(
 ):
     """
     Cria uma corretora e um usuário corretor vinculado.
-    Se 'assessoria_id' vier via query string (?assessoria_id=1),
-    o usuário será vinculado àquela assessoria.
-    Caso contrário, será uma corretora vinculada à finance_id padrão (1).
+    - Se 'assessoria_id' for passado, a corretora não terá finance_id
+      e o usuário será vinculado a essa assessoria.
+    - Caso contrário, a corretora terá finance_id=1 e usuário não terá assessoria.
     """
 
     # Verifica se o CNPJ já existe
@@ -34,7 +34,7 @@ def criar_corretor(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Erro ao processar números: {e}")
 
-    # Define os campos da corretora
+    # Dados da corretora
     corretora_data = dict(
         cnpj=payload.cnpj,
         razao_social=payload.razao_social,
@@ -52,11 +52,10 @@ def criar_corretor(
         data_registro=datetime.utcnow()
     )
 
-    # Adiciona finance_id somente se assessoria_id não for informado
+    # Só define finance_id se não houver assessoria_id
     if not assessoria_id:
         corretora_data["finance_id"] = 1
 
-    # Cria a corretora
     nova_corretora = Corretora(**corretora_data)
     db.add(nova_corretora)
     db.commit()
@@ -65,7 +64,13 @@ def criar_corretor(
     # Criptografa a senha do usuário
     hashed_password = bcrypt.hash(payload.password)
 
-    # Cria o usuário vinculado à corretora e (opcionalmente) à assessoria
+    # Verifica se assessoria_id existe
+    if assessoria_id:
+        assessoria_existente = db.query(Assessoria).filter(Assessoria.id == assessoria_id).first()
+        if not assessoria_existente:
+            raise HTTPException(status_code=400, detail="Assessoria não encontrada.")
+
+    # Cria o usuário vinculado à corretora e, se houver, à assessoria
     novo_usuario = Usuario(
         nome=payload.razao_social,
         email=payload.email,
@@ -74,7 +79,7 @@ def criar_corretor(
         ativo=True,
         corretora_id=nova_corretora.id,
         criado_em=datetime.utcnow(),
-        assessoria_id=assessoria_id  # vincula ao usuário
+        assessoria_id=assessoria_id 
     )
 
     db.add(novo_usuario)
@@ -85,7 +90,8 @@ def criar_corretor(
         "corretora": {
             "id": nova_corretora.id,
             "cnpj": nova_corretora.cnpj,
-            "razao_social": nova_corretora.razao_social
+            "razao_social": nova_corretora.razao_social,
+            "finance_id": getattr(nova_corretora, "finance_id", None)
         },
         "usuario": {
             "id": novo_usuario.id,
