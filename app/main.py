@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import tomador, segurado,propostas,gerarpdf, webhokassas, apolices, usuarios, corretor, assesoria
+from .routers import tomador, segurado,propostas,gerarpdf, webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal
 from fastapi.staticfiles import StaticFiles
 import asyncio
 import sys
@@ -24,6 +24,7 @@ app.include_router(apolices.router)
 app.include_router(usuarios.router, prefix="/api")
 app.include_router(corretor.router, prefix="/api")
 app.include_router(assesoria.router, prefix="/api")
+app.include_router(representanteLegal.router, prefix="/api")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

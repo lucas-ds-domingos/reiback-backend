@@ -49,6 +49,21 @@ class Tomador(Base):
 
     propostas = relationship("Proposta", back_populates="tomador")
     asaas_cliente = relationship("ClienteAsaas", back_populates="tomador", uselist=False)
+    representantes_legais = relationship("RepresentanteLegal", back_populates="tomador", cascade="all, delete-orphan")
+
+
+class RepresentanteLegal(Base):
+    __tablename__ = "representantes_legais"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tomador_id = Column(Integer, ForeignKey("tomadores.id", ondelete="CASCADE"), nullable=False)
+    nome_completo = Column(String, nullable=False)
+    cpf = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
+
+    tomador = relationship("Tomador", back_populates="representantes_legais")
 
 
 class Segurado(Base):
