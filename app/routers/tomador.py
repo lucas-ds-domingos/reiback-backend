@@ -177,3 +177,17 @@ def listar_tomador(
 ):
     # ⚡ Apenas lista os tomadores do usuário logado
     return db.query(Tomador).filter(Tomador.usuario_id == current_user.id).all()
+
+
+@router.get("/list-id/{id}", response_model=TomadorBase)
+def listar_tomador(
+    id: int,  
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    tomador = db.query(Tomador).filter(Tomador.id == id).first()
+
+    if not tomador:
+        raise HTTPException(status_code=404, detail="Tomador não encontrado")
+
+    return tomador
