@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
-
-from database import get_db
-from models import RepresentanteLegal
-from schemas.representante_legal import (
+from ..database import get_db
+from ..models import RepresentanteLegal
+from ..schemas.representanteLegal import (
     RepresentanteLegalCreate,
     RepresentanteLegalUpdate,
     RepresentanteLegalResponse
