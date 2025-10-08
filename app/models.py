@@ -76,7 +76,7 @@ class Fiador(Base):
     cpf_cnpj = Column(String(20), nullable=False, unique=True)
     email = Column(String(255), nullable=False)
     tipo = Column(String(2), nullable=False)  # "PF" ou "PJ"
-    tomador_id = Column(Integer, ForeignKey("tomador.id"))
+    tomador_id = Column(Integer, ForeignKey("tomadores.id", ondelete="CASCADE"), nullable=False)
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
 
