@@ -3,7 +3,6 @@ from typing import Optional
 from datetime import date
 
 class AssesoriaBase(BaseModel):
-    id: Optional[int]
     cnpj: str
     razao_social: str
     comissao: Optional[float] = 0.0
