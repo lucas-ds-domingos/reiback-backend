@@ -10,20 +10,32 @@ router = APIRouter()
 
 @router.post("/gerar", response_model=CCGResponse)
 async def gerar_ccg(data: CCGCreate, db: Session = Depends(get_db)):
-    # Cria registro
-    ccg = CCG(tomador_id=data.tomador_id, status="GERANDO")
+    # 1️⃣ Criar registro inicial
+    ccg = CCG(
+        tomador_id=data.tomador_id,
+        status="GERANDO",
+        caminho_pdf="temporario.pdf"  # só para não quebrar o NOT NULL
+    )
     db.add(ccg)
     db.commit()
     db.refresh(ccg)
 
-    # Gera PDF
+    # 2️⃣ Gerar PDF
     pdf_bytes = await gerar_pdf_ccg(data)
 
-    # Envia para D4Sign
-    uuid = await enviar_para_d4sign(pdf_bytes, data)
+    # 3️⃣ Atualizar registro com PDF real
+    # Se você salvar PDF em disco:
+    caminho = f"pdfs/ccg_{ccg.id}.pdf"
+    with open(caminho, "wb") as f:
+        f.write(pdf_bytes)
+    
+    ccg.caminho_pdf = caminho
 
-    ccg.status = "ENVIADO"
+    # 4️⃣ Enviar para D4Sign
+    uuid = await enviar_para_d4sign(pdf_bytes, data)
     ccg.documento_uuid = uuid
+    ccg.status = "ENVIADO"
+
     db.commit()
     db.refresh(ccg)
 
