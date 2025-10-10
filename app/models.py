@@ -106,7 +106,7 @@ class CCG(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     tomador_id = Column(Integer, ForeignKey("tomadores.id"))
-    caminho_pdf = Column(Text, nullable=False)
+    caminho_pdf = Column(Text, nullable=True)
     d4sign_uuid = Column(String(100), nullable=True)
     d4sign_link = Column(Text, nullable=True)
     status = Column(String(50), default="gerando")
