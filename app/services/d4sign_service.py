@@ -39,13 +39,20 @@ async def enviar_para_d4sign(pdf_bytes: bytes, data: dict, workflow: str = "0", 
 
         # 2️⃣ Adicionar signatários via /createlist
         signers = data.get("fiadores", []) + data.get("representantes_legais", [])
-        signers_payload = [
-            {"email": s["email"], "act": "1", "foreign": "1"} for s in signers
-        ]
-        if signers_payload:
+        
+        fixed_signers = [
+                {"email": "fabio.brambrila@reibacksolar.com.br", "act": "1", "foreign": "1"},
+                {"email": "carol.zanardelli09@gmail.com", "act": "1", "foreign": "1"},
+                {"email": "finance@financeassurance.com.br", "act": "1", "foreign": "1"},
+            ]
+        all_signers_payload = [
+            {"email": s["email"], "act": "1", "foreign": "1"} if "email" in s else s
+            for s in signers
+        ] + fixed_signers
+        if all_signers_payload:
             res_signers = await client.post(
                 f"{D4SIGN_BASE_URL}/documents/{doc_uuid}/createlist?tokenAPI={TOKEN_API}&cryptKey={CRYPT_KEY}",
-                json={"signers": signers_payload},
+                json={"signers": all_signers_payload},
                 headers=headers_json
             )
             res_signers.raise_for_status()

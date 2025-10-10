@@ -22,7 +22,13 @@ async def gerar_pdf_ccg(data: dict) -> bytes:
     html = montar_html_ccg(data)
 
     async with async_playwright() as p:
-        browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
+        
+        if BROWSERLESS_URL:
+            # Produção (Railway, VPS, etc.)
+            browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
+        else:
+            # Local (Windows, Linux, etc.)
+            browser = await p.chromium.launch(headless=True)
         page = await browser.new_page()
         await page.set_content(html, wait_until="networkidle")
         pdf_bytes = await page.pdf(format="A4", print_background=True)

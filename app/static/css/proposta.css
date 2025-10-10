@@ -348,3 +348,28 @@ font-size: 3mm;
   margin-bottom: 4mm;
   margin-top: 4mm;
 }
+
+.assinaturaCCG{
+  page-break-inside: avoid;
+  margin-bottom: 20px;
+}
+body {
+    page-break-after: auto;
+}
+
+.assinaturas-container {
+    display: flex;
+    flex-wrap: wrap;      
+    gap: 30px;  
+}
+
+.assinaturaCCG, .assinatura {
+  flex: 1 1 45%;         /* cada assinatura ocupa ~45% da largura */
+  box-sizing: border-box;
+  margin-bottom: 8px;
+  padding: 5px;
+}
+
+.assinatura p, .assinaturaCCG p {
+  margin: 2px 0;
+}

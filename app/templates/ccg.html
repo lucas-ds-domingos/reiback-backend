@@ -324,6 +324,13 @@
           quaisquer cartas fiança emitidas em favor do AFIANÇADO, as partes acordam que o presente contrato constitui
           título executivo extrajudicial, nos termos do art. 784, inciso III, do Código de Processo Civil.
         </p>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="page">
+    <div class="containerp4">
+      <div class="containerfinalp3">
         <p>
           O AFIANÇADO e seus DEVEDORES SOLIDÁRIOS reconhecem e se obrigam, de forma líquida, certa e exigível, a
           restituir ao FIADOR, a título de garantia e reembolso, o valor correspondente a 150% (cento e cinquenta por
@@ -336,13 +343,6 @@
           amortizar o débito do AFIANÇADO, permanecendo este e seus DEVEDORES SOLIDÁRIOS responsáveis pelo saldo
           remanescente até a quitação integral da obrigação.
         </p>
-      </div>
-    </div>
-  </div>
-  </div>
-  <div class="page">
-    <div class="containerp4">
-      <div class="containerfinalp3">
         <div class="divcondgp3">
           <strong class="obj2">
             CLÁUSULA 8ª - SUB - ROGAÇÃO
@@ -384,6 +384,14 @@
               CLÁUSULA 10ª – FORO
             </strong>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+   <div class="page">
+    <div class="containerp4">
+      <div class="containerfinalp3">
+        <div class="controle3">
           <p>
             10.1 - As partes contratantes se responsabilizam por si, seus herdeiros e sucessores e elegem o Foro do
             domicílio do FIADOR, para dirimir quaisquer dúvidas e / ou controvérsias decorrentes deste contrato, com
@@ -394,36 +402,60 @@
             E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento
             digitalmente, na presença das testemunhas abaixo assinadas.
           </p>
-          <div class="pessoa">
-            <p>------------------------------------------</p>
-            <div class="assinatura">Assinatura</div>
+          <h2>Assinaturas</h2>
+         <div class="assinaturas-container">
+            <div class="assinatura">
             <p>Afiançado</p>
-            <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA <br>
-            <strong>CPF/CNPJ:</strong>13.105.681/0001-02 <br>
+            <p>Nome: FINANCE ASSURANCE GARANTIA LTDA </p>
+            <p>CPF/CNPJ: 13.105.681/0001-02</p>
+            <p>________________________________________</p>
           </div>
-          {% for f in fiadores %}
-          <div class="pessoa">
-            <p>------------------------------------------</p>
-            <div class="assinatura">Assinatura</div>
-            <p>Afiançado</p>
-            <strong>Nome:</strong> {{ f.nome_completo }} <br>
-            <strong>CPF/CNPJ:</strong> {{ f.cpf_cnpj }} <br>
+
+          {% if tomador %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Tomador</p>
+            <p>Nome: {{ tomador.nome }}</p>
+            <p>CPF/CNPJ: {{ tomador.cnpj }}</p>
+            <p>________________________________________</p>
+          </div>
+          {% endif %}
+
+          {% for fiador in fiadores %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Fiador</p>
+            <p>Nome: {{ fiador.nome_completo }}</p>
+            <p>CPF/CNPJ: {{ fiador.cpf_cnpj }}</p>
+            <p>________________________________________</p>
           </div>
           {% endfor %}
 
-          {% for r in representantes_legais %}
-          <div class="pessoa">
-            <p>------------------------------------------</p>
-            <p>Afiançado</p>
-            <div class="assinatura">Assinatura</div>
-            <strong>Nome:</strong> {{ r.nome_completo }} <br>
-            <strong>CPF:</strong> {{ r.cpf }} <br>
+          {% for rep in representantes_legais %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Representante Legal</p>
+            <p>Nome: {{ rep.nome_completo }}</p>
+            <p>CPF/CNPJ: {{ rep.cpf }}</p>
+            <p>________________________________________</p>
           </div>
           {% endfor %}
+
+          <div class="assinaturaCCG">
+          <p>Assinatura - Testemunha</p>
+          <p>Nome: Fabio rogerio brambila</p>
+          <p>CPF/CNPJ: 278.792.438-79</p>
+          <p>________________________________________</p>
+          </div>
+          <div class="assinaturaCCG">
+          <p>Assinatura - Testemunha</p>
+          <p>Nome: Ana carolina zanardelli rodrigues</p>
+          <p>CPF/CNPJ: 488.511.038-60</p>
+          <p>________________________________________</p>
+          </div>
+         </div>
         </div>
       </div>
     </div>
   </div>
+
   <div class="page">
     <div class="containerp4">
       <div class="containerfinalp3">
@@ -840,29 +872,54 @@
           E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento
           digitalmente, na presença das testemunhas abaixo assinadas.
         </p>
-        <div class="pessoa">
-          <div class="assinatura">Assinatura</div>
-          <p>Afiançado</p>
-          <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA <br>
-          <strong>CPF/CNPJ:</strong>13.105.681/0001-02 <br>
-        </div>
-        {% for f in fiadores %}
-        <div class="pessoa">
-          <div class="assinatura">Assinatura</div>
-          <p>Afiançado</p>
-          <strong>Nome:</strong> {{ f.nome_completo }} <br>
-          <strong>CPF/CNPJ:</strong> {{ f.cpf_cnpj }} <br>
-        </div>
-        {% endfor %}
+        <h2>Assinaturas</h2>
+         <div class="assinaturas-container">
+            <div class="assinatura">
+            <p>Afiançado</p>
+            <p>Nome: FINANCE ASSURANCE GARANTIA LTDA </p>
+            <p>CPF/CNPJ: 13.105.681/0001-02</p>
+            <p>________________________________________</p>
+          </div>
 
-        {% for r in representantes %}
-        <div class="pessoa">
-          <p>Afiançado</p>
-          <div class="assinatura">Assinatura</div>
-          <strong>Nome:</strong> {{ r.nome_completo }} <br>
-          <strong>CPF:</strong> {{ r.cpf }} <br>
-        </div>
-        {% endfor %}
+          {% if tomador %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Tomador</p>
+            <p>Nome: {{ tomador.nome }}</p>
+            <p>CPF/CNPJ: {{ tomador.cnpj }}</p>
+            <p>________________________________________</p>
+          </div>
+          {% endif %}
+
+          {% for fiador in fiadores %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Fiador</p>
+            <p>Nome: {{ fiador.nome_completo }}</p>
+            <p>CPF/CNPJ: {{ fiador.cpf_cnpj }}</p>
+            <p>________________________________________</p>
+          </div>
+          {% endfor %}
+
+          {% for rep in representantes_legais %}
+          <div class="assinaturaCCG">
+            <p>Assinatura - Representante Legal</p>
+            <p>Nome: {{ rep.nome_completo }}</p>
+            <p>CPF/CNPJ: {{ rep.cpf }}</p>
+            <p>________________________________________</p>
+          </div>
+          {% endfor %}
+          <div class="assinaturaCCG">
+          <p>Assinatura - Testemunha</p>
+          <p>Nome: Fabio rogerio brambila</p>
+          <p>CPF/CNPJ: 278.792.438-79</p>
+          <p>________________________________________</p>
+          </div>
+          <div class="assinaturaCCG">
+          <p>Assinatura - Testemunha</p>
+          <p>Nome: Ana carolina zanardelli rodrigues</p>
+          <p>CPF/CNPJ: 488.511.038-60</p>
+          <p>________________________________________</p>
+          </div>
+         </div>
       </div>
     </div>
   </div>
