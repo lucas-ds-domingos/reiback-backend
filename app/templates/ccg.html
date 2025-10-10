@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Minuta</title>
+  <title>CCG</title>
   <link rel="stylesheet" href="{{ base_path }}/css/proposta.css">
 
 </head>
@@ -25,7 +25,8 @@
           </p>
           <p>
             2º) {{ tomador.nome }}, inscrito no CNPJ/MF sob o nº {{ tomador.cnpj }},
-            com sede em {{ tomador.endereco }},{{ tomador.municipio }}/{{ tomador.uf }}, doravante denominado AFIANÇADO/TOMADOR,
+            com sede em {{ tomador.endereco }},{{ tomador.municipio }}/{{ tomador.uf }}, doravante denominado
+            AFIANÇADO/TOMADOR,
             neste ato representado pelos sócios abaixo nominados.
           </p>
           <!-- Fiadores dinâmicos -->
@@ -40,9 +41,10 @@
 
           {% for r in representantes_legais %}
           <p>
-            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }}, 
+            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }},
             inscrito(a) no CPF/MF sob o nº {{ r.cpf }},
-            {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{ r.uf }}.
+            {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{
+            r.uf }}.
             doravante denominado REPRESENTANTE LEGAL.
           </p>
           {% endfor %}
@@ -66,26 +68,36 @@
           demais condições da cobertura de fiança, de acordo com a(s) obrigação(ões) garantida(s).
         </p>
         <p>
-          PARAGRAFO 1º - A(s) Carta(s) fiança(s) e o(s) endosso(s) poderão ser emitidos mediante solicitação escrita do 
-          AFIANÇADO, ou pelo seu representante/corretor de seguros, podendo, entretanto, o FIADOR, a seu exclusivo critério, 
-          negar-se a fazê-lo. 
+          PARAGRAFO 1º - A(s) Carta(s) fiança(s) e o(s) endosso(s) poderão ser emitidos mediante solicitação escrita do
+          AFIANÇADO, ou pelo seu representante/corretor de seguros, podendo, entretanto, o FIADOR, a seu exclusivo
+          critério,
+          negar-se a fazê-lo.
         </p>
         <p>
-          PARAGRAFO 2º - Todas a(s) Carta(s) Fiança(s), oriundas do presente instrumento contratual serão unificadas pelo FIADOR, 
-          em um único contrato de contra garantia, sendo ele tambem uma nota promissória e um título executável firmado entre o 
-          AFIANÇADO e o FIADOR, será anexado pelo FIADOR as regras e condições desde CONTRATO DE PRESTAÇÃO DE FIANÇA, e todos serão 
-          unificados, através das emissões realizadas pelo AFIANÇADO, passando a constituir parte integrante do mesmo, para todos os 
-          fins e direitos, sob pena de nulidade e/ou rescisão. 
+          PARAGRAFO 2º - Todas a(s) Carta(s) Fiança(s), oriundas do presente instrumento contratual serão unificadas
+          pelo FIADOR,
+          em um único contrato de contra garantia, sendo ele tambem uma nota promissória e um título executável firmado
+          entre o
+          AFIANÇADO e o FIADOR, será anexado pelo FIADOR as regras e condições desde CONTRATO DE PRESTAÇÃO DE FIANÇA, e
+          todos serão
+          unificados, através das emissões realizadas pelo AFIANÇADO, passando a constituir parte integrante do mesmo,
+          para todos os
+          fins e direitos, sob pena de nulidade e/ou rescisão.
         </p>
         <p>
-          PARAGRAFO 3º - Fica estabelecido que a(s) Carta(s) Fiança(s) se tornará válida e confirmada para todos os fins e direitos 
-          pelo FIADOR, após a realização das assinaturas de todas as partes envolvidas, através do assinador e autenticador  
-          digital disponibilizado pelo FIADOR, não serão válidas as assinaturas que por ventura sejam realizadas manualmernte, 
+          PARAGRAFO 3º - Fica estabelecido que a(s) Carta(s) Fiança(s) se tornará válida e confirmada para todos os fins
+          e direitos
+          pelo FIADOR, após a realização das assinaturas de todas as partes envolvidas, através do assinador e
+          autenticador
+          digital disponibilizado pelo FIADOR, não serão válidas as assinaturas que por ventura sejam realizadas
+          manualmernte,
           ou através de outro autenticador digital não indicado pelo FIADOR.
         </p>
         <p>
-          PARAGRAFO 4º - Em caso de abertura de sinistro acionado pelo CREDOR(ES)/BENEFICÁRIO(S), em decorrência de descumprimento
-          contratual entre AFIANÇADO, e FIADOR, o mesmo deverá cumprir com as exigências constantes no CONTRATO DE FIANÇA, no tocante 
+          PARAGRAFO 4º - Em caso de abertura de sinistro acionado pelo CREDOR(ES)/BENEFICÁRIO(S), em decorrência de
+          descumprimento
+          contratual entre AFIANÇADO, e FIADOR, o mesmo deverá cumprir com as exigências constantes no CONTRATO DE
+          FIANÇA, no tocante
           as notificações, bem como após a excussão dos bens do AFIANÇADO.
         </p>
       </div>
@@ -93,68 +105,88 @@
   </div>
 
   <div class="page">
-     <div class="containerPage3">
+    <div class="containerPage3">
       <div class="controle3">
         <div class="text1Page3">
-        <p>
-          PARAGRAFO 5º - O FIADOR ficará desobrigada a garantir os valores das carta(s) de fiança(s), caso demonstre que a AFIANÇADO 
-          se utilizou de meios ilegais e fraudulentos ou práticas criminosas de lavagem de dinheiro, pirâmide financeira, Indenizações 
-          trabalhistas de qualquer espécie, recolhimento previdenciário do FGTS, indenizações a fornecedores ou quaisquer credores e 
-          recolhimento de impostos de qualquer natureza, de obrigação do AFIANÇADO nesse contrato. 
-        </p>
-        <div class="divcondgp33">
-          <strong class="titulopage3">
-            1.2- O AFIANÇADO obriga-se a:
-          </strong>
+          <p>
+            PARAGRAFO 5º - O FIADOR ficará desobrigada a garantir os valores das carta(s) de fiança(s), caso demonstre
+            que a AFIANÇADO
+            se utilizou de meios ilegais e fraudulentos ou práticas criminosas de lavagem de dinheiro, pirâmide
+            financeira, Indenizações
+            trabalhistas de qualquer espécie, recolhimento previdenciário do FGTS, indenizações a fornecedores ou
+            quaisquer credores e
+            recolhimento de impostos de qualquer natureza, de obrigação do AFIANÇADO nesse contrato.
+          </p>
+          <div class="divcondgp33">
+            <strong class="titulopage3">
+              1.2- O AFIANÇADO obriga-se a:
+            </strong>
+          </div>
+          <br>
+          <p>
+            (1) Enviar ao FIADOR, sempre que solicitado, informações de caráter econômico-financeira, cadastral, fiscal,
+            e trabalhista,
+            inclusive de suas controladas, controladoras e coligadas, assim como informações sobre o cumprimento das
+            obrigações garantidas;
+          </p>
+          <p>
+            (2) Apresentar informações exatas ao FIADOR, ao solicitar a carta de fiança, não omitindo qualquer
+            informação sobre a obrigação
+            a ser garantida, sob pena de nulidade e/ou rescisão desde contrato;
+          </p>
+          <p>
+            (3) Informar ao FIADOR, antes da emissão da(s) carta(s) de fiança e endosso(s), a existência de pluralidade
+            de garantias
+            para o mesmo objeto assegurado, situação em que o FIADOR participará proporcionalmente;
+          </p>
+          <p>
+            (4) Pagar o custo da emissão de fiança ao FIADOR, pelo período total de vigência indicado na(s) carta(s) de
+            fiança(s) e
+            endosso(s), sob pena de nulidade e/ou rescisão por falta de pagamento dentro do prazo hora acordado;
+          </p>
+          <p>
+            (5) Informar previamente ao FIADOR, qualquer alteração no seu controle acionário;
+          </p>
+          <p>
+            (6) Manter íntegras e suficientes as garantias oferecidas a fiança;
+          </p>
+          <p>
+            (7) Entregar ao FIADOR, assim que solicitadas, em caso de aviso formal de sinistro/execução da(s) carta(s)
+            de fiança,
+            garantias adicionais líquidas, ou antecipar o equivalente ao valor da indenização diretamente ao
+            Credor/Beneficiário da Fiança;
+          </p>
+          <p>(8) Ressarcir ao FIADOR de quaisquer prejuízos e/ou despesas oriundas de avisos formais de
+            sinistro/execução da(s) carta(s) de fiança; </p>
+          <p>(9) Cumprir com todas as obrigações decorrentes deste contrato. </p>
+          <p>
+            1.3– Em caso de parcelamento custo da emissão da carta fiança, decorrido o prazo previsto na respectiva
+            parcela sem que
+            este tenha sido efetuado, ocorrerá o vencimento antecipado das demais parcelas, podendo o FIADOR
+            exigir/executar a nulidade
+            e/ou rescisão do presente contrato e o cancelamento da carta fiança, notificando por email/WhatsApp o(s)
+            CREDOR(S)/BENEFICIÁRIO(S), sequencialmente iniciando à cobrança do AFIANÇADO e/ou do(s) DEVEDOR(ES)
+            SOLIDÁRIO(S)e/ou das
+            garantias eventualmente oferecidas, independentemente de qualquer interpelação judicial ou extrajudicial.
+          </p>
+          <p>
+            1.4 - A responsabilidade do FIADOR sobre cada Carta Fiança prestada ficará limitada ao valor indicado na(s)
+            mesma(s)
+            não ultrapassando o limite concedido pelo FIADOR por meio deste instrumento contratual.
+          </p>
+          <p>
+            CLÁUSULA 2ª – DEVEDOR(ES) SOLIDÁRIO(S)
+          </p>
+          <p>
+            2.1 - Intervém neste ato e assina(m) o presente contrato como DEVEDOR(ES) SOLIDÁRIO(S) a(s) pessoa(s) assim
+            designada(s) ao final deste instrumento, a(s) qual (is) se declara(m) principal(is) pagador(es),
+            responsabilizando-se solidariamente com o AFIANÇADO, pelo cumprimento de todas as obrigações por este
+            assumidas neste contrato sejam principais ou acessórias, bem como daquelas assumidas através da(s) carta(s)
+            de fiança e do(s) endosso(s) emitidos, nos termos dos Artigos 821 e 822 do Código Civil Brasileiro e com
+            expressa renúncia aos benefícios de ordem e a faculdade contida nos Artigos 835 e 838 do referido Código.
+          </p>
         </div>
-        <br>
-        <p>
-         (1) Enviar ao FIADOR, sempre que solicitado, informações de caráter econômico-financeira, cadastral, fiscal, e trabalhista, 
-         inclusive de suas controladas, controladoras e coligadas, assim como informações sobre o cumprimento das obrigações garantidas; 
-        </p>
-        <p>
-         (2) Apresentar informações exatas ao FIADOR, ao solicitar a carta de fiança, não omitindo qualquer informação sobre a obrigação 
-          a ser garantida, sob pena de nulidade e/ou rescisão desde contrato; 
-        </p>
-        <p>
-          (3) Informar ao FIADOR, antes da emissão da(s) carta(s) de fiança e endosso(s), a existência de pluralidade de garantias 
-          para o mesmo objeto assegurado, situação em que o FIADOR participará proporcionalmente; 
-        </p>
-        <p>
-          (4) Pagar o custo da emissão de fiança ao FIADOR, pelo período total de vigência indicado na(s) carta(s) de fiança(s) e 
-          endosso(s), sob pena de nulidade e/ou rescisão por falta de pagamento dentro do prazo hora acordado; 
-        </p>
-        <p>
-          (5) Informar previamente ao FIADOR, qualquer alteração no seu controle acionário; 
-        </p>
-        <p>
-          (6) Manter íntegras e suficientes as garantias oferecidas a fiança; 
-        </p>
-        <p>
-          (7) Entregar ao FIADOR, assim que solicitadas, em caso de aviso formal de sinistro/execução da(s) carta(s) de fiança, 
-          garantias adicionais líquidas, ou antecipar o equivalente ao valor da indenização diretamente ao Credor/Beneficiário da Fiança; 
-        </p>
-        <p>(8) Ressarcir ao FIADOR de quaisquer prejuízos e/ou despesas oriundas de avisos formais de sinistro/execução da(s) carta(s) de fiança; </p>
-        <p>(9) Cumprir com todas as obrigações decorrentes deste contrato. </p>
-        <p>
-          1.3– Em caso de parcelamento custo da emissão da carta fiança, decorrido o prazo previsto na respectiva parcela sem que 
-          este tenha sido efetuado, ocorrerá o vencimento antecipado das demais parcelas, podendo o FIADOR exigir/executar a nulidade 
-          e/ou rescisão do presente contrato e o cancelamento da carta fiança, notificando por email/WhatsApp o(s) 
-          CREDOR(S)/BENEFICIÁRIO(S), sequencialmente iniciando à cobrança do AFIANÇADO e/ou do(s) DEVEDOR(ES) SOLIDÁRIO(S)e/ou das 
-          garantias eventualmente oferecidas, independentemente de qualquer interpelação judicial ou extrajudicial. 
-        </p>
-        <p>
-          1.4 - A responsabilidade do FIADOR sobre cada Carta Fiança prestada ficará limitada ao valor indicado na(s) mesma(s)
-           não ultrapassando o limite concedido pelo FIADOR por meio deste instrumento contratual. 
-        </p>
-        <p>
-          CLÁUSULA 2ª – DEVEDOR(ES) SOLIDÁRIO(S) 
-        </p>
-        <p>
-          2.1 - Intervém neste ato e assina(m) o presente contrato como DEVEDOR(ES) SOLIDÁRIO(S) a(s) pessoa(s) assim designada(s) ao final deste instrumento, a(s) qual (is) se declara(m) principal(is) pagador(es), responsabilizando-se solidariamente com o AFIANÇADO, pelo cumprimento de todas as obrigações por este assumidas neste contrato sejam principais ou acessórias, bem como daquelas assumidas através da(s) carta(s) de fiança e do(s) endosso(s) emitidos, nos termos dos Artigos 821 e 822 do Código Civil Brasileiro e com expressa renúncia aos benefícios de ordem e a faculdade contida nos Artigos 835 e 838 do referido Código. 
-        </p>
-        </div>
-        </div>
+      </div>
     </div>
   </div>
   <div class="page">
@@ -162,46 +194,74 @@
       <div class="controle3">
         <div class="text1Page3">
           <p>
-            PARÁGRAFO 1º - O(s) DEVEDOR(ES) SOLIDÁRIO(S) aceita(m) todas as condições descritas neste contrato, da(s) carta(s) fiança e do(s) endosso(s), nota promissória se declara(m) principal(is) pagador(es), responsabilizando-se solidariamente com o AFIANÇADO, pelo cumprimento de todas as obrigações descritas e assumidas neste contrato, sob pena de serem tomadas as medidas judiciais cabíveis visando o cumprimento deste contrato. 
+            PARÁGRAFO 1º - O(s) DEVEDOR(ES) SOLIDÁRIO(S) aceita(m) todas as condições descritas neste contrato, da(s)
+            carta(s) fiança e do(s) endosso(s), nota promissória se declara(m) principal(is) pagador(es),
+            responsabilizando-se solidariamente com o AFIANÇADO, pelo cumprimento de todas as obrigações descritas e
+            assumidas neste contrato, sob pena de serem tomadas as medidas judiciais cabíveis visando o cumprimento
+            deste contrato.
           </p>
           <p>
-            PARÁGRAFO 2º - Obriga(m)-se o(s) DEVEDOR(ES) SOLIDÁRIO(S)a liquidar as obrigações exigidas e/ou apresentar garantias liquidas colaterais no prazo máximo de 05 (cinco) dias úteis e nos termos da comunicação que ocorrerá de forma eletrônica sendo por Email/WhatsApp que será enviado pelos colaboradores do FIADOR, independentemente de qualquer outra formalidade judicial ou extrajudicial. 
+            PARÁGRAFO 2º - Obriga(m)-se o(s) DEVEDOR(ES) SOLIDÁRIO(S)a liquidar as obrigações exigidas e/ou apresentar
+            garantias liquidas colaterais no prazo máximo de 05 (cinco) dias úteis e nos termos da comunicação que
+            ocorrerá de forma eletrônica sendo por Email/WhatsApp que será enviado pelos colaboradores do FIADOR,
+            independentemente de qualquer outra formalidade judicial ou extrajudicial.
           </p>
         </div>
       </div>
       <div class="containerfinalp3">
         <div class="divcondgp33">
           <strong class="CondicoesGeraisp3">
-            CLÁUSULA 3 ª - DO REAJUSTE DO VALOR AFIANÇADO 
+            CLÁUSULA 3 ª - DO REAJUSTE DO VALOR AFIANÇADO
           </strong>
         </div>
         <p>
-         3.1 - Se assim estiver convencionado na Carta Fiança, o FIADOR fará em seus registros o reajuste monetário, de acordo com o “índice de Atualização" que deverá ser especificado na própria carta de fiança, ficando o AFIANÇADO responsável pelo pagamento da diferença do valor da custo de emissão, utilizando a mesma taxa e encargos da fiança originária, todos devidos com base nos valores atualizados, sendo que no caso de extinção do índice de atualização pactuado, será utilizado pelo FIADOR o índice que venha a substituí-lo por lei
+          3.1 - Se assim estiver convencionado na Carta Fiança, o FIADOR fará em seus registros o reajuste monetário, de
+          acordo com o “índice de Atualização" que deverá ser especificado na própria carta de fiança, ficando o
+          AFIANÇADO responsável pelo pagamento da diferença do valor da custo de emissão, utilizando a mesma taxa e
+          encargos da fiança originária, todos devidos com base nos valores atualizados, sendo que no caso de extinção
+          do índice de atualização pactuado, será utilizado pelo FIADOR o índice que venha a substituí-lo por lei
         </p>
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 4ª - DO CUSTO DE EMISSÃO DA CARTA FIANÇA 
+            CLÁUSULA 4ª - DO CUSTO DE EMISSÃO DA CARTA FIANÇA
           </strong>
         </div>
         <p>
-          4.1 - Por Fiança prestada a favor do AFIANÇADO, este pagará antecipadamente ao FIADOR o custo de emissão acordada, caso a caso, calculada sobre o valor da Fiança, e sobre o prazo da fiança, utilizando o cálculo tipo “pró rata temporis”, no ato da assinatura do Contrato. 
+          4.1 - Por Fiança prestada a favor do AFIANÇADO, este pagará antecipadamente ao FIADOR o custo de emissão
+          acordada, caso a caso, calculada sobre o valor da Fiança, e sobre o prazo da fiança, utilizando o cálculo tipo
+          “pró rata temporis”, no ato da assinatura do Contrato.
         </p>
         <p>
-          PARAGRAFO 1º- A confirmação e a validade de todas as Carta (s) Fianças ficarão vinculadas CLÁUSULA 1ª – OBJETO, 1.1 - PARAGRAFO 3º desde contrato e o pagamento antecipado do custo da emissão. 
+          PARAGRAFO 1º- A confirmação e a validade de todas as Carta (s) Fianças ficarão vinculadas CLÁUSULA 1ª –
+          OBJETO, 1.1 - PARAGRAFO 3º desde contrato e o pagamento antecipado do custo da emissão.
         </p>
         <p>
-          PARAGRAFO 2º - Fica estabelecido que caso o BENEFICIÁRIO/CREDOR recuse a carta fiança dentro do prazo de 3 (três) dias úteis após a data de sua emissão, por motivo plausível, o FIADOR NÃO devolverá os custos de emissão pagos pelo AFIANÇADO. 
+          PARAGRAFO 2º - Fica estabelecido que caso o BENEFICIÁRIO/CREDOR recuse a carta fiança dentro do prazo de 3
+          (três) dias úteis após a data de sua emissão, por motivo plausível, o FIADOR NÃO devolverá os custos de
+          emissão pagos pelo AFIANÇADO.
         </p>
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 5ª - DO REEMBOLSO AO FIADOR 
+            CLÁUSULA 5ª - DO REEMBOLSO AO FIADOR
           </strong>
         </div>
         <p>
-          5.1 – Após cumpridas todas as exigências e formalidades previstas neste contrato, sendo o FIADOR acionado para o pagamento do valor total, parcial ou proporcional, dentro do período de vigência da respectiva carta de fiança, o valor principal, que é o objeto deste contrato será de responsábilidade do FIADOR de maneira subsidiária, nos termos do artigo 827 do código civil, ou seja, primeiro serão esgotadas através das vias judiciais a possibilidade de recebimento dos valores pelo AFIANÇADO, em caso de insolvência, ou outra impossibilidade de pagamento, e, não sendo encontrado patrimônio apto a saldar o débito, O AFIANÇADO e/ou o(s) DEVEDOR(ES) SOLIDÁRIO(S), se obrigam a reembolsar ao FIADOR o valor previsto na carta de fiança, no prazo de 48 (quarenta e oito) horas, a contar da data do envio da notificação ao AFIANÇADO.
+          5.1 – Após cumpridas todas as exigências e formalidades previstas neste contrato, sendo o FIADOR acionado para
+          o pagamento do valor total, parcial ou proporcional, dentro do período de vigência da respectiva carta de
+          fiança, o valor principal, que é o objeto deste contrato será de responsábilidade do FIADOR de maneira
+          subsidiária, nos termos do artigo 827 do código civil, ou seja, primeiro serão esgotadas através das vias
+          judiciais a possibilidade de recebimento dos valores pelo AFIANÇADO, em caso de insolvência, ou outra
+          impossibilidade de pagamento, e, não sendo encontrado patrimônio apto a saldar o débito, O AFIANÇADO e/ou o(s)
+          DEVEDOR(ES) SOLIDÁRIO(S), se obrigam a reembolsar ao FIADOR o valor previsto na carta de fiança, no prazo de
+          48 (quarenta e oito) horas, a contar da data do envio da notificação ao AFIANÇADO.
         </p>
         <p>
-          PARAGRAFO 1º - O AFIANÇADO reconhece como líquida e certa a dívida decorrente de qualquer pagamento feito pelo FIADOR ao CREDOR/BENEFICIÁRIO, com relação a qualquer/quaisquer da(s) Carta(s) Fiança prestada(s), não podendo solicitar ao FIADOR protelação quanto ao pagamento de tal débito, nem que o FIADOR discuta com o(a) CREDOR/BENEFICIÁRIO a certeza ou liquidez da dívida, ficando ressalvado, apenas, ao AFIANÇADO, o direito de pedir restituição diretamente ao(a)/s CREDOR/BENEFICIÁRIO, do excesso que, eventualmente, tiver sido o FIADOR compelido a pagar. 
+          PARAGRAFO 1º - O AFIANÇADO reconhece como líquida e certa a dívida decorrente de qualquer pagamento feito pelo
+          FIADOR ao CREDOR/BENEFICIÁRIO, com relação a qualquer/quaisquer da(s) Carta(s) Fiança prestada(s), não podendo
+          solicitar ao FIADOR protelação quanto ao pagamento de tal débito, nem que o FIADOR discuta com o(a)
+          CREDOR/BENEFICIÁRIO a certeza ou liquidez da dívida, ficando ressalvado, apenas, ao AFIANÇADO, o direito de
+          pedir restituição diretamente ao(a)/s CREDOR/BENEFICIÁRIO, do excesso que, eventualmente, tiver sido o FIADOR
+          compelido a pagar.
         </p>
       </div>
     </div>
@@ -210,96 +270,140 @@
     <div class="containerp4">
       <div class="containerfinalp3">
         <p>
-          PARAGRAFO 2º - Neste contrato o AFIANÇADO autoriza ao FIADOR, a utilizar qualquer ativo financeiro, imobiliário ou não, que esteja escriturado ou custodiado, aplicado ou disponível em sua conta de Investimento ou dos avalistas e DEVEDOR(ES) SOLIDÁRIO(S), para fazer frente a qualquer desembolso que for necessário para adimplir as obrigações deste Contrato, ainda que tais ativos não estejam vinculados ao presente Contrato. 
+          PARAGRAFO 2º - Neste contrato o AFIANÇADO autoriza ao FIADOR, a utilizar qualquer ativo financeiro,
+          imobiliário ou não, que esteja escriturado ou custodiado, aplicado ou disponível em sua conta de Investimento
+          ou dos avalistas e DEVEDOR(ES) SOLIDÁRIO(S), para fazer frente a qualquer desembolso que for necessário para
+          adimplir as obrigações deste Contrato, ainda que tais ativos não estejam vinculados ao presente Contrato.
         </p>
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 6ª - DA MORA, EXECUÇÃO E RESCISÃO DESTE CONTRATO  
+            CLÁUSULA 6ª - DA MORA, EXECUÇÃO E RESCISÃO DESTE CONTRATO
           </strong>
         </div>
         <p>
-            6.1 - O inadimplemento de qualquer obrigação nos prazos assinados, constitui de pleno direito em mora o AFIANÇADO e/ou o (s) DEVEDOR(ES) SOLIDÁRIO(S), independentemente de interpelação, notificação ou protesto, facultando-se ao FIADOR a executar este contrato, cujo saldo devedor será acrescido dos encargos legais e contratuais de cobrança judicial ou extrajudicial, obrigam-se o AFIANÇADO e/ou o(s) DEVEDOR(ES) SOLIDÁRIO(S) ao pagamento dos encargos já mencionados, bem como honorários advocatícios de 10% (dez por cento), na hipótese de cobrança amigável, ou de 20% (vintepor cento), no caso de cobrança judicial, além de pena convencional de 10% (dez por cento), tudo calculado sobre o valor total do débito. 
+          6.1 - O inadimplemento de qualquer obrigação nos prazos assinados, constitui de pleno direito em mora o
+          AFIANÇADO e/ou o (s) DEVEDOR(ES) SOLIDÁRIO(S), independentemente de interpelação, notificação ou protesto,
+          facultando-se ao FIADOR a executar este contrato, cujo saldo devedor será acrescido dos encargos legais e
+          contratuais de cobrança judicial ou extrajudicial, obrigam-se o AFIANÇADO e/ou o(s) DEVEDOR(ES) SOLIDÁRIO(S)
+          ao pagamento dos encargos já mencionados, bem como honorários advocatícios de 10% (dez por cento), na hipótese
+          de cobrança amigável, ou de 20% (vintepor cento), no caso de cobrança judicial, além de pena convencional de
+          10% (dez por cento), tudo calculado sobre o valor total do débito.
         </p>
         <p>
-          PARAGRAFO ÚNICO - Constituirão, também, motivo de execução imediata e rescisão do presente Contrato, além das hipóteses previstas no artigo 1425 do Código Civil, ter o AFIANÇADO contra si distribuído título a protesto ou qualquer medida judicial que ponha em risco a(s) contragarantia(s) existente(s), ou ainda, requerer ou ter contra si requerida falência ou recuperação judicial. 
+          PARAGRAFO ÚNICO - Constituirão, também, motivo de execução imediata e rescisão do presente Contrato, além das
+          hipóteses previstas no artigo 1425 do Código Civil, ter o AFIANÇADO contra si distribuído título a protesto ou
+          qualquer medida judicial que ponha em risco a(s) contragarantia(s) existente(s), ou ainda, requerer ou ter
+          contra si requerida falência ou recuperação judicial.
         </p>
         <p>
-          6.2 - Ficam estabelecidas as seguintes penas convencionais, sem prejuízo uma das outras e bem assim das demais sanções previstas em Lei: 
+          6.2 - Ficam estabelecidas as seguintes penas convencionais, sem prejuízo uma das outras e bem assim das demais
+          sanções previstas em Lei:
         </p>
         <p>
-          (1) Ocorrendo o inadimplemento de qualquer quantia devida ao FIADOR, nos termos deste contrato, o débito em atraso ficará sujeito aplicação do índice de correção monetária IGPM, juros de mora à razão de 1% (um por cento) ao mês, calculados sobre o débito corrigido monetariamente e multa irredutível de 2% (dois por cento) sobre o total devido na forma desta alínea; 
+          (1) Ocorrendo o inadimplemento de qualquer quantia devida ao FIADOR, nos termos deste contrato, o débito em
+          atraso ficará sujeito aplicação do índice de correção monetária IGPM, juros de mora à razão de 1% (um por
+          cento) ao mês, calculados sobre o débito corrigido monetariamente e multa irredutível de 2% (dois por cento)
+          sobre o total devido na forma desta alínea;
         </p>
         <p>
-          (2) O inadimplemento de qualquer obrigação não pecuniária prevista neste contrato, sujeita o AFIANÇADO à multa de 0,5% (meio por cento) ao mês calculado sobre o valor das obrigações assumidas pelo FIADOR, cobrada por dia decorrido até que a obrigação seja cumprida. 
+          (2) O inadimplemento de qualquer obrigação não pecuniária prevista neste contrato, sujeita o AFIANÇADO à multa
+          de 0,5% (meio por cento) ao mês calculado sobre o valor das obrigações assumidas pelo FIADOR, cobrada por dia
+          decorrido até que a obrigação seja cumprida.
         </p>
         <p>
-          6.3 - Este CONTRATO vigerá por prazo indeterminado e permanecerá vigente até que sejam cumpridas todas as obrigações do AFIANÇADO garantidas pelo FIADOR através de CARTA(S) DE FIANÇA e ENDOSSO(S). 
+          6.3 - Este CONTRATO vigerá por prazo indeterminado e permanecerá vigente até que sejam cumpridas todas as
+          obrigações do AFIANÇADO garantidas pelo FIADOR através de CARTA(S) DE FIANÇA e ENDOSSO(S).
         </p>
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 7ª – DO TÍTULO EXECUTIVO E GARANTIA DE REEMBOLS 
+            CLÁUSULA 7ª – DO TÍTULO EXECUTIVO E GARANTIA DE REEMBOLS
           </strong>
         </div>
         <p>
-          7.1- Cláusula 7.1 — Para assegurar o reembolso das quantias que o FIADOR vier a desembolsar em decorrência de quaisquer cartas fiança emitidas em favor do AFIANÇADO, as partes acordam que o presente contrato constitui título executivo extrajudicial, nos termos do art. 784, inciso III, do Código de Processo Civil.
+          7.1- Cláusula 7.1 — Para assegurar o reembolso das quantias que o FIADOR vier a desembolsar em decorrência de
+          quaisquer cartas fiança emitidas em favor do AFIANÇADO, as partes acordam que o presente contrato constitui
+          título executivo extrajudicial, nos termos do art. 784, inciso III, do Código de Processo Civil.
         </p>
         <p>
-          O AFIANÇADO e seus DEVEDORES SOLIDÁRIOS reconhecem e se obrigam, de forma líquida, certa e exigível, a restituir ao FIADOR, a título de garantia e reembolso, o valor correspondente a 150% (cento e cinquenta por cento) do montante total de todas as cartas fiança emitidas e vigentes em seu favor, podendo o FIADOR exigir a execução judicial deste contrato pelo valor devido, acrescido de encargos, correção monetária, juros, custas e honorários advocatícios, caso não haja o reembolso voluntário.
+          O AFIANÇADO e seus DEVEDORES SOLIDÁRIOS reconhecem e se obrigam, de forma líquida, certa e exigível, a
+          restituir ao FIADOR, a título de garantia e reembolso, o valor correspondente a 150% (cento e cinquenta por
+          cento) do montante total de todas as cartas fiança emitidas e vigentes em seu favor, podendo o FIADOR exigir a
+          execução judicial deste contrato pelo valor devido, acrescido de encargos, correção monetária, juros, custas e
+          honorários advocatícios, caso não haja o reembolso voluntário.
         </p>
         <p>
-          Fica ainda o FIADOR autorizado a utilizar eventual produto de cobrança, recuperação ou compensação para amortizar o débito do AFIANÇADO, permanecendo este e seus DEVEDORES SOLIDÁRIOS responsáveis pelo saldo remanescente até a quitação integral da obrigação.
+          Fica ainda o FIADOR autorizado a utilizar eventual produto de cobrança, recuperação ou compensação para
+          amortizar o débito do AFIANÇADO, permanecendo este e seus DEVEDORES SOLIDÁRIOS responsáveis pelo saldo
+          remanescente até a quitação integral da obrigação.
         </p>
-        </div>
       </div>
     </div>
+  </div>
   </div>
   <div class="page">
     <div class="containerp4">
       <div class="containerfinalp3">
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 8ª - SUB - ROGAÇÃO 
+            CLÁUSULA 8ª - SUB - ROGAÇÃO
           </strong>
         </div>
         <p>
-         8.1 - Paga a Indenização, ou iniciado o cumprimento das obrigações inadimplidas pelo AFIANÇADO, o FIADOR sub-rogar-se-á nos direitos do(s) credor/beneficiário contra o AFIANÇADO ou contra terceiros cujos atos ou fatos tenham dado causa ao sinistro/execução da fiança, para haver toda e qualquer despesa ou pagamento que venha a efetuar em decorrência da(s) carta(s) de fiança e endosso(s)emitido(s). 
+          8.1 - Paga a Indenização, ou iniciado o cumprimento das obrigações inadimplidas pelo AFIANÇADO, o FIADOR
+          sub-rogar-se-á nos direitos do(s) credor/beneficiário contra o AFIANÇADO ou contra terceiros cujos atos ou
+          fatos tenham dado causa ao sinistro/execução da fiança, para haver toda e qualquer despesa ou pagamento que
+          venha a efetuar em decorrência da(s) carta(s) de fiança e endosso(s)emitido(s).
         </p>
         <div class="divcondgp3">
           <strong class="obj2">
-            CLÁUSULA 9ª - DISPOSIÇÕES GERAIS 
+            CLÁUSULA 9ª - DISPOSIÇÕES GERAIS
           </strong>
         </div>
         <p>
-          9.1 - O AFIANÇADO e o(s) DEVEDOR(ES) SOLIDÁRIO(S) declaram que as obrigações assumidas através deste contrato de forma alguma contradizem as disposições de seu Contrato/Estatuto Social, ou de outros regulamentos, e declara ainda que tem os poderes necessários para assumir tais obrigações e assumem os ônus decorrentes de quaisquer irregularidades. 
+          9.1 - O AFIANÇADO e o(s) DEVEDOR(ES) SOLIDÁRIO(S) declaram que as obrigações assumidas através deste contrato
+          de forma alguma contradizem as disposições de seu Contrato/Estatuto Social, ou de outros regulamentos, e
+          declara ainda que tem os poderes necessários para assumir tais obrigações e assumem os ônus decorrentes de
+          quaisquer irregularidades.
         </p>
         <p>
-          9.2 - O FIADOR fica desde já autorizado pelo AFIANÇADO e pelo(s) DEVEDOR(ES) SOLIDÁRIO(S) a emitir CARTA(S) DE FIANÇA e/ou ENDOSSO(S) que venham ser solicitados pelo AFIANÇADO quando este participe como consorciado, sejam em nome do consórcio ou do próprio consorciado. 
+          9.2 - O FIADOR fica desde já autorizado pelo AFIANÇADO e pelo(s) DEVEDOR(ES) SOLIDÁRIO(S) a emitir CARTA(S) DE
+          FIANÇA e/ou ENDOSSO(S) que venham ser solicitados pelo AFIANÇADO quando este participe como consorciado, sejam
+          em nome do consórcio ou do próprio consorciado.
         <p>
-          PARÁGRAFO 1º - Inclui-se nesta autorização a possibilidade de o FIADOR emitir CARTA(S) DE FIANÇA e ENDOSSO(S) em nome do AFIANÇADO, visando garantir as obrigações do consórcio do qual faça parte, seja para assegurar a integralidade ou parte destas obrigações, independentemente de liderança no consórcio. 
+          PARÁGRAFO 1º - Inclui-se nesta autorização a possibilidade de o FIADOR emitir CARTA(S) DE FIANÇA e ENDOSSO(S)
+          em nome do AFIANÇADO, visando garantir as obrigações do consórcio do qual faça parte, seja para assegurar a
+          integralidade ou parte destas obrigações, independentemente de liderança no consórcio.
         </p>
         <p>
-          PARÁGRAFO 2º - O FIADOR poderá utilizar-se deste CONTRATO para reaver qualquer valor referente à emissão e à satisfação pecuniária da(s) CARTA DE FIANÇA(S) e ENDOSSO(S) citados nesta cláusula. 
+          PARÁGRAFO 2º - O FIADOR poderá utilizar-se deste CONTRATO para reaver qualquer valor referente à emissão e à
+          satisfação pecuniária da(s) CARTA DE FIANÇA(S) e ENDOSSO(S) citados nesta cláusula.
         </p>
         <div>
           <div class="obj33">
             <strong class="obj2">
-              CLÁUSULA 10ª – FORO 
+              CLÁUSULA 10ª – FORO
             </strong>
           </div>
           <p>
-            10.1 - As partes contratantes se responsabilizam por si, seus herdeiros e sucessores e elegem o Foro do domicílio do FIADOR, para dirimir quaisquer dúvidas e / ou controvérsias decorrentes deste contrato, com renúncia a qualquer outro por mais privilegiado ou especial que seja, facultando-se ao FIADOR, porém, optar pelo foro do domicílio do AFIANÇADO e/ou de qualquer do(s) DEVEDOR(ES) SOLIDARIO(S). 
+            10.1 - As partes contratantes se responsabilizam por si, seus herdeiros e sucessores e elegem o Foro do
+            domicílio do FIADOR, para dirimir quaisquer dúvidas e / ou controvérsias decorrentes deste contrato, com
+            renúncia a qualquer outro por mais privilegiado ou especial que seja, facultando-se ao FIADOR, porém, optar
+            pelo foro do domicílio do AFIANÇADO e/ou de qualquer do(s) DEVEDOR(ES) SOLIDARIO(S).
           </p>
           <p>
-           E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento digitalmente, na presença das testemunhas abaixo assinadas.
+            E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento
+            digitalmente, na presença das testemunhas abaixo assinadas.
           </p>
-          <div class="pessoa">
+          <div class="divAss">
+            <p>------------------------------------------</p>
             <div class="assinatura">Assinatura</div>
             <p>Afiançado</p>
-            <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA  <br>
-            <strong>CPF/CNPJ:</strong>13.105.681/0001-02	<br>
+            <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA <br>
+            <strong>CPF/CNPJ:</strong>13.105.681/0001-02 <br>
           </div>
           {% for f in fiadores %}
-          <div class="pessoa">
+          <div class="divAss">
+            <p>------------------------------------------</p>
             <div class="assinatura">Assinatura</div>
             <p>Afiançado</p>
             <strong>Nome:</strong> {{ f.nome_completo }} <br>
@@ -307,8 +411,9 @@
           </div>
           {% endfor %}
 
-          {% for r in representantes %}
-          <div class="pessoa">
+          {% for r in representantes_legais %}
+          <div class="divAss">
+            <p>------------------------------------------</p>
             <p>Afiançado</p>
             <div class="assinatura">Assinatura</div>
             <strong>Nome:</strong> {{ r.nome_completo }} <br>
@@ -323,125 +428,153 @@
     <div class="containerp4">
       <div class="containerfinalp3">
         <div class="controle3">
-        <strong class="titulopage3">
-          CONTRATO DE CONTRAGARANTIA (CCG
-        </strong>
-        <div class="text1Page3">
-          <p>I - PARTES CONTRATANTES</p>
-          <p>
-            1º) FINANCE ASSURANCE GARANTIA LTDA, inscrita no CNPJ/MF sob o nº 13.105.681/0001-02,
-            com sede na Avenida Brasília, nº 2121 – Sala A – Vila são Paulo, na cidade de Araçatuba/SP,
-            CEP 16015-460, doravante denominado FIADOR/GARANTIDOR SUBSIDIÁRIO, neste ato representado na forma de seu
-            Contrato Social;
-          </p>
-          <p>
-            2º) {{ tomador.nome }}, inscrito no CNPJ/MF sob o nº {{ tomador.cnpj }},
-            com sede em {{ tomador.endereco }},{{ tomador.municipio }}/{{ tomador.uf }}, doravante denominado AFIANÇADO/TOMADOR,
-            neste ato representado pelos sócios abaixo nominados.
-          </p>
-          <!-- Fiadores dinâmicos -->
-          {% for f in fiadores %}
-          <p>
-            {{ loop.index + 2 }}º) {{ f.nome_completo }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf_cnpj }},
-            {{ f.estado_civil }}, {{ f.profissao }},
-            residente e domiciliado(a) em {{ f.endereco }}, {{ f.cidade }}/{{ f.uf }},
-            doravante denominado AVALISTA SOLIDÁRIO.
-          </p>
-          {% endfor %}
+          <strong class="titulopage3">
+            CONTRATO DE CONTRAGARANTIA (CCG
+          </strong>
+          <div class="text1Page3">
+            <p>I - PARTES CONTRATANTES</p>
+            <p>
+              1º) FINANCE ASSURANCE GARANTIA LTDA, inscrita no CNPJ/MF sob o nº 13.105.681/0001-02,
+              com sede na Avenida Brasília, nº 2121 – Sala A – Vila são Paulo, na cidade de Araçatuba/SP,
+              CEP 16015-460, doravante denominado FIADOR/GARANTIDOR SUBSIDIÁRIO, neste ato representado na forma de seu
+              Contrato Social;
+            </p>
+            <p>
+              2º) {{ tomador.nome }}, inscrito no CNPJ/MF sob o nº {{ tomador.cnpj }},
+              com sede em {{ tomador.endereco }},{{ tomador.municipio }}/{{ tomador.uf }}, doravante denominado
+              AFIANÇADO/TOMADOR,
+              neste ato representado pelos sócios abaixo nominados.
+            </p>
+            <!-- Fiadores dinâmicos -->
+            {% for f in fiadores %}
+            <p>
+              {{ loop.index + 2 }}º) {{ f.nome_completo }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf_cnpj }},
+              {{ f.estado_civil }}, {{ f.profissao }},
+              residente e domiciliado(a) em {{ f.endereco }}, {{ f.cidade }}/{{ f.uf }},
+              doravante denominado AVALISTA SOLIDÁRIO.
+            </p>
+            {% endfor %}
 
-          {% for r in representantes_legais %}
+            {% for r in representantes_legais %}
+            <p>
+              {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }},
+              inscrito(a) no CPF/MF sob o nº {{ r.cpf }},
+              {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{
+              r.uf }}.
+              doravante denominado REPRESENTANTE LEGAL.
+            </p>
+            {% endfor %}
+            <p>
+              Sendo o FIADOR/GARANTIDOR, o AFIANÇADO/TOMADOR e o(s) AVALISTA(S) SOLIDÁRIO(S),
+              em conjunto, denominados PARTES.
+            </p>
+          </div>
+          <div class="obj33">
+            <strong class="obj2">
+              II - DIREITOS E OBRIGAÇÕES DAS PARTES CONTRATANTES
+            </strong>
+          </div>
+          <div class="obj33">
+            <strong class="obj2">
+              CLÁUSULA PRIMEIRA
+            </strong>
+          </div>
           <p>
-            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }}, 
-            inscrito(a) no CPF/MF sob o nº {{ r.cpf }},
-            {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{ r.uf }}.
-            doravante denominado REPRESENTANTE LEGAL.
+            A FIADORA garantirá as obrigações contratualmente assumidas pelo AFIANÇADA perante o(s)
+            FAVORECIDO/BENEFICIÁRIO(S), mediante a emissão de CARTA(S) FIANÇA(S) na (s) qual(is) será(ão) estabelecidas
+            finalidades, valores, prazos e demais condições da cobertura da carta fiança, de acordo com o(s) CONTRATO(S)
+            garantido(s).
           </p>
-          {% endfor %}
           <p>
-            Sendo o FIADOR/GARANTIDOR, o AFIANÇADO/TOMADOR e o(s) AVALISTA(S) SOLIDÁRIO(S),
-            em conjunto, denominados PARTES.
+            § 1º - A(s) CARTAS FIANÇAS) e o(s) CONTRATO(S) de fiança firmado(s) entre AFIANÇADA e a FIADORA será(ão)
+            anexado(s) automaticamente a este CONTRATO, passando a constituir parte(s) dele integrante, para todos os
+            fins e efeitos de direito.
+          </p>
+          <p>
+            § 2º - A(s) CARTAS FIANÇA(S) será(ão) emitida(s) via sistema mediante limite aprovado, podendo, entretanto,
+            a FIADORA, a seu exclusivo critério, negar-se a fazê-lo.
           </p>
         </div>
-        <div class="obj33">
-          <strong class="obj2">
-            II - DIREITOS E OBRIGAÇÕES DAS PARTES CONTRATANTES 
-          </strong>
-        </div>
-        <div class="obj33">
-          <strong class="obj2">
-            CLÁUSULA PRIMEIRA 
-          </strong>
-        </div>
-        <p>
-          A FIADORA garantirá as obrigações contratualmente assumidas pelo AFIANÇADA perante o(s) FAVORECIDO/BENEFICIÁRIO(S), mediante a emissão de CARTA(S) FIANÇA(S) na (s) qual(is) será(ão) estabelecidas finalidades, valores, prazos e demais condições da cobertura da carta fiança, de acordo com o(s) CONTRATO(S) garantido(s). 
-        </p>
-        <p>
-          § 1º - A(s) CARTAS FIANÇAS) e o(s) CONTRATO(S) de fiança firmado(s) entre AFIANÇADA e a FIADORA será(ão) anexado(s) automaticamente a este CONTRATO, passando a constituir parte(s) dele integrante, para todos os fins e efeitos de direito. 
-        </p>
-        <p>
-         § 2º - A(s) CARTAS FIANÇA(S) será(ão) emitida(s) via sistema mediante limite aprovado, podendo, entretanto, a FIADORA, a seu exclusivo critério, negar-se a fazê-lo.
-        </p>
-       </div>
+      </div>
     </div>
-  </div>
   </div>
   <div class="page">
     <div class="containerp4">
       <div class="containerfinalp3">
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA SEGUNDA 
+            CLÁUSULA SEGUNDA
           </strong>
         </div>
         <p>
-         A AFIANÇADA declara conhecer a extensão e a modalidade de cada CARTA FIANÇA que vier a solicitar à FIADORA, estando de pleno acordo que a FIADORA a preste e a cumpra, tal como nela(s) se contém, independentemente de prévia anuência ou interferência dela, AFIANÇADA, ou de qualquer formalidade judicial ou extrajudicial.
+          A AFIANÇADA declara conhecer a extensão e a modalidade de cada CARTA FIANÇA que vier a solicitar à FIADORA,
+          estando de pleno acordo que a FIADORA a preste e a cumpra, tal como nela(s) se contém, independentemente de
+          prévia anuência ou interferência dela, AFIANÇADA, ou de qualquer formalidade judicial ou extrajudicial.
         </p>
         <p>
-          § ÚNICO - Fica ressalvado que a FIADORA não responderá quando o descumprimento decorra de uma ou mais das seguintes hipóteses: 
+          § ÚNICO - Fica ressalvado que a FIADORA não responderá quando o descumprimento decorra de uma ou mais das
+          seguintes hipóteses:
         </p>
         <p>
-          a. Casos fortuitos ou de força maior; 
+          a. Casos fortuitos ou de força maior;
         </p>
         <p>
-         b. Atos ou fatos de responsabilidade do FAVORECIDO/BENEFICIÁRIO; 
+          b. Atos ou fatos de responsabilidade do FAVORECIDO/BENEFICIÁRIO;
         </p>
         <p>
-         c. Modificação acordada entre FAVORECIDO/BENEFICIÁRIO e AFIANÇADA que se relaciona ao objeto da CARTA FIANÇA, sem prévia concordância da FIADORA; 
+          c. Modificação acordada entre FAVORECIDO/BENEFICIÁRIO e AFIANÇADA que se relaciona ao objeto da CARTA FIANÇA,
+          sem prévia concordância da FIADORA;
         </p>
         <p>
-          d. Atos ilícitos, dolosos ou com culpa grave equiparável ao dolo, praticados pelo Favorecido/Beneficiário pessoa física, ou pelos respectivos representantes legais; e no caso de Favorecido/Beneficiário pessoa jurídica, pelos sócios controladores, seus dirigentes e administradores legais, pelo beneficiário e pelos respectivos representantes legais; 
+          d. Atos ilícitos, dolosos ou com culpa grave equiparável ao dolo, praticados pelo Favorecido/Beneficiário
+          pessoa física, ou pelos respectivos representantes legais; e no caso de Favorecido/Beneficiário pessoa
+          jurídica, pelos sócios controladores, seus dirigentes e administradores legais, pelo beneficiário e pelos
+          respectivos representantes legais;
         </p>
         <p>
-          e. Em caso de insolvência do afiançado no prazo de vigência da Carta Fiança. 
+          e. Em caso de insolvência do afiançado no prazo de vigência da Carta Fiança.
         </p>
         <p>
-          f. O Afiançado, beneficiários ou ainda seus representantes e prepostos fizerem declarações falsas ou, por qualquer meio, tentarem obter benefícios ilícitos da Carta Fiança; e. Praticar atos que contribuam para aumentar o risco do sinistro; 
+          f. O Afiançado, beneficiários ou ainda seus representantes e prepostos fizerem declarações falsas ou, por
+          qualquer meio, tentarem obter benefícios ilícitos da Carta Fiança; e. Praticar atos que contribuam para
+          aumentar o risco do sinistro;
         </p>
         <p>
-         g. O afiançado praticar atos caracterizados como simulação, má-fé ou fraude na obtenção (no ato de contratação) e utilização (período de vigência) da Carta Fiança; 
+          g. O afiançado praticar atos caracterizados como simulação, má-fé ou fraude na obtenção (no ato de
+          contratação) e utilização (período de vigência) da Carta Fiança;
         </p>
         <p>
           h. O afiançado praticar fraude financeira ou sistema ponze.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA TERCEIRA 
+            CLÁUSULA TERCEIRA
           </strong>
         </div>
         <p>
-          A AFIANÇADA se obriga a efetuar o pagamento da remuneração da Carta Fiança à FIADORA, até a liberação da(s) CARTA(S) FIANÇA(S) pelo(s) BENEFICIÁRIO(S), independentemente do prazo de vigência nela(s) indicado(s), salvo se convencionado de outra forma. 
+          A AFIANÇADA se obriga a efetuar o pagamento da remuneração da Carta Fiança à FIADORA, até a liberação da(s)
+          CARTA(S) FIANÇA(S) pelo(s) BENEFICIÁRIO(S), independentemente do prazo de vigência nela(s) indicado(s), salvo
+          se convencionado de outra forma.
         </p>
         <p>
-          § 1º - A liberação far-se-á por escrito e terá efeito na data em que for entregue a FIADORA. 
+          § 1º - A liberação far-se-á por escrito e terá efeito na data em que for entregue a FIADORA.
         </p>
         <p>
-            § 2º - Não sendo paga pela AFIANÇADA qualquer parcela da remuneração da Carta Fiança devida, na data fixada, ocorrerá o vencimento imediato das demais parcelas, podendo a FIADORA recorrer à execução das garantias oferecidas a Carta Fiança, independentemente de notificação judicial ou extrajudicial.
+          § 2º - Não sendo paga pela AFIANÇADA qualquer parcela da remuneração da Carta Fiança devida, na data fixada,
+          ocorrerá o vencimento imediato das demais parcelas, podendo a FIADORA recorrer à execução das garantias
+          oferecidas a Carta Fiança, independentemente de notificação judicial ou extrajudicial.
         </p>
         <p>
-          §3º - O Valor da remuneração da Carta Fiança não será reembolsado em hipótese alguma, salvo se a fiança não for aceita pelo Juízo competente, após esgotados os recursos para aceitação dela, ficando, portanto, retido em qualquer hipótese o percentual de 10% (dez por cento), referente às custas administrativas. 
+          §3º - O Valor da remuneração da Carta Fiança não será reembolsado em hipótese alguma, salvo se a fiança não
+          for aceita pelo Juízo competente, após esgotados os recursos para aceitação dela, ficando, portanto, retido em
+          qualquer hipótese o percentual de 10% (dez por cento), referente às custas administrativas.
         </p>
         <p>
-          § 4º - No caso de recusa da garantia após a afiançada ter obtido qualquer proveito com a emissão da fiança, como por exemplo Certidão Positiva com Efeito de Negativa, desbloqueio de valores em conta da afiançada por meio de concessão de liminar, ou outra vantagem devidamente comprovada pela fiadora por meio de documentos idôneos, a devolução dos valores pagos se dará de forma proporcional, caso o valor da retenção prevista no §3º seja inferior ao cálculo “pro rata” pela utilização da garantia. 
+          § 4º - No caso de recusa da garantia após a afiançada ter obtido qualquer proveito com a emissão da fiança,
+          como por exemplo Certidão Positiva com Efeito de Negativa, desbloqueio de valores em conta da afiançada por
+          meio de concessão de liminar, ou outra vantagem devidamente comprovada pela fiadora por meio de documentos
+          idôneos, a devolução dos valores pagos se dará de forma proporcional, caso o valor da retenção prevista no §3º
+          seja inferior ao cálculo “pro rata” pela utilização da garantia.
         </p>
       </div>
     </div>
@@ -452,68 +585,85 @@
       <div class="containerfinalp3">
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA QUARTA 
+            CLÁUSULA QUARTA
           </strong>
         </div>
         <p>
-          A AFIANÇADA se obriga a: 
+          A AFIANÇADA se obriga a:
         </p>
         <p>
-          a. Pagar a remuneração da Carta Fiança. 
+          a. Pagar a remuneração da Carta Fiança.
         </p>
         <p>
-         b. Enviar à FIADORA, semestralmente, informações de caráter econômico-financeiro, cadastral, fiscal e trabalhista, que a habilitem à correta e contínua avaliação do risco; 
+          b. Enviar à FIADORA, semestralmente, informações de caráter econômico-financeiro, cadastral, fiscal e
+          trabalhista, que a habilitem à correta e contínua avaliação do risco;
         </p>
         <p>
-          c. Prestar à FIADORA, sempre que solicitado, informações sobre o cumprimento da(s) obrigação(ões) garantida(s) pela(s) CARTA(S) FIANÇA(S). 
+          c. Prestar à FIADORA, sempre que solicitado, informações sobre o cumprimento da(s) obrigação(ões) garantida(s)
+          pela(s) CARTA(S) FIANÇA(S).
         </p>
         <p>
-          d. Informar à FIADORA, previamente, da existência ou não de pluralidade de garantias para o mesmo objeto garantido pela(s) CARTA(S) FIANÇA(S), o que, em sendo efetiva, a FIADORA participará proporcionalmente. 
+          d. Informar à FIADORA, previamente, da existência ou não de pluralidade de garantias para o mesmo objeto
+          garantido pela(s) CARTA(S) FIANÇA(S), o que, em sendo efetiva, a FIADORA participará proporcionalmente.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA QUINTA  
+            CLÁUSULA QUINTA
           </strong>
         </div>
         <p>
-          Da(s) CARTA(S) FIANÇA(S) só poderá(ão) constar idêntica(s) condição(ões) de atualização monetária a que estejam sujeitas as obrigações assumidas pelo BENEFICIÁRIO. 
+          Da(s) CARTA(S) FIANÇA(S) só poderá(ão) constar idêntica(s) condição(ões) de atualização monetária a que
+          estejam sujeitas as obrigações assumidas pelo BENEFICIÁRIO.
         </p>
         <p>
-          § ÚNICO - Na hipótese prevista nesta CLÁUSULA, as remunerações da Carta Fiança parceladas sofrerão igual atualização monetária. 
+          § ÚNICO - Na hipótese prevista nesta CLÁUSULA, as remunerações da Carta Fiança parceladas sofrerão igual
+          atualização monetária.
 
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA SEXTA  
+            CLÁUSULA SEXTA
           </strong>
         </div>
         <p>
-          A FIADORA ficará automaticamente sub-rogada nos direitos do(s) BENEFICIÁRIO(S) para haver, da AFIANÇADA, toda e qualquer despesa ou pagamento que venha a efetuar em decorrência da(s) CARTA(S) FIANÇAS(S) emitida(s). 
+          A FIADORA ficará automaticamente sub-rogada nos direitos do(s) BENEFICIÁRIO(S) para haver, da AFIANÇADA, toda
+          e qualquer despesa ou pagamento que venha a efetuar em decorrência da(s) CARTA(S) FIANÇAS(S) emitida(s).
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA SÉTIMA  
+            CLÁUSULA SÉTIMA
           </strong>
         </div>
         <p>
-          Ficam estabelecidas as seguintes penas convencionais, sem prejuízo uma das outras e bem assim das demais sanções previstas em lei. 
+          Ficam estabelecidas as seguintes penas convencionais, sem prejuízo uma das outras e bem assim das demais
+          sanções previstas em lei.
         </p>
         <p>
-          a. Ocorrendo o inadimplemento de qualquer quantia devida à FIADORA, nos termos deste CONTRATO, o débito em atraso ficará sujeito à correção monetária idêntica à atribuída às obrigações da AFIANÇADA, juros de mora à razão de 1% (um por cento) ao mês, calculados sobre o débito corrigido monetariamente, e multa irredutível de 10% (dez por cento) sobre o total devido na forma desta alínea; 
+          a. Ocorrendo o inadimplemento de qualquer quantia devida à FIADORA, nos termos deste CONTRATO, o débito em
+          atraso ficará sujeito à correção monetária idêntica à atribuída às obrigações da AFIANÇADA, juros de mora à
+          razão de 1% (um por cento) ao mês, calculados sobre o débito corrigido monetariamente, e multa irredutível de
+          10% (dez por cento) sobre o total devido na forma desta alínea;
         </p>
         <p>
-         b. O inadimplemento de qualquer obrigação não pecuniária prevista neste CONTRATO, sujeita a AFIANÇADA à multa de 10% (dez por cento) ao mês, calculada sobre o valor do prêmio da(s) CARTA(S) FIANÇA(S) em vigor, cobrada por dia decorrido até que a obrigação seja cumprida; 
+          b. O inadimplemento de qualquer obrigação não pecuniária prevista neste CONTRATO, sujeita a AFIANÇADA à multa
+          de 10% (dez por cento) ao mês, calculada sobre o valor do prêmio da(s) CARTA(S) FIANÇA(S) em vigor, cobrada
+          por dia decorrido até que a obrigação seja cumprida;
         </p>
         <p>
-         c. Se a FIADORA tiver que ingressar em juízo ou em processo administrativo para a defesa dos direitos que decorrem deste CONTRATO, fará jus a honorários advocatícios à razão de 20% (vinte por cento) sobre o valor da condenação. 
+          c. Se a FIADORA tiver que ingressar em juízo ou em processo administrativo para a defesa dos direitos que
+          decorrem deste CONTRATO, fará jus a honorários advocatícios à razão de 20% (vinte por cento) sobre o valor da
+          condenação.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA OITAVA 
+            CLÁUSULA OITAVA
           </strong>
         </div>
         <p>
-          A FIADORA poderá, independentemente de aviso, interpelação ou notificação judicial ou extrajudicial, considerar antecipadamente vencido o CONTRATO e exigir da AFIANÇADA a(s) liberação(ões) da(s) obrigação(ões) assumida(s), quer através de pagamento imediato de valor equivalente e/ou impetrar medida preventiva sobre os bens da AFIANÇADA e/ou FIADOR(ES), nos seguintes casos: 
+          A FIADORA poderá, independentemente de aviso, interpelação ou notificação judicial ou extrajudicial,
+          considerar antecipadamente vencido o CONTRATO e exigir da AFIANÇADA a(s) liberação(ões) da(s) obrigação(ões)
+          assumida(s), quer através de pagamento imediato de valor equivalente e/ou impetrar medida preventiva sobre os
+          bens da AFIANÇADA e/ou FIADOR(ES), nos seguintes casos:
         </p>
       </div>
     </div>
@@ -523,59 +673,72 @@
     <div class="containerp4">
       <div class="containerfinalp3">
         <p>
-          a. Quando ocorrer declaração inexata do BENEFICIÁRIO ao solicitar a Carta Fiança; 
+          a. Quando ocorrer declaração inexata do BENEFICIÁRIO ao solicitar a Carta Fiança;
         </p>
         <p>
-          b. Quando a FIADORA avaliar que a conduta ou solvência da AFIANÇADA evidencie incapacidade para cumprir as obrigações contraídas com o BENEFICIÁRIO; 
+          b. Quando a FIADORA avaliar que a conduta ou solvência da AFIANÇADA evidencie incapacidade para cumprir as
+          obrigações contraídas com o BENEFICIÁRIO;
         </p>
         <p>
-         c. Quando a AFIANÇADA ou empresa a ela coligada ou por ela controlada requerer Recuperação Judicial, requerer ou tiver requerida sua falência; 
+          c. Quando a AFIANÇADA ou empresa a ela coligada ou por ela controlada requerer Recuperação Judicial, requerer
+          ou tiver requerida sua falência;
         </p>
         <p>
-         d. Se ocorrer mudança de seu controle acionário, sem prévia anuência da FIADORA; 
+          d. Se ocorrer mudança de seu controle acionário, sem prévia anuência da FIADORA;
         </p>
         <p>
-         e. Quando a AFIANÇADA não cumprir com quaisquer das obrigações decorrentes deste CONTRATO; 
+          e. Quando a AFIANÇADA não cumprir com quaisquer das obrigações decorrentes deste CONTRATO;
         </p>
         <p>
-          f. Quando ocorrer protesto de títulos ou for distribuída qualquer ação contra a AFIANÇADA ou seu(s)FIADOR(ES). A hipótese desse dispositivo não se aplica em caso de justificativa plausível do AFIANÇADO(S) à FIADORA(S); 
+          f. Quando ocorrer protesto de títulos ou for distribuída qualquer ação contra a AFIANÇADA ou seu(s)FIADOR(ES).
+          A hipótese desse dispositivo não se aplica em caso de justificativa plausível do AFIANÇADO(S) à FIADORA(S);
         </p>
         <p>
           g. Nos demais casos previstos em lei.
         </p>
         <p>
-         § ÚNICO – A FIADORA poderá, com o intuito de fazer prevalecer seus direitos, iniciar as ações judiciais e extrajudiciais e, em especial, solicitar embargos, proibições especiais ou gerais e tantas outras medidas preventivas que julgue necessárias, para as quais a AFIANÇADA e FIADORA desde já restam sua concordância, ficando entendido que as citadas medidas preventivas serão mantidas enquanto persistir a obrigação da FIADORA na(s) CARTA(S) FIANÇA(S) em vigor. 
+          § ÚNICO – A FIADORA poderá, com o intuito de fazer prevalecer seus direitos, iniciar as ações judiciais e
+          extrajudiciais e, em especial, solicitar embargos, proibições especiais ou gerais e tantas outras medidas
+          preventivas que julgue necessárias, para as quais a AFIANÇADA e FIADORA desde já restam sua concordância,
+          ficando entendido que as citadas medidas preventivas serão mantidas enquanto persistir a obrigação da FIADORA
+          na(s) CARTA(S) FIANÇA(S) em vigor.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA NONA 
+            CLÁUSULA NONA
           </strong>
         </div>
         <p>
-         Caso a FIADORA tenha que cumprir, no todo ou em parte, as obrigações decorrentes deste CONTRATO, a AFIANÇADA declara que não exigirá dela nenhuma protelação no pagamento do débito que for apresentado pelo(s) BENEFICIÁRIO(S) credor(es), seja a que título for, nem poderá exigir que ela discuta com o(s) BENEFICIÁRIO(S) a certeza ou liquidez da dívida. 
+          Caso a FIADORA tenha que cumprir, no todo ou em parte, as obrigações decorrentes deste CONTRATO, a AFIANÇADA
+          declara que não exigirá dela nenhuma protelação no pagamento do débito que for apresentado pelo(s)
+          BENEFICIÁRIO(S) credor(es), seja a que título for, nem poderá exigir que ela discuta com o(s) BENEFICIÁRIO(S)
+          a certeza ou liquidez da dívida.
         </p>
         <p>
-          § ÚNICO - Não obstante o estabelecido nesta Cláusula, a FIADORA se reserva o direito de, a seu juízo, fazer ao(s) BENEFICIÁRIO(S) as reservas e objeções que a AFIANÇADA considere pertinentes, desde que este lhe comunique, tempestivamente, e que a FIADORA as julgue procedentes. 
+          § ÚNICO - Não obstante o estabelecido nesta Cláusula, a FIADORA se reserva o direito de, a seu juízo, fazer
+          ao(s) BENEFICIÁRIO(S) as reservas e objeções que a AFIANÇADA considere pertinentes, desde que este lhe
+          comunique, tempestivamente, e que a FIADORA as julgue procedentes.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA DÉCIMA 
+            CLÁUSULA DÉCIMA
           </strong>
         </div>
         <p>
-         Para assegurar o fiel e cabal cumprimento de todas as obrigações, bem como a cobertura de quaisquer importâncias decorrentes deste CONTRATO, a FIADORA poderá, a seu favor, exigir da AFIANÇADA: 
+          Para assegurar o fiel e cabal cumprimento de todas as obrigações, bem como a cobertura de quaisquer
+          importâncias decorrentes deste CONTRATO, a FIADORA poderá, a seu favor, exigir da AFIANÇADA:
         </p>
         <p>
-          a) Nota Promissória em caráter “pró-solvendo” com vencimento à vista; 
+          a) Nota Promissória em caráter “pró-solvendo” com vencimento à vista;
         </p>
         <p>
-         b) Garantia fidejussória; 
+          b) Garantia fidejussória;
         </p>
         <p>
-         c) Garantia real; 
+          c) Garantia real;
         </p>
         <p>
-          d) Outras garantias. 
+          d) Outras garantias.
         </p>
       </div>
     </div>
@@ -585,16 +748,22 @@
     <div class="containerp4">
       <div class="containerfinalp3">
         <p>
-          PARÁGRAFO PRIMEIRO - As Garantias antes referidas deverão corresponder a, no mínimo, 150% (cento e cinquenta por cento) da obrigação garantida. 
+          PARÁGRAFO PRIMEIRO - As Garantias antes referidas deverão corresponder a, no mínimo, 150% (cento e cinquenta
+          por cento) da obrigação garantida.
         </p>
         <p>
-          PARÁGRAFO SEGUNDO - A Afiançada autoriza expressamente, em caso de expectativa de sinistro e/ou sinistro concretizado a emissão de duplicata/boleto bancário para pagamento à vista, dando assim o seu ACEITE, caso não tenha sido ofertado, ou se insuficientes quaisquer das garantias descritas na cláusula décima.
+          PARÁGRAFO SEGUNDO - A Afiançada autoriza expressamente, em caso de expectativa de sinistro e/ou sinistro
+          concretizado a emissão de duplicata/boleto bancário para pagamento à vista, dando assim o seu ACEITE, caso não
+          tenha sido ofertado, ou se insuficientes quaisquer das garantias descritas na cláusula décima.
         </p>
         <p>
-          PARÁGRAFO TERCEIRO - As garantias descritas na Cláusula Décima, alíneas “a” até “d”, só poderão ser exigidas antes da assinatura desse contrato e da emissão da carta de fiança, caso elas sejam dispensadas, não poderão ser exigidas posteriormente pela fiadora. 
+          PARÁGRAFO TERCEIRO - As garantias descritas na Cláusula Décima, alíneas “a” até “d”, só poderão ser exigidas
+          antes da assinatura desse contrato e da emissão da carta de fiança, caso elas sejam dispensadas, não poderão
+          ser exigidas posteriormente pela fiadora.
         </p>
         <p>
-          PARÁGRAFO QUARTO – A FIADORA está desobrigada quanto ao cumprimento da obrigação assumida caso o sinistro tenha ocorrido anteriormente à emissão da Carta de Fiança (Garantia). 
+          PARÁGRAFO QUARTO – A FIADORA está desobrigada quanto ao cumprimento da obrigação assumida caso o sinistro
+          tenha ocorrido anteriormente à emissão da Carta de Fiança (Garantia).
         </p>
         <div class="obj33">
           <strong class="obj2">
@@ -602,7 +771,14 @@
           </strong>
         </div>
         <p>
-          Intervém(êm) neste ato e assina(m) o presente CONTRATO, como AVALISTA(S), a(s) pessoa(s) assim designada(s) e qualificada(s) ao final deste instrumento, a(s) qual(is) se declara(m) principal(is) pagador(es), responsabilizando-se, solidariamente, com a AFIANÇADA, pelo cumprimento de todas as obrigações por ele assumidas neste CONTRATO, bem como na(s) CARTA(S) FIANÇA(S) referida(s) na Cláusula 1ª, sejam principais ou acessórias, compreendendo juros, correção monetária, penas convencionais, comissões, tributos, honorários advocatícios e quaisquer outras despesas ou encargos de responsabilidade da AFIANÇADA, nos termos do Art. 821 e 822 do Novo Código Civil, com a expressa renúncia aos benefícios de ordem e à faculdade contida nos Artigos 835 a 838 do referido Código. 
+          Intervém(êm) neste ato e assina(m) o presente CONTRATO, como AVALISTA(S), a(s) pessoa(s) assim designada(s) e
+          qualificada(s) ao final deste instrumento, a(s) qual(is) se declara(m) principal(is) pagador(es),
+          responsabilizando-se, solidariamente, com a AFIANÇADA, pelo cumprimento de todas as obrigações por ele
+          assumidas neste CONTRATO, bem como na(s) CARTA(S) FIANÇA(S) referida(s) na Cláusula 1ª, sejam principais ou
+          acessórias, compreendendo juros, correção monetária, penas convencionais, comissões, tributos, honorários
+          advocatícios e quaisquer outras despesas ou encargos de responsabilidade da AFIANÇADA, nos termos do Art. 821
+          e 822 do Novo Código Civil, com a expressa renúncia aos benefícios de ordem e à faculdade contida nos Artigos
+          835 a 838 do referido Código.
         </p>
         <p>
           Tem por objetivo, baseado no contrato principal, garantir exclusivamente ao Favorecido/Beneficiário até o
@@ -613,24 +789,34 @@
           pagamento da quantia fixada pelo juízo, por razão de sentença transitada em julgado.
         </p>
         <p>
-         § 1º - O(S) AVALISTA(S) declara(m) aceitar todas as condições da(s) CARTA(S) FIANÇA(S) a ser(em) emitida(s) e que só considerar-se-á(ão) desonerado(s) da fiança prestada uma vez verificado o cumprimento de todas as obrigações a cargo da AFIANÇADA, circunstância que se formaliza mediante entrega, a ele(s), AVALISTA(S), de documento formal subscrito pela FIADORA, declarando extinta a fiança aqui referida.
+          § 1º - O(S) AVALISTA(S) declara(m) aceitar todas as condições da(s) CARTA(S) FIANÇA(S) a ser(em) emitida(s) e
+          que só considerar-se-á(ão) desonerado(s) da fiança prestada uma vez verificado o cumprimento de todas as
+          obrigações a cargo da AFIANÇADA, circunstância que se formaliza mediante entrega, a ele(s), AVALISTA(S), de
+          documento formal subscrito pela FIADORA, declarando extinta a fiança aqui referida.
         </p>
         <p>
-          § 2º - Obriga(m)-se a FIADORA/AVALISTA(S) a liquidar as obrigações exigidas no prazo máximo de 48 (quarenta e oito) horas, contados da comunicação escrita que a FIADORA lhe(s) enviar, independentemente de qualquer outra formalidade, judicial ou extrajudicial. 
+          § 2º - Obriga(m)-se a FIADORA/AVALISTA(S) a liquidar as obrigações exigidas no prazo máximo de 48 (quarenta e
+          oito) horas, contados da comunicação escrita que a FIADORA lhe(s) enviar, independentemente de qualquer outra
+          formalidade, judicial ou extrajudicial.
         </p>
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA DÉCIMA SEGUNDA 
+            CLÁUSULA DÉCIMA SEGUNDA
           </strong>
         </div>
         <p>
-          Acordam ainda as partes as seguintes condições especiais, revogando quaisquer outras contrárias: 
+          Acordam ainda as partes as seguintes condições especiais, revogando quaisquer outras contrárias:
         </p>
         <p>
-          Estabelecem que, na hipótese de a garantia não ser aceita pelo juízo competente ou pelo credor beneficiário, em um prazo de até 30 (trinta) dias, o contrato será rescindido, sem quaisquer ônus ou penalidades para as partes contratantes; 
+          Estabelecem que, na hipótese de a garantia não ser aceita pelo juízo competente ou pelo credor beneficiário,
+          em um prazo de até 30 (trinta) dias, o contrato será rescindido, sem quaisquer ônus ou penalidades para as
+          partes contratantes;
         </p>
         <p>
-          a.	No caso de recusa da garantia após a afiançada ter obtido qualquer proveito com a emissão da fiança, como por exemplo Certidão Positiva com Efeito de Negativa, desbloqueio de valores em conta da afiançada por meio de concessão de liminar, ou outra vantagem devidamente comprovada pela fiadora por meio de documentos idôneos, a devolução dos valores pagos se dará de forma proporcional.
+          a. No caso de recusa da garantia após a afiançada ter obtido qualquer proveito com a emissão da fiança, como
+          por exemplo Certidão Positiva com Efeito de Negativa, desbloqueio de valores em conta da afiançada por meio de
+          concessão de liminar, ou outra vantagem devidamente comprovada pela fiadora por meio de documentos idôneos, a
+          devolução dos valores pagos se dará de forma proporcional.
         </p>
       </div>
     </div>
@@ -641,41 +827,45 @@
       <div class="containerfinalp3">
         <div class="obj33">
           <strong class="obj2">
-            CLÁUSULA DÉCIMA TERCEIRA 
+            CLÁUSULA DÉCIMA TERCEIRA
           </strong>
         </div>
         <p>
-          As partes contratantes se responsabilizam por si, seus herdeiros e sucessores e elegem o Foro do domicílio do FIADOR, para dirimir quaisquer dúvidas e / ou controvérsias decorrentes deste contrato, com renúncia a qualquer outro por mais privilegiado ou especial que seja, facultando-se ao FIADOR, porém, optar pelo foro do domicílio do AFIANÇADO e/ou de qualquer do(s) DEVEDOR(ES) SOLIDARIO(S). 
+          As partes contratantes se responsabilizam por si, seus herdeiros e sucessores e elegem o Foro do domicílio do
+          FIADOR, para dirimir quaisquer dúvidas e / ou controvérsias decorrentes deste contrato, com renúncia a
+          qualquer outro por mais privilegiado ou especial que seja, facultando-se ao FIADOR, porém, optar pelo foro do
+          domicílio do AFIANÇADO e/ou de qualquer do(s) DEVEDOR(ES) SOLIDARIO(S).
         </p>
         <p>
-          E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento digitalmente, na presença das testemunhas abaixo assinadas.
+          E, por estarem assim de comum acordo, FIADOR, AFIANÇADO e DEVEDOR(ES) SOLIDÁRIO(S), assinam este instrumento
+          digitalmente, na presença das testemunhas abaixo assinadas.
         </p>
-                  <div class="pessoa">
-            <div class="assinatura">Assinatura</div>
-            <p>Afiançado</p>
-            <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA  <br>
-            <strong>CPF/CNPJ:</strong>13.105.681/0001-02	<br>
-          </div>
-          {% for f in fiadores %}
-          <div class="pessoa">
-            <div class="assinatura">Assinatura</div>
-            <p>Afiançado</p>
-            <strong>Nome:</strong> {{ f.nome_completo }} <br>
-            <strong>CPF/CNPJ:</strong> {{ f.cpf_cnpj }} <br>
-          </div>
-          {% endfor %}
-
-          {% for r in representantes %}
-          <div class="pessoa">
-            <p>Afiançado</p>
-            <div class="assinatura">Assinatura</div>
-            <strong>Nome:</strong> {{ r.nome_completo }} <br>
-            <strong>CPF:</strong> {{ r.cpf }} <br>
-          </div>
-          {% endfor %}
+        <div class="pessoa">
+          <div class="assinatura">Assinatura</div>
+          <p>Afiançado</p>
+          <strong>Nome:</strong>FINANCE ASSURANCE GARANTIA LTDA <br>
+          <strong>CPF/CNPJ:</strong>13.105.681/0001-02 <br>
         </div>
+        {% for f in fiadores %}
+        <div class="pessoa">
+          <div class="assinatura">Assinatura</div>
+          <p>Afiançado</p>
+          <strong>Nome:</strong> {{ f.nome_completo }} <br>
+          <strong>CPF/CNPJ:</strong> {{ f.cpf_cnpj }} <br>
+        </div>
+        {% endfor %}
+
+        {% for r in representantes %}
+        <div class="pessoa">
+          <p>Afiançado</p>
+          <div class="assinatura">Assinatura</div>
+          <strong>Nome:</strong> {{ r.nome_completo }} <br>
+          <strong>CPF:</strong> {{ r.cpf }} <br>
+        </div>
+        {% endfor %}
       </div>
     </div>
+  </div>
   </div>
   </div>
 </body>
