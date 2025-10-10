@@ -31,23 +31,21 @@
           <!-- Fiadores dinâmicos -->
           {% for f in fiadores %}
           <p>
-            {{ loop.index + 2 }}º) {{ f.nome }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf }} ,
+            {{ loop.index + 2 }}º) {{ f.nome_completo }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf_cnpj }},
             {{ f.estado_civil }}, {{ f.profissao }},
             residente e domiciliado(a) em {{ f.endereco }}, {{ f.cidade }}/{{ f.uf }},
             doravante denominado AVALISTA SOLIDÁRIO.
           </p>
           {% endfor %}
 
-          <!-- Representantes legais -->
           {% for r in representantes_legais %}
           <p>
-            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome }}, 
+            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }}, 
             inscrito(a) no CPF/MF sob o nº {{ r.cpf }},
             {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{ r.uf }}.
             doravante denominado REPRESENTANTE LEGAL.
           </p>
           {% endfor %}
-
           <p>
             Sendo o FIADOR/GARANTIDOR, o AFIANÇADO/TOMADOR e o(s) AVALISTA(S) SOLIDÁRIO(S),
             em conjunto, denominados PARTES.
@@ -344,23 +342,21 @@
           <!-- Fiadores dinâmicos -->
           {% for f in fiadores %}
           <p>
-            {{ loop.index + 2 }}º) {{ f.nome }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf }} ,
+            {{ loop.index + 2 }}º) {{ f.nome_completo }}, inscrito(a) no CPF/MF sob o nº {{ f.cpf_cnpj }},
             {{ f.estado_civil }}, {{ f.profissao }},
             residente e domiciliado(a) em {{ f.endereco }}, {{ f.cidade }}/{{ f.uf }},
             doravante denominado AVALISTA SOLIDÁRIO.
           </p>
           {% endfor %}
 
-          <!-- Representantes legais -->
           {% for r in representantes_legais %}
           <p>
-            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome }}, 
+            {{ loop.index + fiadores|length + 2 }}º) {{ r.nome_completo }}, 
             inscrito(a) no CPF/MF sob o nº {{ r.cpf }},
             {{ r.estado_civil }}, {{ r.profissao }}, residente e domiciliado(a) em {{ r.endereco }}, {{ r.cidade }}/{{ r.uf }}.
             doravante denominado REPRESENTANTE LEGAL.
           </p>
           {% endfor %}
-
           <p>
             Sendo o FIADOR/GARANTIDOR, o AFIANÇADO/TOMADOR e o(s) AVALISTA(S) SOLIDÁRIO(S),
             em conjunto, denominados PARTES.
