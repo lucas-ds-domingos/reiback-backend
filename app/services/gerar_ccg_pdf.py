@@ -27,9 +27,7 @@ async def gerar_pdf_ccg(data: dict) -> bytes:
         await page.set_content(html, wait_until="networkidle")
         pdf_bytes = await page.pdf(format="A4", print_background=True)
         await browser.close()
-    output_pdf = Path(__file__).parent / "ccg_teste.pdf"
-    output_pdf.write_bytes(pdf_bytes) 
-    return pdf_bytes
+        return pdf_bytes
 
 
 def montar_html_ccg(data: dict) -> str:
