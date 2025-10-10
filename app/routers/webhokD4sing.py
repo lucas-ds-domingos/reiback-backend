@@ -1,14 +1,14 @@
-from fastapi import FastAPI, Request, Header, HTTPException
+from fastapi import APIRouter, Request, Header, HTTPException
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app.models import CCG
 import hmac, hashlib, json
 import os
 
-app = FastAPI()
+router = APIRouter()
 D4SIGN_HMAC_KEY = os.getenv("D4SIGN_CRYPT_KEY_HMAC")  # mesma chave que você colocou no .env
 
-@app.post("/webhook-d4sign")
+@router.post("/webhook-d4sign")
 async def webhook_d4sign(request: Request, content_hmac: str = Header(None)):
     body = await request.body()
 
