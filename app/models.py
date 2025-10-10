@@ -52,7 +52,7 @@ class Tomador(Base):
     asaas_cliente = relationship("ClienteAsaas", back_populates="tomador", uselist=False)
     representantes_legais = relationship("RepresentanteLegal", back_populates="tomador", cascade="all, delete-orphan")
     fiadores = relationship("Fiador", back_populates="tomador")
-    ccgs = relationship("CCG", back_populates="tomador", cascade="all, delete-orphan")
+    ccg = relationship("CCG", back_populates="tomador", cascade="all, delete-orphan")
 
 class RepresentanteLegal(Base):
     __tablename__ = "representantes_legais"
