@@ -8,6 +8,12 @@ class FiadorBase(BaseModel):
     email: EmailStr
     tipo: constr(min_length=2, max_length=2)  # "PF" ou "PJ"
 
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    uf: Optional[constr(min_length=2, max_length=2)] = None
+    estado_civil: Optional[str] = None
+    profissao: Optional[str] = None
+
 class FiadorCreate(FiadorBase):
     tomador_id: int
 
@@ -16,6 +22,12 @@ class FiadorUpdate(BaseModel):
     cpf_cnpj: Optional[str] = None
     email: Optional[EmailStr] = None
     tipo: Optional[str] = None
+
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    uf: Optional[constr(min_length=2, max_length=2)] = None
+    estado_civil: Optional[str] = None
+    profissao: Optional[str] = None
 
 class FiadorResponse(FiadorBase):
     id: int

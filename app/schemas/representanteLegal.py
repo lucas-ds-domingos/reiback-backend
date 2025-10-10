@@ -7,6 +7,12 @@ class RepresentanteLegalBase(BaseModel):
     cpf: constr(min_length=11, max_length=14)
     email: EmailStr
 
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    uf: Optional[constr(min_length=2, max_length=2)] = None
+    estado_civil: Optional[str] = None
+    profissao: Optional[str] = None
+
 class RepresentanteLegalCreate(RepresentanteLegalBase):
     tomador_id: int
 
@@ -15,6 +21,12 @@ class RepresentanteLegalUpdate(BaseModel):
     cpf: Optional[str] = None
     email: Optional[EmailStr] = None
 
+    endereco: Optional[str] = None
+    cidade: Optional[str] = None
+    uf: Optional[constr(min_length=2, max_length=2)] = None
+    estado_civil: Optional[str] = None
+    profissao: Optional[str] = None
+
 class RepresentanteLegalResponse(RepresentanteLegalBase):
     id: int
     tomador_id: int
@@ -22,6 +34,5 @@ class RepresentanteLegalResponse(RepresentanteLegalBase):
     atualizado_em: Optional[datetime] = None
 
     model_config = {
-    "from_attributes": True
-}
-
+        "from_attributes": True
+    }

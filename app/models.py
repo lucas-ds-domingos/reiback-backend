@@ -52,6 +52,7 @@ class Tomador(Base):
     asaas_cliente = relationship("ClienteAsaas", back_populates="tomador", uselist=False)
     representantes_legais = relationship("RepresentanteLegal", back_populates="tomador", cascade="all, delete-orphan")
     fiadores = relationship("Fiador", back_populates="tomador")
+    ccgs = relationship("CCG", back_populates="tomador", cascade="all, delete-orphan")
 
 class RepresentanteLegal(Base):
     __tablename__ = "representantes_legais"
@@ -61,10 +62,20 @@ class RepresentanteLegal(Base):
     nome_completo = Column(String, nullable=False)
     cpf = Column(String, nullable=False)
     email = Column(String, nullable=False)
+
+    # ✅ Novos campos
+    endereco = Column(String, nullable=True)
+    cidade = Column(String(100), nullable=True)
+    uf = Column(String(2), nullable=True)
+    estado_civil = Column(String(50), nullable=True)
+    profissao = Column(String(100), nullable=True)
+
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
 
     tomador = relationship("Tomador", back_populates="representantes_legais")
+
+    
 
 
 
@@ -77,10 +88,32 @@ class Fiador(Base):
     email = Column(String(255), nullable=False)
     tipo = Column(String(2), nullable=False)  # "PF" ou "PJ"
     tomador_id = Column(Integer, ForeignKey("tomadores.id", ondelete="CASCADE"), nullable=False)
+
+    endereco = Column(String, nullable=True)
+    cidade = Column(String(100), nullable=True)
+    uf = Column(String(2), nullable=True)
+    estado_civil = Column(String(50), nullable=True)
+    profissao = Column(String(100), nullable=True)
+
     criado_em = Column(DateTime(timezone=True), server_default=func.now())
     atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
 
     tomador = relationship("Tomador", back_populates="fiadores")
+    
+
+class CCG(Base):
+    __tablename__ = "ccg"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tomador_id = Column(Integer, ForeignKey("tomadores.id"))
+    caminho_pdf = Column(Text, nullable=False)
+    d4sign_uuid = Column(String(100), nullable=True)
+    d4sign_link = Column(Text, nullable=True)
+    status = Column(String(50), default="gerando")
+    criado_em = Column(DateTime(timezone=True), server_default=func.now())
+    atualizado_em = Column(DateTime(timezone=True), onupdate=func.now())
+
+    tomador = relationship("Tomador", back_populates="ccg")
 
 class Segurado(Base):
     __tablename__ = "segurados"
