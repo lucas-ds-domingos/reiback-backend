@@ -6,7 +6,7 @@ from ..schemas.ccg import CCGCreate, CCGResponse
 from ..services.gerar_ccg_pdf import gerar_pdf_ccg
 from ..services.d4sign_service import enviar_para_d4sign
 
-router = APIRouter(prefix="/ccg", tags=["CCG"])
+router = APIRouter()
 
 @router.post("/gerar", response_model=CCGResponse)
 async def gerar_ccg(data: CCGCreate, db: Session = Depends(get_db)):
