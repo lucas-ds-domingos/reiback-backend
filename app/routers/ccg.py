@@ -36,12 +36,12 @@ async def gerar_ccg(data: CCGCreate, db: Session = Depends(get_db)):
     pdf_bytes = await gerar_pdf_ccg(pdf_data)
 
     # 5️⃣ Salvar PDF no banco (como bytes ou caminho de arquivo)
-    ccg.caminho_pdf = pdf_bytes  # se for bytea no Postgres
+    ccg.caminho_pdf = pdf_bytes  # se for bytea no Postgres 
     db.commit()
     db.refresh(ccg)
 
     # 6️⃣ Enviar PDF para D4Sign
-    uuid = await enviar_para_d4sign(pdf_bytes, pdf_data)
+    uuid = await enviar_para_d4sign(pdf_bytes, pdf_data, ccg.id, db)
 
     # 7️⃣ Atualizar status e UUID do documento
     ccg.status = "ENVIADO"

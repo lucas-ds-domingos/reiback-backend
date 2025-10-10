@@ -1,30 +1,20 @@
 import httpx
-import os
-from dotenv import load_dotenv
 from sqlalchemy.orm import Session
-from app.models import CCG
-
-load_dotenv()
+from ..models import CCG
 
 D4SIGN_BASE_URL = "https://secure.d4sign.com.br/api/v1"
-TOKEN_API = os.getenv("D4SIGN_TOKEN_API")
-CRYPT_KEY = os.getenv("D4SIGN_CRYPT_KEY")
-UUID_FOLDER = os.getenv("D4SIGN_SAFE_UUID")  # UUID da pasta segura
 
-async def enviar_para_d4sign(
-    pdf_bytes: bytes,
-    data: dict,
-    ccg_id: int,
-    db: Session,
-    workflow: str = "0",
-    message: str = "Por favor, assine o documento"
-):
+async def enviar_para_d4sign(pdf_bytes: bytes, data: dict, ccg_id: int, db: Session, workflow: str = "0", message: str = "Por favor, assine o documento"):
     """
-    Envia PDF para D4Sign, adiciona signatários e campos de assinatura.
-    Salva o d4sign_uuid no banco e atualiza status para 'enviado'.
+    Envia PDF para D4Sign, adiciona signatários e campos, e salva o UUID no banco.
     """
+    from os import getenv
+    TOKEN_API = getenv("D4SIGN_TOKEN_API")
+    CRYPT_KEY = getenv("D4SIGN_CRYPT_KEY")
+    UUID_FOLDER = getenv("D4SIGN_SAFE_UUID")
+
     if not TOKEN_API or not CRYPT_KEY or not UUID_FOLDER:
-        raise ValueError("TOKEN_API, CRYPT_KEY ou UUID_FOLDER não configurados no ambiente")
+        raise ValueError("TOKEN_API, CRYPT_KEY ou UUID_FOLDER não configurados")
 
     headers_json = {"Accept": "application/json", "Content-Type": "application/json"}
     headers_file = {"Accept": "application/json"}
@@ -42,18 +32,8 @@ async def enviar_para_d4sign(
         res.raise_for_status()
         doc_uuid = res.json().get("uuid")
         if not doc_uuid:
-            raise ValueError(f"UUID não retornado no upload: {res.text}")
+            raise ValueError(f"UUID não retornado: {res.text}")
         print(f"✅ Documento enviado para D4Sign. UUID: {doc_uuid}")
-
-        # 🔹 Atualiza CCG no banco
-        ccg = db.query(CCG).filter(CCG.id == ccg_id).first()
-        if ccg:
-            ccg.d4sign_uuid = doc_uuid
-            ccg.status = "enviado"
-            db.commit()
-            print(f"📌 CCG {ccg.id} atualizado no banco com d4sign_uuid")
-        else:
-            print(f"⚠️ CCG com id {ccg_id} não encontrado no banco.")
 
         # 2️⃣ Adicionar signatários
         signers = data.get("fiadores", []) + data.get("representantes_legais", [])
@@ -76,7 +56,7 @@ async def enviar_para_d4sign(
             res_signers.raise_for_status()
             print("✍️ Signatários adicionados.")
 
-        # 3️⃣ Adicionar campos de assinatura (exemplo simples)
+        # 3️⃣ Adicionar campos de assinatura/rubrica
         fields_payload = []
         for idx, s in enumerate(signers):
             fields_payload.append({
@@ -104,15 +84,23 @@ async def enviar_para_d4sign(
                 headers=headers_json
             )
             res_fields.raise_for_status()
-            print("🖊️ Campos de assinatura e rubrica adicionados.")
+            print("🖊️ Campos de assinatura adicionados.")
 
-        # 4️⃣ Enviar para assinatura via e-mail
+        # 4️⃣ Enviar para assinatura por e-mail
         res_send = await client.post(
             f"{D4SIGN_BASE_URL}/documents/{doc_uuid}/sendtosigner?tokenAPI={TOKEN_API}&cryptKey={CRYPT_KEY}",
             json={"workflow": workflow, "message": message, "skip_email": "0"},
             headers=headers_json
         )
         res_send.raise_for_status()
-        print("📤 Documento enviado por e-mail para assinatura.")
+        print("📤 Documento enviado para assinatura.")
+
+        # 5️⃣ Atualizar banco
+        ccg = db.query(CCG).filter(CCG.id == ccg_id).first()
+        if ccg:
+            ccg.d4sign_uuid = doc_uuid
+            ccg.status = "ENVIADO"
+            db.commit()
+            db.refresh(ccg)
 
         return doc_uuid
