@@ -33,6 +33,26 @@ class CorretoraCreate(CorretoraBase):
         if v is None or v == "":
             return None
         return int(v)
+    
+class CorretoraUpdate(BaseModel):
+    razao_social: Optional[str]
+    telefone: Optional[str]
+    endereco: Optional[str]
+    numero: Optional[str]
+    complemento: Optional[str]
+    bairro: Optional[str]
+    cidade: Optional[str]
+    uf: Optional[str]
+    cep: Optional[str]
+    susep: Optional[int]
+
+    # Dados bancários
+    banco: Optional[str]
+    tipo_conta: Optional[str]
+    agencia: Optional[str]
+    digito_agencia: Optional[str]
+    conta: Optional[str]
+    digito_conta: Optional[str]
 
 class CorretoraResponse(CorretoraBase):
     id: int

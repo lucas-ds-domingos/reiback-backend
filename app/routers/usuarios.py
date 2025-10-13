@@ -70,7 +70,22 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
             "numero": corretora.numero,
             "complemento": corretora.complemento,
             "bairro": corretora.bairro,
-            "susep": corretora.susep
+            "susep": corretora.susep,
+            # dados bancários
+            "banco": corretora.banco,
+            "tipo_conta": corretora.tipo_conta,
+            "agencia": corretora.agencia,
+            "digito_agencia": corretora.digito_agencia,
+            "conta": corretora.conta,
+            "digito_conta": corretora.digito_conta,
+            # responsável financeiro
+            "responsavel": {
+                "nome": corretora.responsavel.nome,
+                "cpf": corretora.responsavel.cpf,
+                "email": corretora.responsavel.email,
+                "telefone": corretora.responsavel.telefone
+            } if corretora.responsavel else None
         } if corretora else None
     }
+
 
