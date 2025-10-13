@@ -47,13 +47,15 @@ class CorretoraUpdate(BaseModel):
     cep: Optional[str]
     susep: Optional[int]
 
-    # Dados bancários
+class CorretoraUpdateFinanceiro(BaseModel):
     banco: Optional[str]
+    bancoOutro: Optional[str]
     tipo_conta: Optional[str]
     agencia: Optional[str]
     digito_agencia: Optional[str]
     conta: Optional[str]
     digito_conta: Optional[str]
+    pix: Optional[str]
 
 class CorretoraResponse(CorretoraBase):
     id: int

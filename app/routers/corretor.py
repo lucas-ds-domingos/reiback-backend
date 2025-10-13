@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Corretora, Usuario, Assessoria, ResponsavelFinanceiroCorretora
-from ..schemas.corretor import CorretoraCreate, CorretoraUpdate
+from ..schemas.corretor import CorretoraCreate, CorretoraUpdate, CorretoraUpdateFinanceiro
 from passlib.hash import bcrypt
 from datetime import datetime
 from decimal import Decimal
@@ -103,72 +103,39 @@ def criar_corretor(
         }
     }
 
-@router.put("/corretora")
-def update_corretora(
+
+# Atualiza dados gerais da corretora
+@router.put("/corretora/dados")
+def update_corretora_dados(
     payload: CorretoraUpdate,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    """
-    Atualiza os dados da corretora do usuário logado, incluindo dados bancários.
-    """
-    if not current_user.corretora_id:
-        raise HTTPException(status_code=404, detail="Usuário não possui corretora vinculada")
-
     corretora = db.query(Corretora).filter(Corretora.id == current_user.corretora_id).first()
     if not corretora:
         raise HTTPException(status_code=404, detail="Corretora não encontrada")
 
-    # Atualiza campos básicos
     for field, value in payload.dict(exclude_unset=True).items():
         setattr(corretora, field, value)
 
     db.commit()
     db.refresh(corretora)
+    return {"message": "Dados da corretora atualizados com sucesso", "corretora": corretora}
 
-    return {"message": "Corretora atualizada com sucesso", "corretora": corretora}
-
-@router.put("/corretora/responsavel")
-def update_responsavel(
-    nome: str,
-    cpf: str,
-    email: str,
-    telefone: str | None = None,
+# Atualiza dados financeiros
+@router.put("/corretora/financeiro")
+def update_corretora_financeiro(
+    payload: CorretoraUpdateFinanceiro,
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    """
-    Cria ou atualiza o responsável financeiro da corretora do usuário logado.
-    """
-    if not current_user.corretora_id:
-        raise HTTPException(status_code=404, detail="Usuário não possui corretora vinculada")
-
     corretora = db.query(Corretora).filter(Corretora.id == current_user.corretora_id).first()
     if not corretora:
         raise HTTPException(status_code=404, detail="Corretora não encontrada")
 
-    responsavel = db.query(ResponsavelFinanceiroCorretora).filter(
-        ResponsavelFinanceiroCorretora.corretora_id == corretora.id
-    ).first()
-
-    if responsavel:
-        # Atualiza
-        responsavel.nome = nome
-        responsavel.cpf = cpf
-        responsavel.email = email
-        responsavel.telefone = telefone
-    else:
-        # Cria
-        responsavel = ResponsavelFinanceiroCorretora(
-            corretora_id=corretora.id,
-            nome=nome,
-            cpf=cpf,
-            email=email,
-            telefone=telefone
-        )
-        db.add(responsavel)
+    for field, value in payload.dict(exclude_unset=True).items():
+        setattr(corretora, field, value)
 
     db.commit()
-    db.refresh(responsavel)
-
-    return {"message": "Responsável financeiro atualizado com sucesso", "responsavel": responsavel}
+    db.refresh(corretora)
+    return {"message": "Dados financeiros atualizados com sucesso", "corretora": corretora}
