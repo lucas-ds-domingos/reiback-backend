@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List
 import os
 import requests
-from ..models import Proposta, ClienteAsaas, Tomador, Usuario
+from ..models import Proposta, ClienteAsaas, Tomador, Usuario, CCG
 from ..utils.get_current_user import get_current_user
 
 router = APIRouter()
@@ -18,6 +18,17 @@ router = APIRouter()
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id or 1
 
+    # ======== Verificação de CCG assinado ========
+    ccg_assinado = (
+        db.query(CCG)
+        .filter(CCG.tomador_id == payload.tomador_id)
+        .filter(CCG.status == "assinado") 
+        .first()
+    )
+    if not ccg_assinado:
+        raise HTTPException(status_code=400, detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta.")
+
+    # ======== Criação da proposta ========
     nova = Proposta(
         numero=payload.numero,
         grupo=payload.grupo,
@@ -66,8 +77,6 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     db.refresh(tomador)
 
     return nova
-
-
 
 @router.patch("/propostas/{proposta_id}/cancelar", response_model=PropostaResponse)
 def cancelar_proposta(proposta_id: int, db: Session = Depends(get_db)):
