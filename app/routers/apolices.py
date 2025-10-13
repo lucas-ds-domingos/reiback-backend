@@ -1,22 +1,19 @@
+from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session, joinedload
-from fastapi import APIRouter, Depends,Response, HTTPException
 from ..database import get_db
-from ..models import Apolice, Proposta
-
-
-
-router = APIRouter()
-
+from ..models import Apolice, Proposta, Usuario
+from ..utils.get_current_user import get_current_user
+from pydantic import BaseModel
+from datetime import date
+from decimal import Decimal
+from typing import List
 
 router = APIRouter(
     prefix="/apolices",
     tags=["Apolices"]
 )
 
-from pydantic import BaseModel
-from datetime import date
-from decimal import Decimal
-
+# Schemas
 class PropostaInfo(BaseModel):
     numero: str
     inicio_vigencia: date | None
@@ -33,12 +30,31 @@ class ApoliceResponse(BaseModel):
     class Config:
         orm_mode = True
 
-@router.get("/", response_model=list[ApoliceResponse])
-def listar_apolices(db: Session = Depends(get_db)):
-    # Carrega Apolice + Proposta + Tomador de uma vez
-    apolices = db.query(Apolice).options(
+# Listagem com controle por role
+@router.get("/", response_model=List[ApoliceResponse])
+def listar_apolices(
+    db: Session = Depends(get_db),
+    current_user_data: dict = Depends(get_current_user)  # só vem id
+):
+    # Busca usuário completo no banco
+    usuario = db.query(Usuario).filter(Usuario.id == current_user_data["id"]).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # Query base com joinedload
+    query = db.query(Apolice).options(
         joinedload(Apolice.proposta).joinedload(Proposta.tomador)
-    ).all()
+    )
+
+    # Filtro por role
+    if usuario.role == "corretor":
+        query = query.join(Apolice.proposta).filter(Proposta.usuario_id == usuario.id)
+    elif usuario.role == "assessoria":
+        # Todas apólices de propostas dos corretores da assessoria
+        query = query.join(Apolice.proposta).join(Usuario).filter(Usuario.assessoria_id == usuario.assessoria_id)
+    # master vê tudo -> não filtra
+
+    apolices = query.all()
 
     result = []
     for a in apolices:
@@ -58,17 +74,3 @@ def listar_apolices(db: Session = Depends(get_db)):
             proposta=proposta_info
         ))
     return result
-
-
-
-@router.get("/apolice/{apolice_id}/download")
-def download_apolice(apolice_id: int, db: Session = Depends(get_db)):
-    apolice = db.query(Apolice).filter(Apolice.id == apolice_id).first()
-    if not apolice or not apolice.pdf_assinado:
-        raise HTTPException(status_code=404, detail="PDF não encontrado")
-    
-    return Response(
-        content=apolice.pdf_assinado,
-        media_type="application/pdf",
-        headers={"Content-Disposition": f"attachment; filename=Apolice-{apolice.numero}.pdf"}
-    )
