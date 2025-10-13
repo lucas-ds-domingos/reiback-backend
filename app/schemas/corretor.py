@@ -49,7 +49,7 @@ class CorretoraUpdate(BaseModel):
 
 class CorretoraUpdateFinanceiro(BaseModel):
     banco: Optional[str]
-    bancoOutro: Optional[str]
+    bancoOutro: Optional[str] = None 
     tipo_conta: Optional[str]
     agencia: Optional[str]
     digito_agencia: Optional[str]
