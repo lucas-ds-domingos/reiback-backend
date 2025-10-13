@@ -156,31 +156,31 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(
     db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
+    current_user_data: dict = Depends(get_current_user)  # aqui só vem o id
 ):
-    """
-    Listagem de propostas:
-    - Master: vê todas as propostas
-    - Assessoria: vê propostas dos corretores vinculados à assessoria
-    - Corretor: vê apenas suas próprias propostas
-    """
-    if current_user.role == "master":
-        # Master vê todas as propostas
+    # Busca usuário completo no banco
+    usuario = db.query(Usuario).filter(Usuario.id == current_user_data["id"]).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # Master vê todas as propostas
+    if usuario.role == "master":
         propostas = db.query(Proposta).all()
-    elif current_user.role == "assessoria":
-        # Busca todos os tomadores dos corretores da assessoria
+    
+    # Assessoria vê propostas de todos os corretores vinculados a ela
+    elif usuario.role == "assessoria":
         propostas = (
             db.query(Proposta)
-            .join(Usuario)
-            .filter(Usuario.assessoria_id == current_user.assessoria_id)
+            .join(Usuario, Proposta.usuario_id == Usuario.id)
+            .filter(Usuario.assessoria_id == usuario.assessoria_id)
             .all()
         )
+    
+    # Corretor vê apenas suas próprias propostas
     else:
-        # Corretor vê apenas suas propostas
-        propostas = db.query(Proposta).filter(Proposta.usuario_id == current_user.id).all()
+        propostas = db.query(Proposta).filter(Proposta.usuario_id == usuario.id).all()
 
     return propostas
-
 
 
 
