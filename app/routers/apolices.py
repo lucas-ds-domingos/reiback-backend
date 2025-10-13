@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, Response, HTTPException
 from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..models import Apolice, Proposta, Usuario
-from ..utils.get_current_user import get_current_user
+from ..utils import get_current_user
 from pydantic import BaseModel
 from datetime import date
 from decimal import Decimal
@@ -31,30 +31,38 @@ class ApoliceResponse(BaseModel):
         orm_mode = True
 
 # Listagem com controle por role
-@router.get("/", response_model=List[ApoliceResponse])
+from ..utils.get_current_user import get_current_user
+from ..models import Usuario
+
+@router.get("/", response_model=list[ApoliceResponse])
 def listar_apolices(
     db: Session = Depends(get_db),
-    current_user_data: dict = Depends(get_current_user)  # só vem id
+    current_user: Usuario = Depends(get_current_user)
 ):
-    # Busca usuário completo no banco
-    usuario = db.query(Usuario).filter(Usuario.id == current_user_data["id"]).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    # current_user já é o objeto Usuario, então acessa direto:
+    usuario = current_user
 
-    # Query base com joinedload
-    query = db.query(Apolice).options(
-        joinedload(Apolice.proposta).joinedload(Proposta.tomador)
-    )
-
-    # Filtro por role
-    if usuario.role == "corretor":
-        query = query.join(Apolice.proposta).filter(Proposta.usuario_id == usuario.id)
+    if usuario.role == "master":
+        apolices = db.query(Apolice).options(
+            joinedload(Apolice.proposta).joinedload(Proposta.tomador)
+        ).all()
     elif usuario.role == "assessoria":
-        # Todas apólices de propostas dos corretores da assessoria
-        query = query.join(Apolice.proposta).join(Usuario).filter(Usuario.assessoria_id == usuario.assessoria_id)
-    # master vê tudo -> não filtra
-
-    apolices = query.all()
+        apolices = (
+            db.query(Apolice)
+            .join(Proposta, Apolice.proposta_id == Proposta.id)
+            .join(Usuario, Proposta.usuario_id == Usuario.id)
+            .filter(Usuario.assessoria_id == usuario.assessoria_id)
+            .options(joinedload(Apolice.proposta).joinedload(Proposta.tomador))
+            .all()
+        )
+    else:  # corretor
+        apolices = (
+            db.query(Apolice)
+            .join(Proposta, Apolice.proposta_id == Proposta.id)
+            .filter(Proposta.usuario_id == usuario.id)
+            .options(joinedload(Apolice.proposta).joinedload(Proposta.tomador))
+            .all()
+        )
 
     result = []
     for a in apolices:
