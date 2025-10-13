@@ -191,3 +191,19 @@ def listar_tomador(
         raise HTTPException(status_code=404, detail="Tomador não encontrado")
 
     return tomador
+
+@router.get("/list-tomadores-assessoria/{user_id}", response_model=List[TomadorBase])
+def listar_tomadores_assessoria(user_id: int, db: Session = Depends(get_db)):
+    # Pega o usuário para descobrir a assessoria dele
+    usuario = db.query(Usuario).filter(Usuario.id == user_id).first()
+    if not usuario or not usuario.assessoria_id:
+        raise HTTPException(status_code=404, detail="Usuário ou assessoria não encontrada")
+
+    # Busca todos os tomadores dos corretores vinculados à assessoria
+    tomadores = (
+        db.query(Tomador)
+        .join(Usuario)
+        .filter(Usuario.assessoria_id == usuario.assessoria_id)
+        .all()
+    )
+    return tomadores
