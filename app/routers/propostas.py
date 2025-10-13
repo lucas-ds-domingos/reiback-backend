@@ -9,7 +9,8 @@ from datetime import datetime, timedelta
 from typing import List
 import os
 import requests
-from ..models import Proposta, ClienteAsaas, Tomador  
+from ..models import Proposta, ClienteAsaas, Tomador, Usuario
+from ..utils.get_current_user import get_current_user
 
 router = APIRouter()
 
@@ -153,8 +154,31 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
     }
 
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
-def listar_propostas(db: Session = Depends(get_db)):
-    propostas = db.query(Proposta).all()
+def listar_propostas(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    """
+    Listagem de propostas:
+    - Master: vê todas as propostas
+    - Assessoria: vê propostas dos corretores vinculados à assessoria
+    - Corretor: vê apenas suas próprias propostas
+    """
+    if current_user.role == "master":
+        # Master vê todas as propostas
+        propostas = db.query(Proposta).all()
+    elif current_user.role == "assessoria":
+        # Busca todos os tomadores dos corretores da assessoria
+        propostas = (
+            db.query(Proposta)
+            .join(Usuario)
+            .filter(Usuario.assessoria_id == current_user.assessoria_id)
+            .all()
+        )
+    else:
+        # Corretor vê apenas suas propostas
+        propostas = db.query(Proposta).filter(Proposta.usuario_id == current_user.id).all()
+
     return propostas
 
 
