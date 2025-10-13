@@ -41,23 +41,22 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
     }
 
 @router.get("/me")
-def get_me(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     """
     Retorna os dados do usuário logado, incluindo a corretora vinculada
     """
-    usuario = db.query(Usuario).filter(Usuario.id == current_user["id"]).first()
-    if not usuario:
+    if not current_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
     
     corretora = None
-    if usuario.corretora_id:
-        corretora = db.query(Corretora).filter(Corretora.id == usuario.corretora_id).first()
+    if current_user.corretora_id:
+        corretora = db.query(Corretora).filter(Corretora.id == current_user.corretora_id).first()
     
     return {
-        "id": usuario.id,
-        "nome": usuario.nome,
-        "email": usuario.email,
-        "role": usuario.role,
+        "id": current_user.id,
+        "nome": current_user.nome,
+        "email": current_user.email,
+        "role": current_user.role,
         "corretora": {
             "id": corretora.id,
             "nome": corretora.razao_social,
@@ -74,3 +73,4 @@ def get_me(db: Session = Depends(get_db), current_user: dict = Depends(get_curre
             "susep": corretora.susep
         } if corretora else None
     }
+
