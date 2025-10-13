@@ -37,10 +37,6 @@ async def webhook_d4sign(
 
     # 🔹 Remover prefixo sha256= do header recebido
     content_hmac_received = content_hmac.replace("sha256=", "")
-
-    print("HMAC recebido:", content_hmac_received)
-    print("HMAC calculado:", computed_hmac)
-
     # 🔹 Validar HMAC
     if not hmac.compare_digest(computed_hmac, content_hmac_received):
         raise HTTPException(status_code=403, detail="HMAC inválido")
@@ -52,13 +48,10 @@ async def webhook_d4sign(
             ccg.status = "assinado"
         elif type_post == "2":  # Documento cancelado
             ccg.status = "cancelado"
-        elif type_post == "4":  # Assinatura realizada parcialmente
+        elif type_post == "4" and ccg.status != "assinado":
             ccg.status = "parcialmente_assinado"
+
         db.commit()
-        print(f"✅ CCG {ccg.id} atualizado para {ccg.status}")
     else:
         print(f"⚠️ CCG com uuid {uuid_doc} não encontrado")
-
-    print(f"Webhook recebido: uuid={uuid_doc}, type_post={type_post}, message={message}, email={email}")
-
     return {"ok": True}
