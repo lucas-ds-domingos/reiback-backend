@@ -61,7 +61,7 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
             "id": corretora.id,
             "nome": corretora.razao_social,
             "cnpj": corretora.cnpj,
-            "email": corretora.email,
+            "email": current_user.email,
             "telefone": corretora.telefone,
             "endereco": corretora.endereco,
             "cidade": corretora.cidade,
