@@ -35,5 +35,5 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
     return {
         "access_token": token,
         "token_type": "bearer",
-        "usuario": {"id": usuario.id, "nome": usuario.nome, "email": usuario.email},
+        "usuario": {"id": usuario.id, "nome": usuario.nome, "email": usuario.email, "role": usuario.role},
     }
