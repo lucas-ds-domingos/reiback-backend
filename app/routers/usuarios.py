@@ -1,9 +1,11 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends,status
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import Usuario
+from ..models import Usuario, Corretora
 from ..utils.auts import hash_password, verify_password, create_access_token
 from ..schemas.usuarios import UsuarioCreate, LoginSchema
+from ..utils.get_current_user import get_current_user
+
 
 router = APIRouter()
 
@@ -36,4 +38,39 @@ def login(data: LoginSchema, db: Session = Depends(get_db)):
         "access_token": token,
         "token_type": "bearer",
         "usuario": {"id": usuario.id, "nome": usuario.nome, "email": usuario.email, "role": usuario.role},
+    }
+
+@router.get("/me")
+def get_me(db: Session = Depends(get_db), current_user: dict = Depends(get_current_user)):
+    """
+    Retorna os dados do usuário logado, incluindo a corretora vinculada
+    """
+    usuario = db.query(Usuario).filter(Usuario.id == current_user["id"]).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    
+    corretora = None
+    if usuario.corretora_id:
+        corretora = db.query(Corretora).filter(Corretora.id == usuario.corretora_id).first()
+    
+    return {
+        "id": usuario.id,
+        "nome": usuario.nome,
+        "email": usuario.email,
+        "role": usuario.role,
+        "corretora": {
+            "id": corretora.id,
+            "nome": corretora.razao_social,
+            "cnpj": corretora.cnpj,
+            "email": corretora.email,
+            "telefone": corretora.telefone,
+            "endereco": corretora.endereco,
+            "cidade": corretora.cidade,
+            "uf": corretora.uf,
+            "cep": corretora.cep,
+            "numero": corretora.numero,
+            "complemento": corretora.complemento,
+            "bairro": corretora.bairro,
+            "susep": corretora.susep
+        } if corretora else None
     }
