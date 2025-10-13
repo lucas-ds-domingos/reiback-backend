@@ -5,64 +5,58 @@ from app.models import CCG
 import hmac, hashlib, os
 
 router = APIRouter()
-
-D4SIGN_HMAC_KEY = os.getenv("D4SIGN_CRYPT_KEY_HMAC")
+D4SIGN_HMAC_KEY = os.getenv("D4SIGN_CRYPT_KEY_HMAC")  # sua nova chave HMAC
 
 @router.post("/webhook-d4sign")
 async def webhook_d4sign(
     request: Request,
     content_hmac: str = Header(None, alias="Content-Hmac"),
-    content_hmac_alt: str = Header(None, alias="Content-HMAC"),
     db: Session = Depends(get_db)
 ):
-    # ✅ Aceitar os dois formatos de header
-    hmac_received = content_hmac or content_hmac_alt
-    if not hmac_received:
+    if not content_hmac:
         raise HTTPException(status_code=400, detail="HMAC não enviado")
 
-    # ✅ Capturar corpo bruto para verificar o HMAC
+    # ✅ remover o prefixo 'sha256='
+    if content_hmac.startswith("sha256="):
+        content_hmac = content_hmac.replace("sha256=", "")
+
+    # ✅ pegar corpo bruto exatamente como chegou
     body = await request.body()
 
-    print("HEADERS RECEBIDOS:", request.headers)
-    print("BODY RAW RECEBIDO:", body)
-
-    # ✅ Calcular HMAC
+    # ✅ calcular HMAC
     computed_hmac = hmac.new(
         D4SIGN_HMAC_KEY.encode(),
         body,
         hashlib.sha256
     ).hexdigest()
 
-    print("HMAC RECEBIDO:", hmac_received)
-    print("HMAC CALCULADO:", computed_hmac)
+    print("HMAC recebido:", content_hmac)
+    print("HMAC calculado:", computed_hmac)
 
-    if not hmac.compare_digest(computed_hmac, hmac_received):
+    if not hmac.compare_digest(computed_hmac, content_hmac):
         raise HTTPException(status_code=403, detail="HMAC inválido")
 
-    # ✅ Ler o corpo conforme tipo de conteúdo
-    if "application/json" in request.headers.get("content-type", ""):
-        data = await request.json()
-        uuid_doc = data.get("uuid")
-        type_post = data.get("type_post")
-        message = data.get("message")
-    else:
-        form = await request.form()
-        uuid_doc = form.get("uuid")
-        type_post = form.get("type_post")
-        message = form.get("message")
+    # ✅ parse do form-data
+    form = await request.form()
+    uuid_doc = form.get("uuid")
+    type_post = form.get("type_post")
+    message = form.get("message")
+    email = form.get("email")
 
-    print(f"Webhook recebido: {uuid_doc}, type_post: {type_post}, message: {message}")
+    print(f"Webhook recebido: uuid={uuid_doc}, type_post={type_post}, message={message}, email={email}")
 
-    # ✅ Atualizar no banco
+    # ✅ atualizar no banco
     ccg = db.query(CCG).filter(CCG.d4sign_uuid == uuid_doc).first()
     if ccg:
         if type_post == "1":
             ccg.status = "assinado"
         elif type_post == "2":
             ccg.status = "cancelado"
+        elif type_post == "4":
+            ccg.status = "parcialmente_assinado"
         db.commit()
-        print(f"✅ CCG {ccg.id} atualizado para status {ccg.status}")
+        print(f"✅ CCG {ccg.id} atualizado para {ccg.status}")
     else:
-        print(f"⚠️ Nenhum registro encontrado com uuid {uuid_doc}")
+        print(f"⚠️ CCG com uuid {uuid_doc} não encontrado")
 
     return {"ok": True}
