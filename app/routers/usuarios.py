@@ -78,6 +78,7 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
             "digito_agencia": corretora.digito_agencia,
             "conta": corretora.conta,
             "digito_conta": corretora.digito_conta,
+            "pix": corretora.pix ,
             # responsável financeiro
             "responsavel": {
                 "nome": corretora.responsavel.nome,

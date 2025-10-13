@@ -262,6 +262,7 @@ class Corretora(Base):
     digito_agencia = Column(String(5), nullable=True)
     conta = Column(String(20), nullable=True)
     digito_conta = Column(String(5), nullable=True)
+    pix = Column(String, nullable=True)
 
     # Relacionamentos
     finance = relationship("Finance", back_populates="corretoras")

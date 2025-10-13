@@ -23,6 +23,7 @@ class CorretoraBase(BaseModel):
     bairro: Optional[str] = None
     uf: Optional[str] = None
     cidade: Optional[str] = None
+    pix: Optional[str]
 
 class CorretoraCreate(CorretoraBase):
     email: str
