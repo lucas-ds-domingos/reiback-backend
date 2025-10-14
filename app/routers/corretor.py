@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Corretora, Usuario, Assessoria, ResponsavelFinanceiroCorretora
-from ..schemas.corretor import CorretoraCreate, CorretoraUpdate, CorretoraUpdateFinanceiro
+from ..schemas.corretor import CorretoraCreate, CorretoraUpdate, CorretoraUpdateFinanceiro, ResponsavelUpdate
 from passlib.hash import bcrypt
 from datetime import datetime
 from decimal import Decimal
@@ -139,3 +139,34 @@ def update_corretora_financeiro(
     db.commit()
     db.refresh(corretora)
     return {"message": "Dados financeiros atualizados com sucesso", "corretora": corretora}
+
+
+
+@router.put("/corretora/responsavel")
+def update_corretora_responsavel(
+    payload: ResponsavelUpdate,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    corretora_id = current_user.corretora_id
+
+    responsavel = db.query(ResponsavelFinanceiroCorretora).filter(
+        ResponsavelFinanceiroCorretora.corretora_id == corretora_id
+    ).first()
+
+    if responsavel:
+        # Atualizar responsável existente
+        for field, value in payload.dict(exclude={"corretora_id"}, exclude_unset=True).items():
+            setattr(responsavel, field, value)
+    else:
+        # Criar um novo responsável
+        responsavel = ResponsavelFinanceiroCorretora(
+            corretora_id=corretora_id,
+            **payload.dict(exclude={"corretora_id"})
+        )
+        db.add(responsavel)
+
+    db.commit()
+    db.refresh(responsavel)
+
+    return {"message": "Responsável atualizado com sucesso", "responsavel": responsavel}

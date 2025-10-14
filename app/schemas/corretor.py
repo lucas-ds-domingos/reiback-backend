@@ -63,3 +63,13 @@ class CorretoraResponse(CorretoraBase):
     model_config = {
         "from_attributes": True
     }
+
+
+from pydantic import BaseModel
+
+class ResponsavelUpdate(BaseModel):
+    nome: str | None = None
+    email: str | None = None
+    telefone: str | None = None
+    cpf: str | None = None
+    corretora_id: int
