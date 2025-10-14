@@ -27,6 +27,28 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     )
     if not ccg_assinado:
         raise HTTPException(status_code=400, detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta.")
+    
+    # ======== Verificação de limite disponível ========
+    tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
+
+    if not tomador:
+        raise HTTPException(status_code=404, detail="Tomador não encontrado.")
+
+    limite_disponivel = tomador.limite_disponivel or 0
+
+    # Bloqueia se limite <= 0
+    if limite_disponivel <= 0:
+        raise HTTPException(
+            status_code=403,
+            detail=f"Tomador sem limite disponível. Limite atual: {limite_disponivel}."
+        )
+
+    # Bloqueia se proposta for maior que o limite disponível
+    if payload.importancia_segurada > limite_disponivel:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Limite insuficiente. Limite atual: {limite_disponivel}, valor da proposta: {payload.importancia_segurada}."
+        )
 
     # ======== Criação da proposta ========
     nova = Proposta(
@@ -52,12 +74,9 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         tipo_emp=payload.tipo_emp,
     )
 
-    tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
-    if tomador:
-        tomador.limite_disponivel = (tomador.limite_disponivel or 0) - (payload.importancia_segurada or 0)
-        if tomador.limite_disponivel < 0:
-            tomador.limite_disponivel = 0  
-        db.add(tomador)
+    # Desconta o limite
+    tomador.limite_disponivel = limite_disponivel - payload.importancia_segurada
+    db.add(tomador)
 
     # Gerar XML automaticamente
     import xml.etree.ElementTree as ET
@@ -77,6 +96,7 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     db.refresh(tomador)
 
     return nova
+
 
 @router.patch("/propostas/{proposta_id}/cancelar", response_model=PropostaResponse)
 def cancelar_proposta(proposta_id: int, db: Session = Depends(get_db)):
