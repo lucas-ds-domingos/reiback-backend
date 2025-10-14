@@ -10,10 +10,13 @@ router = APIRouter()
 def get_user_filter(user: Usuario):
     """Retorna um filtro SQLAlchemy para aplicar de acordo com a role"""
     if user.role == "master":
-        return True  # Master vê tudo
+        # Master vê tudo
+        return True
     elif user.role == "assessoria":
+        # Assessoria vê todos os corretores vinculados à mesma assessoria
         return Proposta.usuario.has(Usuario.assessoria_id == user.assessoria_id)
     else:
+        # Corretor vê apenas suas próprias propostas
         return Proposta.usuario_id == user.id
 
 def get_current_user(
@@ -24,7 +27,6 @@ def get_current_user(
     user = db.query(Usuario).filter(Usuario.id == x_user_id).first()
     if not user:
         raise HTTPException(status_code=401, detail="Usuário não encontrado")
-    # Atualiza a role do usuário baseado no header
     user.role = x_user_role
     return user
 
@@ -40,14 +42,17 @@ def get_dashboard(
 
     # Contagem de propostas
     total_proposals = db.query(Proposta).filter(filtro).count()
+    proposals_paid = db.query(Proposta).filter(filtro, Proposta.pago_em != None).count()
     proposals_draft = db.query(Proposta).filter(filtro, Proposta.status == "rascunho").count()
     proposals_rejected = db.query(Proposta).filter(filtro, Proposta.status == "rejeitada").count()
-    proposals_canceled = db.query(Proposta).filter(filtro, Proposta.status == "cancelada").count()
-    proposals_paid = db.query(Proposta).filter(filtro, Proposta.pago_em != None).count()
     
-    # Emitidas e aguardando pagamento (status "aprovada" e não pagas)
-    proposals_pending_payment = db.query(Proposta).filter(filtro, Proposta.status == "aprovada", Proposta.pago_em == None).count()
-    proposals_emitted = proposals_pending_payment  # mesmo valor para exibir no gráfico
+    # Propostas emitidas / aguardando pagamento
+    proposals_pending_payment = db.query(Proposta).filter(
+        filtro, Proposta.status == "aprovada", Proposta.pago_em == None
+    ).count()
+    
+    # Canceladas
+    proposals_canceled = db.query(Proposta).filter(filtro, Proposta.status == "cancelada").count()
 
     # Apólices geradas
     policies_total = db.query(Apolice).filter(Apolice.proposta.has(filtro)).count()
@@ -60,13 +65,14 @@ def get_dashboard(
     ).scalar() or 0
 
     # Comissão do mês (apenas para quem não é assessoria)
-    commission_to_pay = 0
     if current_user.role != "assessoria":
         commission_to_pay = db.query(func.sum(Proposta.comissao_valor)).filter(
             filtro,
             Proposta.pago_em != None,
             Proposta.pago_em >= start_month
         ).scalar() or 0
+    else:
+        commission_to_pay = 0
 
     # Série mensal para gráfico
     monthly_series = []
@@ -89,14 +95,18 @@ def get_dashboard(
     # Distribuição por status
     status_distribution = [
         {"name": "Rascunho", "value": proposals_draft},
-        {"name": "Emitida", "value": proposals_emitted},
-        {"name": "Aguardando pagamento", "value": proposals_pending_payment},
+        {"name": "Emitida / Aguardando pagamento", "value": proposals_pending_payment},
         {"name": "Paga", "value": proposals_paid},
         {"name": "Cancelada", "value": proposals_canceled},
     ]
 
+    # Retorno ajustado para o frontend
     return {
         "totalProposals": total_proposals,
+        "proposalsDraft": proposals_draft,
+        "proposalsPending": proposals_pending_payment,
+        "proposalsPaid": proposals_paid,
+        "proposalsCancelled": proposals_canceled,
         "policiesTotal": policies_total,
         "revenueThisMonth": revenue_this_month,
         "commissionToPay": commission_to_pay,
