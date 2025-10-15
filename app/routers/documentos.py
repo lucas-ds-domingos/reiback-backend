@@ -6,6 +6,8 @@ from supabase import create_client
 from dotenv import load_dotenv
 from typing import List, Optional
 import os
+import re
+import unicodedata
 
 load_dotenv()
 
@@ -14,6 +16,15 @@ SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 router = APIRouter()
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Remove acentos, espaços e caracteres inválidos para Supabase Storage.
+    """
+    nfkd_form = unicodedata.normalize('NFKD', filename)
+    only_ascii = nfkd_form.encode('ASCII', 'ignore').decode('ASCII')
+    sanitized = re.sub(r'[^a-zA-Z0-9_.-]', '_', only_ascii)
+    return sanitized
 
 @router.post("/api/documentos")
 async def upload_documentos(
@@ -29,16 +40,6 @@ async def upload_documentos(
 ):
     bucket = supabase.storage.from_("pdfs")
 
-    # Inicializa todos os campos como listas vazias
-    urls = {
-        "contrato_social": [],
-        "ultimas_alteracoes": [],
-        "balanco": [],
-        "ultimas_alteracoes_adicional": [],
-        "dre": [],
-        "balancete": [],
-    }
-
     arquivos = {
         "contrato_social": contrato_social,
         "ultimas_alteracoes": ultimas_alteracoes,
@@ -48,31 +49,29 @@ async def upload_documentos(
         "balancete": balancete,
     }
 
-    # Upload de arquivos para Supabase
+    urls = {}
+
     for key, file_list in arquivos.items():
         if file_list:
+            urls[key] = []
             for file in file_list:
                 content = await file.read()
-                unique_name = f"{key}_{tomador_id}_{user_id}_{file.filename}"
+                # sanitizar o nome
+                unique_name = f"{key}_{tomador_id}_{user_id}_{sanitize_filename(file.filename)}"
+
                 try:
                     bucket.upload(unique_name, content)
                     public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
                     urls[key].append(public_url)
                 except Exception as e:
-                    print(f"Erro ao enviar {key} ({file.filename}): {str(e)}")
+                    print(f"Erro ao enviar {key}: {str(e)}")
 
-    # Converte listas vazias em None antes de salvar no banco
+    # Salvar no banco
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
-        contrato_social=urls["contrato_social"] or None,
-        ultimas_alteracoes=urls["ultimas_alteracoes"] or None,
-        balanco=urls["balanco"] or None,
-        ultimas_alteracoes_adicional=urls["ultimas_alteracoes_adicional"] or None,
-        dre=urls["dre"] or None,
-        balancete=urls["balancete"] or None
+        **urls  # campos do banco devem ser compatíveis com listas ou serializados
     )
-
     db.add(doc)
     db.commit()
     db.refresh(doc)
