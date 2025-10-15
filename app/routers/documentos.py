@@ -13,7 +13,7 @@ Base.metadata.create_all(bind=engine)
 
 FOLDER_ID = "1vlOKf_aj-o9cHpvSlSG6U7oMM0kg7Lw9"
 
-@app.post("/api/documentos")
+@router.post("/api/documentos")
 async def upload_documentos(
     tomador_id: int = Form(...),
     user_id: int = Form(...),
@@ -63,7 +63,7 @@ async def upload_documentos(
 
 
 
-@app.get("/api/documentos/{tomador_id}")
+@router.get("/api/documentos/{tomador_id}")
 def listar_documentos(tomador_id: int, db: Session = Depends(get_db)):
     doc = db.query(DocumentosTomador).filter_by(tomador_id=tomador_id).first()
     if not doc:
