@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, Depends
+from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import DocumentosTomador, Tomador, Usuario
@@ -10,6 +10,7 @@ import re
 import unicodedata
 import uuid
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 
 load_dotenv()
 
@@ -32,7 +33,7 @@ def sanitize_filename(filename: str) -> str:
 async def upload_documentos(
     tomador_id: int = Form(...),
     user_id: int = Form(...),
-    valor: float = Form(...),
+    valor: str = Form(...),
     contrato_social: Optional[List[UploadFile]] = File(None),
     ultimas_alteracoes: Optional[List[UploadFile]] = File(None),
     balanco: Optional[List[UploadFile]] = File(None),
@@ -54,14 +55,13 @@ async def upload_documentos(
 
     urls = {}
 
+    # Upload arquivos para Supabase
     for key, file_list in arquivos.items():
         if file_list:
             urls[key] = []
             for file in file_list:
                 content = await file.read()
-                # Gerar nome único: key + tomador + user + timestamp + UUID + filename sanitizado
                 unique_name = f"{key}_{tomador_id}_{user_id}_{int(datetime.now().timestamp())}_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}"
-
                 try:
                     bucket.upload(unique_name, content)
                     public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
@@ -69,12 +69,19 @@ async def upload_documentos(
                 except Exception as e:
                     print(f"Erro ao enviar {key}: {str(e)}")
 
+    # Converter valor para Decimal
+    try:
+        valor_decimal = Decimal(valor.replace(".", "").replace(",", ".")).quantize(Decimal("0.01"))
+    except (InvalidOperation, ValueError):
+        valor_decimal = Decimal("0.00")  # ou lançar HTTPException
+        # raise HTTPException(status_code=400, detail="Valor inválido")
+
     # Salvar no banco
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
-        valor=valor,
-        **urls  # campos do banco devem ser compatíveis com listas ou serializados
+        valor=valor_decimal,
+        **urls  # PDFs
     )
     db.add(doc)
     db.commit()
@@ -111,7 +118,7 @@ def listar_documentos(db: Session = Depends(get_db)):
                 "dre": doc.dre,
                 "balancete": doc.balancete,
             },
-            "valor":doc.valor,
+            "valor": str(doc.valor),  # pode enviar como string para front
             "status": doc.status,
             "data_upload": doc.data_upload,
         })
