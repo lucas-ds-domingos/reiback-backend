@@ -354,7 +354,8 @@ class DocumentosTomador(Base):
     ultimas_alteracoes_adicional = Column(JSON, nullable=True)
     dre = Column(JSON, nullable=True)
     balancete = Column(JSON, nullable=True)
-    
+    valor= Column(Numeric(12, 2), nullable=True) 
+
     status = Column(String(50), nullable=False, default="pendente")
 
     data_upload = Column(DateTime(timezone=True), default=func.now())

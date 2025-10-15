@@ -32,6 +32,7 @@ def sanitize_filename(filename: str) -> str:
 async def upload_documentos(
     tomador_id: int = Form(...),
     user_id: int = Form(...),
+    valor: float = Form(...),
     contrato_social: Optional[List[UploadFile]] = File(None),
     ultimas_alteracoes: Optional[List[UploadFile]] = File(None),
     balanco: Optional[List[UploadFile]] = File(None),
@@ -72,6 +73,7 @@ async def upload_documentos(
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
+        valor=valor,
         **urls  # campos do banco devem ser compatíveis com listas ou serializados
     )
     db.add(doc)
@@ -109,6 +111,7 @@ def listar_documentos(db: Session = Depends(get_db)):
                 "dre": doc.dre,
                 "balancete": doc.balancete,
             },
+            "valor":doc.valor,
             "status": doc.status,
             "data_upload": doc.data_upload,
         })
