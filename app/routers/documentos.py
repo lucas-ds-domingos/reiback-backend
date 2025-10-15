@@ -35,7 +35,7 @@ async def upload_documentos(
         "contrato_social": contrato_social,
         "ultimas_alteracoes": ultimas_alteracoes,
         "balanco": balanco,
-        "ultimas_alteracoes_ad": ultimas_alteracoes_ad,  # corrigido
+        "ultimas_alteracoes_adicional": ultimas_alteracoes_ad,  # corrigido
         "dre": dre,
         "balancete": balancete,
     }
