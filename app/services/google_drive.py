@@ -27,7 +27,8 @@ def upload_to_drive(file_bytes, filename, parent_folder_id):
     uploaded = service.files().create(
         body=file_metadata,
         media_body=media,
-        fields="id, webViewLink, webContentLink"
+        fields="id, webViewLink, webContentLink",
+        supportsAllDrives=True
     ).execute()
 
     return uploaded.get("webViewLink")  # ou webContentLink para download direto
