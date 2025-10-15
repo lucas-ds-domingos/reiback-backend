@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric, LargeBinary
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric, LargeBinary, JSON
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -348,11 +348,11 @@ class DocumentosTomador(Base):
     tomador_id = Column(Integer, nullable=False)
     user_id = Column(Integer, nullable=False)
 
-    contrato_social = Column(String, nullable=True)
-    ultimas_alteracoes = Column(String, nullable=True)
-    balanco = Column(String, nullable=True)
-    ultimas_alteracoes_adicional = Column(String, nullable=True)
-    dre = Column(String, nullable=True)
-    balancete = Column(String, nullable=True)
+    contrato_social = Column(JSON, nullable=True)
+    ultimas_alteracoes = Column(JSON, nullable=True)
+    balanco = Column(JSON, nullable=True)
+    ultimas_alteracoes_adicional = Column(JSON, nullable=True)
+    dre = Column(JSON, nullable=True)
+    balancete = Column(JSON, nullable=True)
 
     data_upload = Column(DateTime(timezone=True), default=func.now())

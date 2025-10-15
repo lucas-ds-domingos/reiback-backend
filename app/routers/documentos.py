@@ -1,13 +1,11 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends
-from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from ..database import get_db  # sua função de conexão com o DB
-from ..models import DocumentosTomador  # sua tabela
+from ..database import get_db
+from ..models import DocumentosTomador
 from supabase import create_client
 from dotenv import load_dotenv
-import shutil
+from typing import List, Optional
 import os
-
 
 load_dotenv()
 
@@ -21,45 +19,60 @@ router = APIRouter()
 async def upload_documentos(
     tomador_id: int = Form(...),
     user_id: int = Form(...),
-    contrato_social: UploadFile | None = File(None),
-    ultimas_alteracoes: UploadFile | None = File(None),
-    balanco: UploadFile | None = File(None),
-    ultimas_alteracoes_ad: UploadFile | None = File(None),
-    dre: UploadFile | None = File(None),
-    balancete: UploadFile | None = File(None),
+    contrato_social: Optional[List[UploadFile]] = File(None),
+    ultimas_alteracoes: Optional[List[UploadFile]] = File(None),
+    balanco: Optional[List[UploadFile]] = File(None),
+    ultimas_alteracoes_ad: Optional[List[UploadFile]] = File(None),
+    dre: Optional[List[UploadFile]] = File(None),
+    balancete: Optional[List[UploadFile]] = File(None),
     db: Session = Depends(get_db),
 ):
     bucket = supabase.storage.from_("pdfs")
+
+    # Inicializa todos os campos como listas vazias
+    urls = {
+        "contrato_social": [],
+        "ultimas_alteracoes": [],
+        "balanco": [],
+        "ultimas_alteracoes_adicional": [],
+        "dre": [],
+        "balancete": [],
+    }
 
     arquivos = {
         "contrato_social": contrato_social,
         "ultimas_alteracoes": ultimas_alteracoes,
         "balanco": balanco,
-        "ultimas_alteracoes_adicional": ultimas_alteracoes_ad,  # corrigido
+        "ultimas_alteracoes_adicional": ultimas_alteracoes_ad,
         "dre": dre,
         "balancete": balancete,
     }
 
-    urls = {}
+    # Upload de arquivos para Supabase
+    for key, file_list in arquivos.items():
+        if file_list:
+            for file in file_list:
+                content = await file.read()
+                unique_name = f"{key}_{tomador_id}_{user_id}_{file.filename}"
+                try:
+                    bucket.upload(unique_name, content)
+                    public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
+                    urls[key].append(public_url)
+                except Exception as e:
+                    print(f"Erro ao enviar {key} ({file.filename}): {str(e)}")
 
-    for key, file in arquivos.items():
-        if file:
-            file_content = await file.read()  # lê direto o conteúdo
-            unique_name = f"{key}_{tomador_id}_{user_id}_{file.filename}"
-
-            try:
-                bucket.upload(unique_name, file_content)
-                public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
-                urls[key] = public_url
-            except Exception as e:
-                print(f"Erro ao enviar {key}: {str(e)}")
-
-    # --- Salvar no banco ---
+    # Converte listas vazias em None antes de salvar no banco
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
-        **urls
+        contrato_social=urls["contrato_social"] or None,
+        ultimas_alteracoes=urls["ultimas_alteracoes"] or None,
+        balanco=urls["balanco"] or None,
+        ultimas_alteracoes_adicional=urls["ultimas_alteracoes_adicional"] or None,
+        dre=urls["dre"] or None,
+        balancete=urls["balancete"] or None
     )
+
     db.add(doc)
     db.commit()
     db.refresh(doc)
