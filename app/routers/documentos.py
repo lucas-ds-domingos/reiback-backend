@@ -17,8 +17,6 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 router = APIRouter()
 
-
-
 @router.post("/api/documentos")
 async def upload_documentos(
     tomador_id: int = Form(...),
@@ -31,11 +29,13 @@ async def upload_documentos(
     balancete: UploadFile | None = File(None),
     db: Session = Depends(get_db),
 ):
+    bucket = supabase.storage.from_("pdfs")
+
     arquivos = {
         "contrato_social": contrato_social,
         "ultimas_alteracoes": ultimas_alteracoes,
         "balanco": balanco,
-        "ultimas_alteracoes_adicional": ultimas_alteracoes_ad,
+        "ultimas_alteracoes_ad": ultimas_alteracoes_ad,  # corrigido
         "dre": dre,
         "balancete": balancete,
     }
@@ -44,23 +44,21 @@ async def upload_documentos(
 
     for key, file in arquivos.items():
         if file:
-            local_path = f"temp_{file.filename}"
-            with open(local_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+            file_content = await file.read()  # lê direto o conteúdo
+            unique_name = f"{key}_{tomador_id}_{user_id}_{file.filename}"
 
-            # Upload para Supabase
-            bucket = supabase.storage.from_("pdfs")
-            bucket.upload(file.filename, open(local_path, "rb"))
-            url = bucket.get_public_url(file.filename)["publicUrl"]
-            urls[key] = url
+            try:
+                bucket.upload(unique_name, file_content)
+                public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
+                urls[key] = public_url
+            except Exception as e:
+                print(f"Erro ao enviar {key}: {str(e)}")
 
-            os.remove(local_path)
-
-    # Salvar no banco
+    # --- Salvar no banco ---
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
-        **urls  # atribui os campos dinamicamente
+        **urls
     )
     db.add(doc)
     db.commit()
