@@ -339,3 +339,20 @@ class DocumentoCorretora(Base):
     caminho = Column(String(500), nullable=True)
     enviado_em = Column(DateTime, default=datetime.utcnow)
     corretora = relationship("Corretora", back_populates="documentos")
+
+
+class DocumentosTomador(Base):
+    __tablename__ = "documentos_tomadores"
+
+    id = Column(Integer, primary_key=True, index=True)
+    tomador_id = Column(Integer, nullable=False)
+    user_id = Column(Integer, nullable=False)
+
+    contrato_social = Column(String, nullable=True)
+    ultimas_alteracoes = Column(String, nullable=True)
+    balanco = Column(String, nullable=True)
+    ultimas_alteracoes_adicional = Column(String, nullable=True)
+    dre = Column(String, nullable=True)
+    balancete = Column(String, nullable=True)
+
+    data_upload = Column(DateTime(timezone=True), default=func.now())
