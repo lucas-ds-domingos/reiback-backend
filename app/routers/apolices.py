@@ -82,3 +82,15 @@ def listar_apolices(
             proposta=proposta_info
         ))
     return result
+
+@router.get("/apolice/{apolice_id}/download")
+def download_apolice(apolice_id: int, db: Session = Depends(get_db)):
+    apolice = db.query(Apolice).filter(Apolice.id == apolice_id).first()
+    if not apolice or not apolice.pdf_assinado:
+        raise HTTPException(status_code=404, detail="PDF não encontrado")
+    
+    return Response(
+        content=apolice.pdf_assinado,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename=Apolice-{apolice.numero}.pdf"}
+    )

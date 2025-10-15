@@ -94,7 +94,7 @@ async def upload_documentos(
 
     return {"documentos": urls, "id": doc.id}
 
-SIGNED_URL_EXPIRE = 60  # tempo em segundos que o link será válido
+SIGNED_URL_EXPIRE = 350  # tempo em segundos que o link será válido
 
 @router.get("/api/documentos/list")
 def listar_documentos(db: Session = Depends(get_db)):
