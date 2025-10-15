@@ -8,6 +8,8 @@ from typing import List, Optional
 import os
 import re
 import unicodedata
+import uuid
+from datetime import datetime
 
 load_dotenv()
 
@@ -56,8 +58,8 @@ async def upload_documentos(
             urls[key] = []
             for file in file_list:
                 content = await file.read()
-                # sanitizar o nome
-                unique_name = f"{key}_{tomador_id}_{user_id}_{sanitize_filename(file.filename)}"
+                # Gerar nome único: key + tomador + user + timestamp + UUID + filename sanitizado
+                unique_name = f"{key}_{tomador_id}_{user_id}_{int(datetime.now().timestamp())}_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}"
 
                 try:
                     bucket.upload(unique_name, content)
