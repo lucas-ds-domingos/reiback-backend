@@ -12,7 +12,7 @@ import os
 load_dotenv()
 
 SUPABASE_URL = "https://surlbofnknvgmloladqf.supabase.co"
-SUPABASE_KEY = os.getenv("sua_service_role_key")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 router = APIRouter()
