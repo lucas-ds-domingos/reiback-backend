@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from database import get_db  # sua função de conexão com o DB
+from ..database import get_db  # sua função de conexão com o DB
 from models import DocumentosTomador  # sua tabela
 from supabase import create_client
 from dotenv import load_dotenv
