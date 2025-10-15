@@ -1,11 +1,11 @@
-from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends
+from fastapi import FastAPI, UploadFile, File, Form, HTTPException, Depends, APIRouter
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from ..database import get_db, Base, engine
 from ..models import DocumentosTomador
 from ..services.google_drive import upload_to_drive
 
-app = FastAPI()
+router = APIRouter()
 
 # Cria tabelas
 Base.metadata.create_all(bind=engine)
