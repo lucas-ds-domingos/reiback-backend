@@ -69,12 +69,17 @@ async def upload_documentos(
                 except Exception as e:
                     print(f"Erro ao enviar {key}: {str(e)}")
 
-    # Converter valor para Decimal
+    # Converter valor para Decimal corretamente
     try:
-        valor_decimal = Decimal(valor.replace(".", "").replace(",", ".")).quantize(Decimal("0.01"))
-    except (InvalidOperation, ValueError):
-        valor_decimal = Decimal("0.00")  # ou lançar HTTPException
-        # raise HTTPException(status_code=400, detail="Valor inválido")
+        if "," in valor:
+            # Exemplo: "1.234,56" → "1234.56"
+            valor_decimal = Decimal(valor.replace(".", "").replace(",", "."))
+        else:
+            # Já está no formato "1234.56"
+            valor_decimal = Decimal(valor)
+    except Exception:
+        valor_decimal = Decimal("0.00")
+
 
     # Salvar no banco
     doc = DocumentosTomador(
