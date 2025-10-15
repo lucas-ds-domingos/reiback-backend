@@ -1,7 +1,7 @@
 from fastapi import APIRouter, UploadFile, File, Form, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..models import DocumentosTomador
+from ..models import DocumentosTomador, Tomador, Usuario
 from supabase import create_client
 from dotenv import load_dotenv
 from typing import List, Optional
@@ -79,3 +79,38 @@ async def upload_documentos(
     db.refresh(doc)
 
     return {"documentos": urls, "id": doc.id}
+
+@router.get("/api/documentos/list")
+def listar_documentos(db: Session = Depends(get_db)):
+    documentos = db.query(DocumentosTomador).order_by(DocumentosTomador.data_upload.desc()).all()
+
+    resultado = []
+    for doc in documentos:
+        tomador = db.query(Tomador).filter(Tomador.id == doc.tomador_id).first()
+        user = db.query(Usuario).filter(Usuario.id == doc.user_id).first()
+
+        resultado.append({
+            "id": doc.id,
+            "tomador": {
+                "id": tomador.id,
+                "nome": tomador.nome,
+                "cnpj": tomador.cnpj,
+            } if tomador else None,
+            "usuario": {
+                "id": user.id,
+                "nome": user.nome,
+                "email": user.email,
+            } if user else None,
+            "documentos": {
+                "contrato_social": doc.contrato_social,
+                "ultimas_alteracoes": doc.ultimas_alteracoes,
+                "balanco": doc.balanco,
+                "ultimas_alteracoes_adicional": doc.ultimas_alteracoes_adicional,
+                "dre": doc.dre,
+                "balancete": doc.balancete,
+            },
+            "status": doc.status,
+            "data_upload": doc.data_upload,
+        })
+
+    return resultado
