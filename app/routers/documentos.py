@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from ..database import get_db, Base, engine
 from ..models import DocumentosTomador
-from google_drive import upload_to_drive
+from ..services.google_drive import upload_to_drive
 
 app = FastAPI()
 
