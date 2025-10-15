@@ -79,6 +79,4 @@ weasyprint==66.0
 webencodings==0.5.1
 websockets==15.0.1
 zopfli==0.2.3.post1
-google-api-python-client==2.184.0
-google-auth-httplib2==0.2.0
-google-auth-oauthlib==1.2.2
+supabase==2.4.0
