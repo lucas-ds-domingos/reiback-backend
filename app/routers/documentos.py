@@ -94,14 +94,30 @@ async def upload_documentos(
 
     return {"documentos": urls, "id": doc.id}
 
+SIGNED_URL_EXPIRE = 60  # tempo em segundos que o link será válido
+
 @router.get("/api/documentos/list")
 def listar_documentos(db: Session = Depends(get_db)):
     documentos = db.query(DocumentosTomador).order_by(DocumentosTomador.data_upload.desc()).all()
+    bucket = supabase.storage.from_("pdfs")
 
     resultado = []
     for doc in documentos:
         tomador = db.query(Tomador).filter(Tomador.id == doc.tomador_id).first()
         user = db.query(Usuario).filter(Usuario.id == doc.user_id).first()
+
+        # Função auxiliar para gerar URLs assinadas
+        def signed_urls(files):
+            if not files:
+                return None
+            urls = []
+            for f in files:
+                try:
+                    url = bucket.create_signed_url(f, SIGNED_URL_EXPIRE)
+                    urls.append(url['signedURL'])
+                except Exception as e:
+                    print("Erro ao gerar signed URL:", e)
+            return urls
 
         resultado.append({
             "id": doc.id,
@@ -116,14 +132,14 @@ def listar_documentos(db: Session = Depends(get_db)):
                 "email": user.email,
             } if user else None,
             "documentos": {
-                "contrato_social": doc.contrato_social,
-                "ultimas_alteracoes": doc.ultimas_alteracoes,
-                "balanco": doc.balanco,
-                "ultimas_alteracoes_adicional": doc.ultimas_alteracoes_adicional,
-                "dre": doc.dre,
-                "balancete": doc.balancete,
+                "contrato_social": signed_urls(doc.contrato_social),
+                "ultimas_alteracoes": signed_urls(doc.ultimas_alteracoes),
+                "balanco": signed_urls(doc.balanco),
+                "ultimas_alteracoes_adicional": signed_urls(doc.ultimas_alteracoes_adicional),
+                "dre": signed_urls(doc.dre),
+                "balancete": signed_urls(doc.balancete),
             },
-            "valor": str(doc.valor),  # pode enviar como string para front
+            "valor": str(doc.valor),
             "status": doc.status,
             "data_upload": doc.data_upload,
         })
