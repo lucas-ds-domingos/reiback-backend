@@ -63,6 +63,7 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         usuario_id=usuario_id,
         text_modelo=payload.text_modelo,
         tipo_emp=payload.tipo_emp,
+        emitida_em=datetime.now(),
     )
 
     # Desconta o limite
