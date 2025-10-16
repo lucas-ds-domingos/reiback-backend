@@ -62,7 +62,7 @@ async def upload_documentos(
                 content = await file.read()
                 unique_name = f"{key}_{tomador_id}_{user_id}_{int(datetime.now().timestamp())}_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}"
                 try:
-                    bucket.upload(unique_name, content)
+                    bucket.upload(unique_name, content, {"content-type": "application/pdf"})
                     paths[key].append(unique_name)  # armazenamos somente o path
                 except Exception as e:
                     print(f"Erro ao enviar {key}: {str(e)}")
