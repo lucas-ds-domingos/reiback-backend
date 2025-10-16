@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..models import Assessoria, Usuario
 from ..schemas.assesorias import AssesoriaCreate, AssesoriaBase
@@ -77,17 +77,14 @@ def listar_assessorias(
     if not current_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-    # Se for MASTER → vê tudo
+    query = db.query(Assessoria).options(
+        joinedload(Assessoria.usuarios) 
+    )
+
     if current_user.role == "master":
-        assessorais = db.query(Assessoria).all()
-
-    # Se for ASSESSORIA → vê somente a própria
+        assessorais = query.all()
     elif current_user.role == "assessoria":
-        assessorais = db.query(Assessoria).filter(
-            Assessoria.id == current_user.assessoria_id
-        ).all()
-
-    # Se for CORRETOR ou outro → não vê nada (ou pode retornar apenas a própria assessoria dele, se quiser)
+        assessorais = query.filter(Assessoria.id == current_user.assessoria_id).all()
     else:
         assessorais = []
 

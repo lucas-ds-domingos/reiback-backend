@@ -1,6 +1,16 @@
 from pydantic import BaseModel, validator
 from typing import Optional
 from datetime import date
+from typing import List, Optional
+
+class UsuarioSimples(BaseModel):
+    id: int
+    nome: str
+    email: str
+    role: str
+
+    class Config:
+        orm_mode = True
 
 class AssesoriaBase(BaseModel):
     id: Optional[int]
@@ -18,11 +28,13 @@ class AssesoriaBase(BaseModel):
     bairro: Optional[str] = None
     uf: Optional[str] = None
     cidade: Optional[str] = None
+    usuarios: Optional[List[UsuarioSimples]] = [] 
 
 class AssesoriaCreate(AssesoriaBase):
     email: str
     password: str
     
+
 
 class AssesoriaResponse(AssesoriaBase):
     id: int
