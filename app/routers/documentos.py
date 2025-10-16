@@ -118,6 +118,8 @@ def listar_documentos(db: Session = Depends(get_db)):
                 "id": tomador.id,
                 "nome": tomador.nome,
                 "cnpj": tomador.cnpj,
+                "limite_aprovado":tomador.limite_aprovado,
+                "limite_disponivel":tomador.limite_disponivel,
             } if tomador else None,
             "usuario": {
                 "id": user.id,
