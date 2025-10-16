@@ -146,6 +146,27 @@ def atualizar_status(doc_id: int, status: str, db: Session = Depends(get_db)):
     if not doc:
         raise HTTPException(status_code=404, detail="Documento não encontrado")
     
+    # Atualiza status
     doc.status = status  # "aceito", "recusado", "pendente"
+    
+    # Remover arquivos do bucket se aprovado ou recusado
+    if status in ["aceito", "recusado"]:
+        bucket = supabase.storage.from_("pdfs")
+        arquivos = [
+            doc.contrato_social,
+            doc.ultimas_alteracoes,
+            doc.balanco,
+            doc.ultimas_alteracoes_adicional,
+            doc.dre,
+            doc.balancete,
+        ]
+        for lista in arquivos:
+            if lista:
+                for path in lista:
+                    try:
+                        bucket.remove([path])
+                    except Exception as e:
+                        print(f"Erro ao deletar {path}: {e}")
+    
     db.commit()
     return {"message": "Status atualizado com sucesso", "status": doc.status}
