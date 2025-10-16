@@ -7,6 +7,7 @@ from passlib.hash import bcrypt
 from datetime import datetime
 from decimal import Decimal
 from typing import List
+from ..utils.get_current_user import get_current_user
 
 router = APIRouter()
 
@@ -69,9 +70,25 @@ def criar_corretor(payload: AssesoriaCreate, db: Session = Depends(get_db)):
 
 
 @router.get("/list-assesoria", response_model=List[AssesoriaBase])
-def listar_assessorias(db: Session = Depends(get_db)):
-    """
-    Retorna todas as assessorias cadastradas.
-    """
-    assessorais = db.query(Assessoria).all()
+def listar_assessorias(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # Se for MASTER → vê tudo
+    if current_user.role == "master":
+        assessorais = db.query(Assessoria).all()
+
+    # Se for ASSESSORIA → vê somente a própria
+    elif current_user.role == "assessoria":
+        assessorais = db.query(Assessoria).filter(
+            Assessoria.id == current_user.assessoria_id
+        ).all()
+
+    # Se for CORRETOR ou outro → não vê nada (ou pode retornar apenas a própria assessoria dele, se quiser)
+    else:
+        assessorais = []
+
     return assessorais
