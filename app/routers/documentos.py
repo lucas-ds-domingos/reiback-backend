@@ -109,7 +109,7 @@ def listar_documentos(db: Session = Depends(get_db)):
         # Função auxiliar para gerar URLs assinadas
         def signed_urls(files):
             if not files:
-                return None
+                return []
             urls = []
             for f in files:
                 try:
