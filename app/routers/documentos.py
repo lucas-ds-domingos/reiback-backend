@@ -92,7 +92,7 @@ async def upload_documentos(
 
 @router.get("/api/documentos/list")
 def listar_documentos(db: Session = Depends(get_db)):
-    documentos = db.query(DocumentosTomador).order_by(DocumentosTomador.data_upload.desc()).all()
+    documentos = db.query(DocumentosTomador).filter(DocumentosTomador.status=='pendente').order_by(DocumentosTomador.data_upload.desc()).all()
     bucket = supabase.storage.from_("pdfs")
 
     def generate_signed_urls(files):
@@ -138,3 +138,14 @@ def listar_documentos(db: Session = Depends(get_db)):
         })
 
     return resultado
+
+
+@router.patch("/api/documentos/{doc_id}/status")
+def atualizar_status(doc_id: int, status: str, db: Session = Depends(get_db)):
+    doc = db.query(DocumentosTomador).filter(DocumentosTomador.id == doc_id).first()
+    if not doc:
+        raise HTTPException(status_code=404, detail="Documento não encontrado")
+    
+    doc.status = status  # "aceito", "recusado", "pendente"
+    db.commit()
+    return {"message": "Status atualizado com sucesso", "status": doc.status}

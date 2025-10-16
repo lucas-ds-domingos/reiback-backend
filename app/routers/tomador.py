@@ -207,3 +207,15 @@ def listar_tomadores_assessoria(user_id: int, db: Session = Depends(get_db)):
         .all()
     )
     return tomadores
+
+
+
+@router.patch("/tomadores/{tomador_id}/limite")
+def atualizar_limite(tomador_id: int, valor: Decimal, db: Session = Depends(get_db)):
+    tomador = db.query(Tomador).filter(Tomador.id == tomador_id).first()
+    if not tomador:
+        raise HTTPException(status_code=404, detail="Tomador não encontrado")
+    
+    tomador.limite_disponivel += valor
+    db.commit()
+    return {"message": "Limite atualizado com sucesso", "novo_limite": tomador.limite_disponivel}
