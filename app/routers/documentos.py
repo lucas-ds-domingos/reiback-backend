@@ -20,10 +20,9 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 router = APIRouter()
 
+SIGNED_URL_EXPIRE = 360  # 6 minutos de validade
+
 def sanitize_filename(filename: str) -> str:
-    """
-    Remove acentos, espaços e caracteres inválidos para Supabase Storage.
-    """
     nfkd_form = unicodedata.normalize('NFKD', filename)
     only_ascii = nfkd_form.encode('ASCII', 'ignore').decode('ASCII')
     sanitized = re.sub(r'[^a-zA-Z0-9_.-]', '_', only_ascii)
@@ -53,71 +52,65 @@ async def upload_documentos(
         "balancete": balancete,
     }
 
-    urls = {}
+    paths = {}  # salvamos apenas o nome do arquivo no bucket
 
     # Upload arquivos para Supabase
     for key, file_list in arquivos.items():
         if file_list:
-            urls[key] = []
+            paths[key] = []
             for file in file_list:
                 content = await file.read()
                 unique_name = f"{key}_{tomador_id}_{user_id}_{int(datetime.now().timestamp())}_{uuid.uuid4().hex}_{sanitize_filename(file.filename)}"
                 try:
                     bucket.upload(unique_name, content)
-                    public_url = f"{SUPABASE_URL}/storage/v1/object/public/pdfs/{unique_name}"
-                    urls[key].append(public_url)
+                    paths[key].append(unique_name)  # armazenamos somente o path
                 except Exception as e:
                     print(f"Erro ao enviar {key}: {str(e)}")
 
-    # Converter valor para Decimal corretamente
+    # Converter valor para Decimal
     try:
         if "," in valor:
-            # Exemplo: "1.234,56" → "1234.56"
             valor_decimal = Decimal(valor.replace(".", "").replace(",", "."))
         else:
-            # Já está no formato "1234.56"
             valor_decimal = Decimal(valor)
     except Exception:
         valor_decimal = Decimal("0.00")
-
 
     # Salvar no banco
     doc = DocumentosTomador(
         tomador_id=tomador_id,
         user_id=user_id,
         valor=valor_decimal,
-        **urls  # PDFs
+        **paths
     )
     db.add(doc)
     db.commit()
     db.refresh(doc)
 
-    return {"documentos": urls, "id": doc.id}
+    return {"message": "Arquivos enviados com sucesso", "id": doc.id}
 
-SIGNED_URL_EXPIRE = 350  # tempo em segundos que o link será válido
 
 @router.get("/api/documentos/list")
 def listar_documentos(db: Session = Depends(get_db)):
     documentos = db.query(DocumentosTomador).order_by(DocumentosTomador.data_upload.desc()).all()
     bucket = supabase.storage.from_("pdfs")
 
+    def generate_signed_urls(files):
+        if not files:
+            return []
+        urls = []
+        for f in files:
+            try:
+                signed = bucket.create_signed_url(f, SIGNED_URL_EXPIRE)
+                urls.append(signed['signedURL'])
+            except Exception as e:
+                print("Erro ao gerar signed URL:", e)
+        return urls
+
     resultado = []
     for doc in documentos:
         tomador = db.query(Tomador).filter(Tomador.id == doc.tomador_id).first()
         user = db.query(Usuario).filter(Usuario.id == doc.user_id).first()
-
-        # Função auxiliar para gerar URLs assinadas
-        def signed_urls(files):
-            if not files:
-                return []
-            urls = []
-            for f in files:
-                try:
-                    url = bucket.create_signed_url(f, SIGNED_URL_EXPIRE)
-                    urls.append(url['signedURL'])
-                except Exception as e:
-                    print("Erro ao gerar signed URL:", e)
-            return urls
 
         resultado.append({
             "id": doc.id,
@@ -132,12 +125,12 @@ def listar_documentos(db: Session = Depends(get_db)):
                 "email": user.email,
             } if user else None,
             "documentos": {
-                "contrato_social": signed_urls(doc.contrato_social),
-                "ultimas_alteracoes": signed_urls(doc.ultimas_alteracoes),
-                "balanco": signed_urls(doc.balanco),
-                "ultimas_alteracoes_adicional": signed_urls(doc.ultimas_alteracoes_adicional),
-                "dre": signed_urls(doc.dre),
-                "balancete": signed_urls(doc.balancete),
+                "contrato_social": generate_signed_urls(doc.contrato_social),
+                "ultimas_alteracoes": generate_signed_urls(doc.ultimas_alteracoes),
+                "balanco": generate_signed_urls(doc.balanco),
+                "ultimas_alteracoes_adicional": generate_signed_urls(doc.ultimas_alteracoes_adicional),
+                "dre": generate_signed_urls(doc.dre),
+                "balancete": generate_signed_urls(doc.balancete),
             },
             "valor": str(doc.valor),
             "status": doc.status,
