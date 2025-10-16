@@ -217,5 +217,6 @@ def atualizar_limite(tomador_id: int, valor: Decimal, db: Session = Depends(get_
         raise HTTPException(status_code=404, detail="Tomador não encontrado")
     
     tomador.limite_disponivel += valor
+    tomador.limite_aprovado += valor
     db.commit()
     return {"message": "Limite atualizado com sucesso", "novo_limite": tomador.limite_disponivel}
