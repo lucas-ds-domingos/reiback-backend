@@ -18,15 +18,7 @@ router = APIRouter()
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id or 1
        
-        # ======== Verificação de CCG assinado ========
-    ccg_assinado = (
-        db.query(CCG)
-        .filter(CCG.tomador_id == payload.tomador_id)
-        .filter(CCG.status == "assinado") 
-        .first()
-    )
-    if not ccg_assinado:
-        raise HTTPException(status_code=400, detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta.")
+
     
 
 
