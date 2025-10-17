@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from ..database import get_db
 from ..schemas.proposta import PropostaCreate, PropostaResponse
 import xml.etree.ElementTree as ET
@@ -242,3 +242,20 @@ def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
     return {"link_pagamento": pagamento.get("invoiceUrl")}
 
     
+@router.get("/propostas-Resumo/{proposta_id}", response_model=PropostaResponse)
+def obter_proposta(proposta_id: int, db: Session = Depends(get_db)):
+    proposta = (
+        db.query(Proposta)
+        .options(
+            joinedload(Proposta.tomador),   
+            joinedload(Proposta.segurado),  
+            joinedload(Proposta.usuario),    
+        )
+        .filter(Proposta.id == proposta_id)
+        .first()
+    )
+
+    if not proposta:
+        raise HTTPException(status_code=404, detail="Proposta não encontrada")
+
+    return proposta
