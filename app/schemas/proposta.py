@@ -84,7 +84,7 @@ class PropostaResponse(BaseModel):
     subgrupo: Optional[str]
     comissao_percentual: Optional[condecimal(max_digits=5, decimal_places=2)] = Field(default=Decimal("20.00"))
     comissao_valor: Optional[condecimal(max_digits=12, decimal_places=2)] = None
-
+    emitida_em: Optional[date]
     # 🔹 novos campos
     link_pagamento: Optional[str] = None
     pago_em: Optional[datetime] = None

@@ -75,9 +75,6 @@ class RepresentanteLegal(Base):
 
     tomador = relationship("Tomador", back_populates="representantes_legais")
 
-    
-
-
 
 class Fiador(Base):
     __tablename__ = "fiadores"
