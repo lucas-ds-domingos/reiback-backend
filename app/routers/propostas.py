@@ -38,6 +38,12 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         )
 
     # Bloqueia se proposta for maior que o limite disponível
+    if payload.importancia_segurada > limite_disponivel:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Limite insuficiente. Limite atual: {limite_disponivel}, valor da proposta: {payload.importancia_segurada}."
+        )
+
     # ======== Criação da proposta ========
     nova = Proposta(
         numero=payload.numero,

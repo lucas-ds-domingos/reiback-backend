@@ -55,9 +55,6 @@ class PropostaCreate(BaseModel):
     xml: Optional[str] = None
     tipo_emp: Optional[str]
 
-    tomador: Optional[TomadorSchema]
-    segurado: Optional[SeguradoSchema]
-
     # Relações
     tomador_id: Optional[int]
     segurado_id: Optional[int]
@@ -94,3 +91,6 @@ class PropostaResponse(BaseModel):
         "from_attributes": True 
     }
 
+class PropostaRead(PropostaCreate):
+    tomador: Optional[TomadorSchema]
+    segurado: Optional[SeguradoSchema]
