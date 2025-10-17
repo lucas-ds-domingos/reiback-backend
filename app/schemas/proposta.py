@@ -6,6 +6,31 @@ from .segurado import SeguradoBase
 from .tomador import TomadorBase
 
 
+
+class TomadorSchema(BaseModel):
+    id: int
+    cnpj: str
+    nome: str
+    email: Optional[str]
+    telefone: Optional[str]
+    endereco: Optional[str]
+    municipio: Optional[str]
+    uf: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+class SeguradoSchema(BaseModel):
+    id: int
+    cpf_cnpj: str
+    nome: str
+    email: Optional[str]
+    telefone: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
 class PropostaCreate(BaseModel):
     numero: str
     grupo: Optional[str]
@@ -30,6 +55,9 @@ class PropostaCreate(BaseModel):
     xml: Optional[str] = None
     tipo_emp: Optional[str]
 
+    tomador: Optional[TomadorSchema]
+    segurado: Optional[SeguradoSchema]
+
     # Relações
     tomador_id: Optional[int]
     segurado_id: Optional[int]
@@ -51,6 +79,11 @@ class PropostaResponse(BaseModel):
     segurado: Optional[SeguradoBase]
     status: Optional[str]
     importancia_segurada: Optional[condecimal(max_digits=12, decimal_places=2)] = None
+    dias_vigencia: Optional[int]
+    grupo: Optional[str]
+    subgrupo: Optional[str]
+    comissao_percentual: Optional[condecimal(max_digits=5, decimal_places=2)] = Field(default=Decimal("20.00"))
+    comissao_valor: Optional[condecimal(max_digits=12, decimal_places=2)] = None
 
     # 🔹 novos campos
     link_pagamento: Optional[str] = None
@@ -60,3 +93,4 @@ class PropostaResponse(BaseModel):
     model_config = {
         "from_attributes": True 
     }
+
