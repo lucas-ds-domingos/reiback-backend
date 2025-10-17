@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, condecimal
-from datetime import datetime, date
+from datetime import datetime, date, datetime
 from typing import Optional
 from decimal import Decimal
 from .segurado import SeguradoBase
@@ -84,7 +84,7 @@ class PropostaResponse(BaseModel):
     subgrupo: Optional[str]
     comissao_percentual: Optional[condecimal(max_digits=5, decimal_places=2)] = Field(default=Decimal("20.00"))
     comissao_valor: Optional[condecimal(max_digits=12, decimal_places=2)] = None
-    emitida_em: Optional[date]
+    emitida_em: Optional[datetime]
     # 🔹 novos campos
     link_pagamento: Optional[str] = None
     pago_em: Optional[datetime] = None
