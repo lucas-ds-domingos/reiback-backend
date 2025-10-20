@@ -8,3 +8,10 @@ class UsuarioCreate(BaseModel):
 class LoginSchema(BaseModel):
     email: str
     senha: str
+
+
+class UsuarioCreateFisico(BaseModel):
+    nome: str
+    email: EmailStr
+    senha: str
+    cpf: str

@@ -17,6 +17,8 @@ class Usuario(Base):
     role = Column(String(50), default="corretora")  # master, corretor, corretora
     criado_em = Column(DateTime, default=datetime.utcnow)
 
+    cpf = Column(String(14), unique=True, nullable=True)
+
     finance_id = Column(Integer, ForeignKey("finances.id"), nullable=True)
     corretora_id = Column(Integer, ForeignKey("corretoras.id"), nullable=True)
     assessoria_id = Column(Integer, ForeignKey("assessorias.id"), nullable=True)
