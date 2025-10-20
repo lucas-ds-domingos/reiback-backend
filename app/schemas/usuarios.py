@@ -21,7 +21,7 @@ class UsuarioResponse(BaseModel):
     id: int
     nome: str
     email: str
-    cpf: str
+    cpf: Optional[str]
     criado_por: str | None = None  # opcional, usado no master
     class Config:
         from_attributes = True
