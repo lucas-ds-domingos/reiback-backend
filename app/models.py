@@ -29,6 +29,11 @@ class Usuario(Base):
 
     propostas = relationship("Proposta", back_populates="usuario")
     tomadores = relationship("Tomador", back_populates="usuario")
+    propostas = relationship(
+        "Proposta",back_populates="usuario",foreign_keys="Proposta.usuario_id")
+
+    propostas_adicionais = relationship("Proposta",back_populates="usuario_adicional",foreign_keys="Proposta.usuario_adicional_id"
+    )
 
 
 class Tomador(Base):
