@@ -148,12 +148,33 @@ def listar_usuarios_adicionais(db: Session = Depends(get_db), current_user=Depen
         query = query.filter(Usuario.corretora_id == current_user.id)
     elif current_user.role == "assessoria":
         query = query.filter(Usuario.assessoria_id == current_user.id)
-    elif current_user.role == "master":
-        pass  # master vê todos
+    # master vê todos, sem filtro
 
     usuarios = query.all()
-    return usuarios
+    result = []
 
+    for u in usuarios:
+        criado_por = None
+        if current_user.role == "master":
+            # se tiver corretora_id ou assessoria_id, busca o nome do criador
+            if u.corretora_id:
+                criador = db.query(Usuario).filter(Usuario.id == u.corretora_id).first()
+                criado_por = criador.nome if criador else None
+            elif u.assessoria_id:
+                criador = db.query(Usuario).filter(Usuario.id == u.assessoria_id).first()
+                criado_por = criador.nome if criador else None
+
+        result.append(
+            UsuarioResponse(
+                id=u.id,
+                nome=u.nome,
+                email=u.email,
+                cpf=u.cpf,
+                criado_por=criado_por
+            )
+        )
+
+    return result
 
 # EDITAR parcialmente
 @router.patch("/meu/{usuario_id}", response_model=UsuarioResponse)
