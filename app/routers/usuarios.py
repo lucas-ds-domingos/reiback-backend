@@ -89,25 +89,27 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
         } if corretora else None
     }
 
-
-
-
 @router.post("/usuarios-fisico")
-def criar_usuario(usuario: UsuarioCreateFisico, db: Session = Depends(get_db)):
+def criar_usuario(usuario: UsuarioCreateFisico, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user)):
     # Verifica se já existe usuário com o mesmo email
     if db.query(Usuario).filter(Usuario.email == usuario.email).first():
         raise HTTPException(status_code=400, detail="Usuário já existe")
 
-    # Cria usuário
+    # Pega o usuário logado para buscar os vínculos corretos
+    usuario_logado = db.query(Usuario).filter(Usuario.id == current_user_id).first()
+    if not usuario_logado:
+        raise HTTPException(status_code=404, detail="Usuário logado não encontrado")
+
+    # Cria o novo usuário PF com o vínculo correto
     novo_usuario = Usuario(
         nome=usuario.nome,
         email=usuario.email,
         senha_hash=hash_password(usuario.senha),
         cpf=usuario.cpf,
         role="corretor",  # PF terá permissões de corretor
-        corretora_id=getattr(usuario, "corretora_id", None),
-        assessoria_id=getattr(usuario, "assessoria_id", None),
-        finance_id=getattr(usuario, "finance_id", None)
+        corretora_id=usuario_logado.corretora_id,
+        assessoria_id=usuario_logado.assessoria_id,
+        finance_id=usuario_logado.finance_id
     )
 
     try:

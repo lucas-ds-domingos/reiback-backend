@@ -1,4 +1,5 @@
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 
 class UsuarioCreate(BaseModel):
     nome: str
@@ -15,3 +16,6 @@ class UsuarioCreateFisico(BaseModel):
     email: EmailStr
     senha: str
     cpf: str
+    corretora_id: Optional[int]
+    assessoria_id: Optional[int]
+    finance_id: Optional[int]
