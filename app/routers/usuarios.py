@@ -3,8 +3,9 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import Usuario, Corretora
 from ..utils.auts import hash_password, verify_password, create_access_token
-from ..schemas.usuarios import UsuarioCreate, LoginSchema, UsuarioCreateFisico
+from ..schemas.usuarios import UsuarioCreate, LoginSchema, UsuarioCreateFisico, UsuarioResponse, UsuarioUpdate
 from ..utils.get_current_user import get_current_user
+from typing import List
 
 
 router = APIRouter()
@@ -136,3 +137,59 @@ def criar_usuario_pf(
         "assessoria_id": novo_usuario.assessoria_id,
         "finance_id": novo_usuario.finance_id
     }
+
+
+# LISTAR usuários adicionais do usuário logado
+@router.get("/meu", response_model=List[UsuarioResponse])
+def listar_usuarios_adicionais(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    query = db.query(Usuario)
+
+    if current_user.role == "corretor":
+        query = query.filter(Usuario.corretora_id == current_user.id)
+    elif current_user.role == "assessoria":
+        query = query.filter(Usuario.assessoria_id == current_user.id)
+    elif current_user.role == "master":
+        pass  # master vê todos
+
+    usuarios = query.all()
+    return usuarios
+
+
+# EDITAR parcialmente
+@router.patch("/meu/{usuario_id}", response_model=UsuarioResponse)
+def editar_usuario(usuario_id: int, payload: UsuarioUpdate, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # valida permissões
+    if current_user.role == "corretor" and usuario.corretora_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+    if current_user.role == "assessoria" and usuario.assessoria_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+    # master pode editar qualquer usuário
+
+    for key, value in payload.dict(exclude_unset=True).items():
+        setattr(usuario, key, value)
+
+    db.commit()
+    db.refresh(usuario)
+    return usuario
+
+
+# DELETAR usuário
+@router.delete("/meu/{usuario_id}", status_code=204)
+def deletar_usuario(usuario_id: int, db: Session = Depends(get_db), current_user=Depends(get_current_user)):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # valida permissões
+    if current_user.role == "corretor" and usuario.corretora_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+    if current_user.role == "assessoria" and usuario.assessoria_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Sem permissão")
+
+    db.delete(usuario)
+    db.commit()
+    return

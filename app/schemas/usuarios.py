@@ -15,3 +15,20 @@ class UsuarioCreateFisico(BaseModel):
     email: str
     senha: str
     cpf: str
+
+
+class UsuarioResponse(BaseModel):
+    id: int
+    nome: str
+    email: str
+    cpf: str
+    criado_por: str | None = None  # opcional, usado no master
+    class Config:
+        from_attributes = True
+
+
+class UsuarioUpdate(BaseModel):
+    nome:  str | None = None
+    email: str | None = None
+    senha: str | None = None
+    cpf:   str | None = None
