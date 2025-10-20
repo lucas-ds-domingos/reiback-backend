@@ -18,3 +18,14 @@ class CCGResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class CCGList(BaseModel):
+    id: int
+    status: str
+    caminho_pdf: Optional[str] = None
+    d4sign_link: Optional[str] = None
+    criado_em: datetime
+
+    class Config:
+        orm_mode = True

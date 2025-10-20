@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import CCG, Tomador
-from ..schemas.ccg import CCGCreate, CCGResponse
+from ..schemas.ccg import CCGCreate, CCGResponse, CCGList
 from ..services.gerar_ccg_pdf import gerar_pdf_ccg
 from ..services.d4sign_service import enviar_para_d4sign
 
@@ -50,3 +50,27 @@ async def gerar_ccg(data: CCGCreate, db: Session = Depends(get_db)):
     db.refresh(ccg)
 
     return ccg
+
+
+
+@router.get("/list/{tomador_id}", response_model=list[CCGList])
+def list_ccgs(tomador_id: int, db: Session = Depends(get_db)):
+    return (
+        db.query(CCG)
+        .filter(CCG.tomador_id == tomador_id)
+        .order_by(CCG.id.desc())
+        .all()
+    )
+
+
+@router.get("/latest/{tomador_id}", response_model=CCGList)
+def get_latest_ccg(tomador_id: int, db: Session = Depends(get_db)):
+        ccg = (
+            db.query(CCG)
+            .filter(CCG.tomador_id == tomador_id)
+            .order_by(CCG.id.desc())
+            .first()
+        )
+        if not ccg:
+            raise HTTPException(status_code=404, detail="Nenhuma CCG encontrada")
+        return ccg
