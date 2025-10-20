@@ -94,18 +94,36 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
 
 @router.post("/usuarios-fisico")
 def criar_usuario(usuario: UsuarioCreateFisico, db: Session = Depends(get_db)):
-    usuario_existente = db.query(Usuario).filter(Usuario.email == usuario.email).first()
-    if usuario_existente:
+    # Verifica se já existe usuário com o mesmo email
+    if db.query(Usuario).filter(Usuario.email == usuario.email).first():
         raise HTTPException(status_code=400, detail="Usuário já existe")
 
+    # Cria usuário
     novo_usuario = Usuario(
         nome=usuario.nome,
         email=usuario.email,
         senha_hash=hash_password(usuario.senha),
-        cpf= usuario.cpf
+        cpf=usuario.cpf,
+        role="corretor",  # PF terá permissões de corretor
+        corretora_id=getattr(usuario, "corretora_id", None),
+        assessoria_id=getattr(usuario, "assessoria_id", None),
+        finance_id=getattr(usuario, "finance_id", None)
     )
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
 
-    return {"id": novo_usuario.id, "nome": novo_usuario.nome, "email": novo_usuario.email}
+    try:
+        db.add(novo_usuario)
+        db.commit()
+        db.refresh(novo_usuario)
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Erro ao criar usuário")
+
+    return {
+        "id": novo_usuario.id,
+        "nome": novo_usuario.nome,
+        "email": novo_usuario.email,
+        "role": novo_usuario.role,
+        "corretora_id": novo_usuario.corretora_id,
+        "assessoria_id": novo_usuario.assessoria_id,
+        "finance_id": novo_usuario.finance_id
+    }
