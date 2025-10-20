@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends,status
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, aliased
 from ..database import get_db
 from ..models import Usuario, Corretora
 from ..utils.auts import hash_password, verify_password, create_access_token
@@ -142,39 +142,40 @@ def criar_usuario_pf(
 # LISTAR usuários adicionais do usuário logado
 @router.get("/meu", response_model=List[UsuarioResponse])
 def listar_usuarios_adicionais(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    query = db.query(Usuario)
-
+    Criador = aliased(Usuario)
+    
+    query = db.query(
+        Usuario,
+        Criador.nome.label("criado_por")
+    ).outerjoin(
+        Criador,
+        (Usuario.corretora_id == Criador.id) |
+        (Usuario.assessoria_id == Criador.id) |
+        (Usuario.finance_id == Criador.id)
+    ).filter(
+        Usuario.cpf != None 
+    )
+    
     if current_user.role == "corretor":
         query = query.filter(Usuario.corretora_id == current_user.id)
     elif current_user.role == "assessoria":
         query = query.filter(Usuario.assessoria_id == current_user.id)
-    # master vê todos, sem filtro
-
+    elif current_user.role == "master":
+        pass  # master vê todos
+    
     usuarios = query.all()
-    result = []
-
-    for u in usuarios:
-        criado_por = None
-        if current_user.role == "master":
-            # se tiver corretora_id ou assessoria_id, busca o nome do criador
-            if u.corretora_id:
-                criador = db.query(Usuario).filter(Usuario.id == u.corretora_id).first()
-                criado_por = criador.nome if criador else None
-            elif u.assessoria_id:
-                criador = db.query(Usuario).filter(Usuario.id == u.assessoria_id).first()
-                criado_por = criador.nome if criador else None
-
-        result.append(
-            UsuarioResponse(
-                id=u.id,
-                nome=u.nome,
-                email=u.email,
-                cpf=u.cpf,
-                criado_por=criado_por
-            )
-        )
-
-    return result
+    
+    resultado = []
+    for usuario, criado_por in usuarios:
+        resultado.append({
+            "id": usuario.id,
+            "nome": usuario.nome,
+            "email": usuario.email,
+            "cpf": usuario.cpf,
+            "criado_por": criado_por
+        })
+    
+    return resultado
 
 # EDITAR parcialmente
 @router.patch("/meu/{usuario_id}", response_model=UsuarioResponse)
