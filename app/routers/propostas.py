@@ -11,6 +11,7 @@ import os
 import requests
 from ..models import Proposta, ClienteAsaas, Tomador, Usuario, CCG
 from ..utils.get_current_user import get_current_user
+from sqlalchemy import or_
 
 router = APIRouter()
 
@@ -205,19 +206,23 @@ def listar_propostas(
         )
 
     elif usuario.role.endswith("-adicional"):
-        # Usuário adicional vê:
-        # - propostas do vínculo real (corretor/assessoria/finance)
-        # - propostas que ele mesmo gerou (usuario_adicional_id)
-        propostas = (
-            db.query(Proposta)
-            .filter(
-                (Proposta.usuario_id == usuario.corretora_id) |
-                (Proposta.usuario_id == usuario.assessoria_id) |
-                (Proposta.usuario_id == usuario.finance_id) |
-                (Proposta.usuario_adicional_id == usuario.id)
-            )
-            .all()
-        )
+    # Usuário adicional vê:
+    # - suas próprias propostas (usuario_adicional_id)
+    # - propostas do usuário real vinculado (usuario_id)
+        filters = [Proposta.usuario_adicional_id == usuario.id]
+
+        # adiciona vínculos se existirem
+        if usuario.corretora_id:
+            filters.append(Proposta.usuario_id == usuario.corretora_id)
+        if usuario.assessoria_id:
+            filters.append(Proposta.usuario_id == usuario.assessoria_id)
+        if usuario.finance_id:
+            filters.append(Proposta.usuario_id == usuario.finance_id)
+
+        propostas = db.query(Proposta).filter(
+            or_(*filters)
+        ).all()
+
 
     else:
         propostas = db.query(Proposta).filter(Proposta.usuario_id == usuario.id).all()
