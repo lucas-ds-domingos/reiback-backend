@@ -90,35 +90,42 @@ def get_me(db: Session = Depends(get_db), current_user: Usuario = Depends(get_cu
     }
 
 @router.post("/usuarios-fisico")
-def criar_usuario(usuario: UsuarioCreateFisico, db: Session = Depends(get_db), current_user_id: int = Depends(get_current_user)):
-    # Verifica se já existe usuário com o mesmo email
-    if db.query(Usuario).filter(Usuario.email == usuario.email).first():
+def criar_usuario_pf(
+    usuario_data: UsuarioCreateFisico,
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)  # Token do usuário logado
+):
+    # Verificar se o email já existe
+    if db.query(Usuario).filter(Usuario.email == usuario_data.email).first():
         raise HTTPException(status_code=400, detail="Usuário já existe")
 
-    # Pega o usuário logado para buscar os vínculos corretos
-    usuario_logado = db.query(Usuario).filter(Usuario.id == current_user_id).first()
-    if not usuario_logado:
-        raise HTTPException(status_code=404, detail="Usuário logado não encontrado")
+    # Preparar vínculos com base no usuário logado
+    corretora_id = None
+    assessoria_id = None
+    finance_id = None
 
-    # Cria o novo usuário PF com o vínculo correto
+    if current_user.role == "corretor":
+        corretora_id = current_user.corretora_id  # Vincula à mesma corretora
+    elif current_user.role == "assessoria":
+        assessoria_id = current_user.assessoria_id  # Vincula à mesma assessoria
+    elif current_user.role == "master":
+        finance_id = current_user.finance_id  # Vincula ao financeiro
+
+    # Criar o novo usuário PF
     novo_usuario = Usuario(
-        nome=usuario.nome,
-        email=usuario.email,
-        senha_hash=hash_password(usuario.senha),
-        cpf=usuario.cpf,
-        role="corretor",  # PF terá permissões de corretor
-        corretora_id=usuario_logado.corretora_id,
-        assessoria_id=usuario_logado.assessoria_id,
-        finance_id=usuario_logado.finance_id
+        nome=usuario_data.nome,
+        email=usuario_data.email,
+        senha_hash=hash_password(usuario_data.senha),
+        cpf=usuario_data.cpf,
+        role="corretor",  # Usuário PF sempre entra como corretor
+        corretora_id=corretora_id,
+        assessoria_id=assessoria_id,
+        finance_id=finance_id
     )
 
-    try:
-        db.add(novo_usuario)
-        db.commit()
-        db.refresh(novo_usuario)
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail="Erro ao criar usuário")
+    db.add(novo_usuario)
+    db.commit()
+    db.refresh(novo_usuario)
 
     return {
         "id": novo_usuario.id,

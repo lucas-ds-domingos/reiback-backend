@@ -10,12 +10,8 @@ class LoginSchema(BaseModel):
     email: str
     senha: str
 
-
 class UsuarioCreateFisico(BaseModel):
     nome: str
-    email: EmailStr
+    email: str
     senha: str
     cpf: str
-    corretora_id: Optional[int]
-    assessoria_id: Optional[int]
-    finance_id: Optional[int]
