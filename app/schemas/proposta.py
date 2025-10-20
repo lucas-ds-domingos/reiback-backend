@@ -95,7 +95,7 @@ class PropostaResponse(BaseModel):
     pago_em: Optional[datetime] = None
     valor_pago: Optional[condecimal(max_digits=12, decimal_places=2)] = None
     tipo_emp: Optional[str]
-    usuario_adicional_id: Optional[UsuarioResponse] = None
+    usuario_adicional_id: Optional[int] = None
     model_config = {
         "from_attributes": True 
     }

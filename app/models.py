@@ -14,7 +14,7 @@ class Usuario(Base):
     email = Column(String(120), unique=True, index=True, nullable=False)
     senha_hash = Column(String(255), nullable=False)
     ativo = Column(Boolean, default=True)
-    role = Column(String(50), default="corretora")  # master, corretor, corretora
+    role = Column(String(50), default="corretor")  # master, corretor, corretora
     criado_em = Column(DateTime, default=datetime.utcnow)
 
     cpf = Column(String(14), unique=True, nullable=True)
