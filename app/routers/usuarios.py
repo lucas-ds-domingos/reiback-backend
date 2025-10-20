@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends,status
-from sqlalchemy.orm import Session, aliased
+from sqlalchemy.orm import Session, aliased, joinedload
 from ..database import get_db
 from ..models import Usuario, Corretora
 from ..utils.auts import hash_password, verify_password, create_access_token
@@ -140,41 +140,45 @@ def criar_usuario_pf(
 
 
 # LISTAR usuários adicionais do usuário logado
+
 @router.get("/meu", response_model=List[UsuarioResponse])
 def listar_usuarios_adicionais(db: Session = Depends(get_db), current_user=Depends(get_current_user)):
-    Criador = aliased(Usuario)
-    
-    query = db.query(
-        Usuario,
-        Criador.nome.label("criado_por")
-    ).outerjoin(
-        Criador,
-        (Usuario.corretora_id == Criador.id) |
-        (Usuario.assessoria_id == Criador.id) |
-        (Usuario.finance_id == Criador.id)
-    ).filter(
-        Usuario.cpf != None 
-    )
-    
+    # Base query
+    query = db.query(Usuario).options(
+        joinedload(Usuario.finance),
+        joinedload(Usuario.corretora),
+        joinedload(Usuario.assessoria)
+    ).filter(Usuario.cpf != None)  # só usuários adicionais
+
+    # Filtrar de acordo com o role
     if current_user.role == "corretor":
-        query = query.filter(Usuario.corretora_id == current_user.id)
+        query = query.filter(Usuario.corretora_id == current_user.corretora_id)
     elif current_user.role == "assessoria":
-        query = query.filter(Usuario.assessoria_id == current_user.id)
+        query = query.filter(Usuario.assessoria_id == current_user.assessoria_id)
     elif current_user.role == "master":
         pass  # master vê todos
-    
+
     usuarios = query.all()
-    
+
     resultado = []
-    for usuario, criado_por in usuarios:
+    for u in usuarios:
+        # Descobrir de quem o usuário adicional depende
+        criado_por = None
+        if u.corretora:
+            criado_por = u.corretora.razao_social
+        elif u.assessoria:
+            criado_por = u.assessoria.razao_social
+        elif u.finance:
+            criado_por = u.finance.nome
+
         resultado.append({
-            "id": usuario.id,
-            "nome": usuario.nome,
-            "email": usuario.email,
-            "cpf": usuario.cpf,
+            "id": u.id,
+            "nome": u.nome,
+            "email": u.email,
+            "cpf": u.cpf,
             "criado_por": criado_por
         })
-    
+
     return resultado
 
 # EDITAR parcialmente
