@@ -118,7 +118,7 @@ def criar_usuario_pf(
         email=usuario_data.email,
         senha_hash=hash_password(usuario_data.senha),
         cpf=usuario_data.cpf,
-        role="corretor",  # Usuário PF sempre entra como corretor
+        role="corretor-Adicional",  # Usuário PF sempre entra como corretor
         corretora_id=corretora_id,
         assessoria_id=assessoria_id,
         finance_id=finance_id
@@ -137,7 +137,6 @@ def criar_usuario_pf(
         "assessoria_id": novo_usuario.assessoria_id,
         "finance_id": novo_usuario.finance_id
     }
-
 
 # LISTAR usuários adicionais do usuário logado
 

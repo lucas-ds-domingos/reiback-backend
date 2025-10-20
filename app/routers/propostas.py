@@ -17,16 +17,21 @@ router = APIRouter()
 @router.post("/propostas/", response_model=PropostaResponse)
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id or 1
-       
-    # ======== Verificação de CCG assinado ========
-    #ccg_assinado = (
-    #    db.query(CCG)
-    #    .filter(CCG.tomador_id == payload.tomador_id)
-    #    .filter(CCG.status == "assinado") 
-    #    .first()
-    # )
-    #if not ccg_assinado:
-    #    raise HTTPException(status_code=400, detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta.")
+    usuario_adicional_id = usuario_id  # inicialmente é o mesmo
+
+    # ======== Verifica se é usuário adicional ========
+    usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if usuario_logado and usuario_logado.role.endswith("-adicional"):
+        # altera o usuario_id para o vinculo real
+        if usuario_logado.corretora_id:
+            usuario_id = usuario_logado.corretora_id
+        elif usuario_logado.assessoria_id:
+            usuario_id = usuario_logado.assessoria_id
+        elif usuario_logado.finance_id:
+            usuario_id = usuario_logado.finance_id
+
+        # mantém o ID do usuário adicional no campo novo
+        usuario_adicional_id = usuario_logado.id
 
     # ======== Verificação de limite disponível ========
     tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
@@ -36,14 +41,12 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
 
     limite_disponivel = tomador.limite_disponivel or 0
 
-    # Bloqueia se limite <= 0
     if limite_disponivel <= 0:
         raise HTTPException(
             status_code=403,
             detail=f"Tomador sem limite disponível. Limite atual: {limite_disponivel}."
         )
 
-    # Bloqueia se proposta for maior que o limite disponível
     if payload.importancia_segurada > limite_disponivel:
         raise HTTPException(
             status_code=422,
@@ -69,7 +72,8 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         percentual=payload.percentual,
         tomador_id=payload.tomador_id,
         segurado_id=payload.segurado_id,
-        usuario_id=usuario_id,
+        usuario_id=usuario_id,  # vinculo real
+        usuario_adicional_id=usuario_adicional_id,  # usuário adicional
         text_modelo=payload.text_modelo,
         tipo_emp=payload.tipo_emp,
         emitida_em=datetime.now(),
@@ -79,7 +83,7 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     tomador.limite_disponivel = limite_disponivel - payload.importancia_segurada
     db.add(tomador)
 
-    # Gerar XML automaticamente
+    # ======== Gerar XML automaticamente ========
     import xml.etree.ElementTree as ET
     from io import BytesIO
     root = ET.Element("Proposta")
@@ -97,6 +101,7 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     db.refresh(tomador)
 
     return nova
+
 
 
 @router.patch("/propostas/{proposta_id}/cancelar", response_model=PropostaResponse)

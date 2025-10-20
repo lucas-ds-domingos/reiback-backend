@@ -5,6 +5,14 @@ from decimal import Decimal
 from .segurado import SeguradoBase
 from .tomador import TomadorBase
 
+class UsuarioResponse(BaseModel):
+    id: int
+    nome: str
+    email: str
+
+    class Config:
+        orm_mode = True
+
 
 
 class TomadorSchema(BaseModel):
@@ -87,6 +95,7 @@ class PropostaResponse(BaseModel):
     pago_em: Optional[datetime] = None
     valor_pago: Optional[condecimal(max_digits=12, decimal_places=2)] = None
     tipo_emp: Optional[str]
+    usuario_adicional_id: Optional[UsuarioResponse] = None
     model_config = {
         "from_attributes": True 
     }

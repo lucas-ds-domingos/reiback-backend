@@ -155,7 +155,6 @@ class Proposta(Base):
     emitida_em = Column(DateTime, nullable=True)
     cancelada_em = Column(DateTime, nullable=True)
     tipo_emp = Column(String(50))
-
     # Financeiro
     taxa_percentual = Column(Numeric(5, 2), nullable=False, default=Decimal("5.00"))
     comissao_percentual = Column(Numeric(5, 2), nullable=False, default=Decimal("20.00"))
@@ -173,15 +172,17 @@ class Proposta(Base):
 
     xml = Column(Text, nullable=True)
 
-    # Relações
+    # Relações  
     tomador_id = Column(Integer, ForeignKey("tomadores.id"))
     segurado_id = Column(Integer, ForeignKey("segurados.id"))
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
+    usuario_adicional_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
 
     tomador = relationship("Tomador", back_populates="propostas")
     segurado = relationship("Segurado", back_populates="propostas")
     apolice = relationship("Apolice", uselist=False, back_populates="proposta")
     usuario = relationship("Usuario", back_populates="propostas")
+    usuario_adicional = relationship("Usuario", foreign_keys=[usuario_adicional_id])
 
 class Apolice(Base):
     __tablename__ = "apolices"
