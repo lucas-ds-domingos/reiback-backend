@@ -188,7 +188,6 @@ def listar_propostas(
     db: Session = Depends(get_db),
     current_user_data: Usuario = Depends(get_current_user)  # tipado como Usuario
 ):
-    # Se já é um objeto Usuario, não precisa buscar no banco de novo
     usuario = current_user_data
 
     if not usuario:
@@ -202,6 +201,21 @@ def listar_propostas(
             db.query(Proposta)
             .join(Usuario, Proposta.usuario_id == Usuario.id)
             .filter(Usuario.assessoria_id == usuario.assessoria_id)
+            .all()
+        )
+
+    elif usuario.role.endswith("-adicional"):
+        # Usuário adicional vê:
+        # - propostas do vínculo real (corretor/assessoria/finance)
+        # - propostas que ele mesmo gerou (usuario_adicional_id)
+        propostas = (
+            db.query(Proposta)
+            .filter(
+                (Proposta.usuario_id == usuario.corretora_id) |
+                (Proposta.usuario_id == usuario.assessoria_id) |
+                (Proposta.usuario_id == usuario.finance_id) |
+                (Proposta.usuario_adicional_id == usuario.id)
+            )
             .all()
         )
 
