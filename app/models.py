@@ -29,11 +29,8 @@ class Usuario(Base):
 
     propostas = relationship("Proposta", back_populates="usuario")
     tomadores = relationship("Tomador", back_populates="usuario")
-    propostas = relationship(
-        "Proposta",back_populates="usuario",foreign_keys="Proposta.usuario_id")
 
-    propostas_adicionais = relationship("Proposta",back_populates="usuario_adicional",foreign_keys="Proposta.usuario_adicional_id"
-    )
+
 
 
 class Tomador(Base):
@@ -181,13 +178,12 @@ class Proposta(Base):
     tomador_id = Column(Integer, ForeignKey("tomadores.id"))
     segurado_id = Column(Integer, ForeignKey("segurados.id"))
     usuario_id = Column(Integer, ForeignKey("usuarios.id"))
-    usuario_adicional_id = Column(Integer, ForeignKey("usuarios.id"), nullable=True)
+    usuario_adicional_id = Column(Integer, nullable=True)
 
     tomador = relationship("Tomador", back_populates="propostas")
     segurado = relationship("Segurado", back_populates="propostas")
     apolice = relationship("Apolice", uselist=False, back_populates="proposta")
     usuario = relationship("Usuario", back_populates="propostas")
-    usuario_adicional = relationship("Usuario", foreign_keys=[usuario_adicional_id])
 
 class Apolice(Base):
     __tablename__ = "apolices"
