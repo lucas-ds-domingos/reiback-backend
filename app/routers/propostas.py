@@ -203,18 +203,18 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(
     db: Session = Depends(get_db),
-    current_user_data: Usuario = Depends(get_current_user)
+    current_user: Usuario = Depends(get_current_user)
 ):
-    usuario = current_user_data
+    usuario = current_user
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-    # ===== MASTER =====
+    # master vê tudo
     if usuario.role == "master":
         propostas = db.query(Proposta).all()
 
-    # ===== ASSESSORIA =====
+    # assessoria vê propostas dos usuários vinculados à mesma assessoria
     elif usuario.role == "assessoria":
         propostas = (
             db.query(Proposta)
@@ -223,46 +223,24 @@ def listar_propostas(
             .all()
         )
 
-    # ===== USUÁRIO ADICIONAL =====
-    elif usuario.role.endswith("-adicional"):
-        # Pega todas as propostas onde ele é o adicional OU ligadas ao usuário principal dele
-        filters = [Proposta.usuario_adicional_id == usuario.id]
+    # usuário adicional (ex: corretor-adicional, assessoria-adicional, finance-adicional)
+    elif usuario.role and usuario.role.lower().endswith("-adicional"):
+        # vê apenas as propostas que ele criou
+        propostas = (
+            db.query(Proposta)
+            .filter(Proposta.usuario_adicional_id == usuario.id)
+            .all()
+        )
 
-        # Agora, buscamos o usuário principal (dono da conta)
-        usuario_principal_id = None
-
-        # procura o usuário principal com base nos vínculos que você cria
-        if usuario.corretora_id:
-            usuario_principal = db.query(Usuario).filter(Usuario.id == usuario.corretora_id).first()
-            if usuario_principal:
-                usuario_principal_id = usuario_principal.id
-        elif usuario.assessoria_id:
-            usuario_principal = db.query(Usuario).filter(Usuario.id == usuario.assessoria_id).first()
-            if usuario_principal:
-                usuario_principal_id = usuario_principal.id
-        elif usuario.finance_id:
-            usuario_principal = db.query(Usuario).filter(Usuario.id == usuario.finance_id).first()
-            if usuario_principal:
-                usuario_principal_id = usuario_principal.id
-
-        if usuario_principal_id:
-            filters.append(Proposta.usuario_id == usuario_principal_id)
-
-        propostas = db.query(Proposta).filter(or_(*filters)).all()
-
-    # ===== USUÁRIO COMUM =====
+    # demais usuários (corretor, finance, etc.)
     else:
-        propostas = db.query(Proposta).filter(Proposta.usuario_id == usuario.id).all()
+        propostas = (
+            db.query(Proposta)
+            .filter(Proposta.usuario_id == usuario.id)
+            .all()
+        )
 
     return propostas
-
-@router.get("/propostas/{proposta_id}", response_model=PropostaResponse)
-def obter_proposta(proposta_id: int, db: Session = Depends(get_db)):
-    proposta = db.query(Proposta).filter(Proposta.id == proposta_id).first()
-    if not proposta:
-        raise HTTPException(404, "Proposta não encontrada")
-    return proposta
-
 
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
