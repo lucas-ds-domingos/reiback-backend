@@ -175,8 +175,37 @@ def listar_tomador(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # ⚡ Apenas lista os tomadores do usuário logado
-    return db.query(Tomador).filter(Tomador.usuario_id == current_user.id).all()
+    # 🟢 MASTER: vê todos
+    if current_user.role == "master":
+        return db.query(Tomador).all()
+
+    # 🟣 ASSESSORIA: vê todos os tomadores de todos os corretores vinculados à assessoria
+    if current_user.role == "assessoria":
+        return (
+            db.query(Tomador)
+            .join(Usuario, Usuario.id == Tomador.usuario_id)
+            .filter(Usuario.assessoria_id == current_user.assessoria_id)
+            .all()
+        )
+
+    # 🔵 CORRETOR: vê os próprios tomadores
+    if current_user.role == "corretor":
+        return (
+            db.query(Tomador)
+            .filter(Tomador.usuario_id == current_user.id)
+            .all()
+        )
+
+    # 🟠 USUÁRIO ADICIONAL: vê apenas os tomadores criados por ele mesmo
+    if current_user.role == "usuario_adicional":
+        return (
+            db.query(Tomador)
+            .filter(Tomador.usuario_id == current_user.id)
+            .all()
+        )
+
+    # Caso o tipo de usuário não seja reconhecido
+    raise HTTPException(status_code=403, detail="Tipo de usuário inválido.")
 
 
 @router.get("/list-id/{id}", response_model=TomadorBase)
