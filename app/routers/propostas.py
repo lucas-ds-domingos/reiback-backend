@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from typing import List
 import os
 import requests
-from ..models import Proposta, ClienteAsaas, Tomador, Usuario, CCG
+from ..models import Proposta, ClienteAsaas, Tomador, Usuario, CCG,Segurado
 from ..utils.get_current_user import get_current_user
 from sqlalchemy import or_
 
@@ -220,64 +220,55 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/propostas-buscar", response_model=List[PropostaResponse])
-def listar_propostas(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
-    usuario = current_user
+@router.get("/propostas", response_model=List[PropostaResponse])
+def listar_propostas(db: Session = Depends(get_db)):
+    propostas = db.query(Proposta).all()
+    resultado = []
 
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    # Master vê tudo
-    if usuario.role == "master":
-        propostas = db.query(Proposta).all()
-
-    # Assessoria vê propostas dos usuários da mesma assessoria
-    elif usuario.role == "assessoria":
-        propostas = (
-            db.query(Proposta)
-            .join(Usuario, Proposta.usuario_id == Usuario.id)
-            .filter(Usuario.assessoria_id == usuario.assessoria_id)
-            .all()
-        )
-
-    # Usuário adicional
-    elif usuario.role and usuario.role.lower().endswith("-adicional"):
-        propostas = (
-            db.query(Proposta)
-            .filter(Proposta.usuario_adicional_id == usuario.id)
-            .all()
-        )
-
-    # Usuários normais (corretor, finance, etc.)
-    else:
-        propostas = db.query(Proposta).filter(Proposta.usuario_id == usuario.id).all()
-
-    # Montar resposta com nomes e objetos tomador/segurado
-    result = []
     for p in propostas:
-        item = p.__dict__.copy()
+        # Buscar Tomador
+        tomador = db.query(Tomador).filter(Tomador.id == p.tomador_id).first()
+        # Buscar Segurado
+        segurado = db.query(Segurado).filter(Segurado.id == p.segurado_id).first()
 
-        # Nomes do usuário principal e adicional
-        item["usuario_principal_nome"] = p.usuario.nome if p.usuario else None
-        item["usuario_adicional_nome"] = p.usuario_adicional.nome if p.usuario_adicional else None
+        # Buscar usuário principal
+        usuario = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
+        usuario_nome = usuario.nome if usuario else None
 
-        # Objeto tomador
-        item["tomador"] = {
-            "id": p.tomador.id if p.tomador else None,
-            "nome": p.tomador.nome if p.tomador else None,
-            "email": p.tomador.email if p.tomador else None,
-        }
+        # Buscar usuário adicional
+        usuario_adicional_nome = None
+        if p.usuario_adicional_id:
+            usuario_adicional = db.query(Usuario).filter(Usuario.id == p.usuario_adicional_id).first()
+            if usuario_adicional:
+                usuario_adicional_nome = usuario_adicional.nome
 
-        # Objeto segurado
-        item["segurado"] = {
-            "id": p.segurado.id if p.segurado else None,
-            "nome": p.segurado.nome if p.segurado else None,
-            "email": p.segurado.email if p.segurado else None,
-        }
+        resultado.append({
+            "id": p.id,
+            "numero": p.numero,
+            "numero_contrato": p.numero_contrato,
+            "inicio_vigencia": p.inicio_vigencia,
+            "termino_vigencia": p.termino_vigencia,
+            "premio": p.premio,
+            "tomador": tomador,
+            "segurado": segurado,
+            "status": p.status,
+            "importancia_segurada": p.importancia_segurada,
+            "dias_vigencia": p.dias_vigencia,
+            "grupo": p.grupo,
+            "subgrupo": p.subgrupo,
+            "comissao_percentual": p.comissao_percentual or Decimal("20.00"),
+            "comissao_valor": p.comissao_valor,
+            "emitida_em": p.emitida_em,
+            "link_pagamento": p.link_pagamento,
+            "pago_em": p.pago_em,
+            "valor_pago": p.valor_pago,
+            "tipo_emp": p.tipo_emp,
+            "usuario_adicional_id": p.usuario_adicional_id,
+            "usuario_principal_nome": usuario_nome,
+            "usuario_adicional_nome": usuario_adicional_nome,
+        })
 
-        result.append(item)
-
-    return result
+    return resultado
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
 def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
