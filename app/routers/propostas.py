@@ -229,7 +229,8 @@ def listar_propostas(
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
     # Se for usuário adicional → vê apenas as propostas onde ele é o usuario_adicional_id
-    if current_user.role == "corretor-adicional":
+    
+    if current_user.role == "corretor-Adicional":
         propostas = (
             db.query(Proposta)
             .filter(Proposta.usuario_adicional_id == current_user.id)
