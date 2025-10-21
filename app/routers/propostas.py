@@ -23,16 +23,32 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     # ======== Verifica se é usuário adicional ========
     usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if usuario_logado and usuario_logado.role.lower() == "corretor-adicional":
-        # substitui pelo vínculo real
-        if usuario_logado.corretora_id:
-            usuario_id = usuario_logado.corretora_id
-        elif usuario_logado.assessoria_id:
-            usuario_id = usuario_logado.assessoria_id
-        elif usuario_logado.finance_id:
-            usuario_id = usuario_logado.finance_id
+        usuario_adicional_id = payload.usuario_id  # mantém o adicional
 
-        # mantém o usuário original no campo adicional
-        usuario_adicional_id = payload.usuario_id
+        # busca o usuário principal vinculado à corretora / assessoria / financeira
+        usuario_principal = None
+
+        if usuario_logado.corretora_id:
+            usuario_principal = db.query(Usuario).filter(
+                Usuario.corretora_id == usuario_logado.corretora_id,
+                Usuario.role == "corretor"
+            ).first()
+
+        elif usuario_logado.assessoria_id:
+            usuario_principal = db.query(Usuario).filter(
+                Usuario.assessoria_id == usuario_logado.assessoria_id,
+                Usuario.role == "assessoria"
+            ).first()
+
+        elif usuario_logado.finance_id:
+            usuario_principal = db.query(Usuario).filter(
+                Usuario.finance_id == usuario_logado.finance_id,
+                Usuario.role == "finance"
+            ).first()
+
+        # se achou o principal, substitui o usuario_id
+        if usuario_principal:
+            usuario_id = usuario_principal.id
 
     # ======== Verificação de limite ========
     tomador = db.query(Tomador).filter(Tomador.id == payload.tomador_id).first()
@@ -70,8 +86,8 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         percentual=payload.percentual,
         tomador_id=payload.tomador_id,
         segurado_id=payload.segurado_id,
-        usuario_id=usuario_id,                   # vínculo real
-        usuario_adicional_id=usuario_adicional_id,  # usuário original (adicional)
+        usuario_id=usuario_id,                   # vínculo REAL (usuário principal)
+        usuario_adicional_id=usuario_adicional_id,  # usuário adicional
         text_modelo=payload.text_modelo,
         tipo_emp=payload.tipo_emp,
         emitida_em=datetime.now(),
