@@ -228,11 +228,19 @@ def listar_propostas(
     if not current_user:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-    # MASTER → vê tudo
-    if current_user.role == "master":
+    # Se for usuário adicional → vê apenas as propostas onde ele é o usuario_adicional_id
+    if current_user.role == "corretor-adicional":
+        propostas = (
+            db.query(Proposta)
+            .filter(Proposta.usuario_adicional_id == current_user.id)
+            .all()
+        )
+
+    # Se for master → vê todas
+    elif current_user.role == "master":
         propostas = db.query(Proposta).all()
 
-    # ASSESSORIA → vê propostas dos usuários da mesma assessoria
+    # Se for assessoria → vê propostas dos corretores da mesma assessoria
     elif current_user.role == "assessoria":
         propostas = (
             db.query(Proposta)
@@ -241,25 +249,13 @@ def listar_propostas(
             .all()
         )
 
-    # CORRETOR-ADICIONAL → vê apenas propostas onde ele é o adicional
-    elif current_user.role == "corretor-adicional":
-        propostas = (
-            db.query(Proposta)
-            .filter(Proposta.usuario_adicional_id == current_user.id)
-            .all()
-        )
-
-    # CORRETOR → vê apenas propostas criadas por ele
-    elif current_user.role == "corretor":
+    # Se for corretor → vê apenas as próprias propostas
+    else:
         propostas = (
             db.query(Proposta)
             .filter(Proposta.usuario_id == current_user.id)
             .all()
         )
-
-    # Caso não entre em nenhum dos papéis
-    else:
-        propostas = []
 
     resultado = []
 
@@ -268,11 +264,11 @@ def listar_propostas(
         tomador = db.query(Tomador).filter(Tomador.id == p.tomador_id).first()
         segurado = db.query(Segurado).filter(Segurado.id == p.segurado_id).first()
 
-        # Buscar nome do usuário principal
-        usuario = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
-        usuario_nome = usuario.nome if usuario else None
+        # Nome do usuário principal
+        usuario_principal = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
+        usuario_principal_nome = usuario_principal.nome if usuario_principal else None
 
-        # Buscar nome do usuário adicional (se houver)
+        # Nome do usuário adicional
         usuario_adicional_nome = None
         if p.usuario_adicional_id:
             usuario_adicional = db.query(Usuario).filter(Usuario.id == p.usuario_adicional_id).first()
@@ -301,7 +297,7 @@ def listar_propostas(
             "valor_pago": p.valor_pago,
             "tipo_emp": p.tipo_emp,
             "usuario_adicional_id": p.usuario_adicional_id,
-            "usuario_principal_nome": usuario_nome,
+            "usuario_principal_nome": usuario_principal_nome,
             "usuario_adicional_nome": usuario_adicional_nome,
         })
 
