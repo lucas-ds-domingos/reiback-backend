@@ -20,31 +20,11 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id  # vem do front
     usuario_adicional_id = None       # padrão
 
-    # ======== Verificação de CCG assinado ========
-    usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if not usuario_logado:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
-
-    # só checa CCG se não for master
-    if usuario_logado.role.lower() != "master":
-        ccg_assinado = (
-            db.query(CCG)
-            .filter(CCG.tomador_id == payload.tomador_id)
-            .filter(CCG.status == "assinado")
-            .first()
-        )
-        if not ccg_assinado:
-            raise HTTPException(
-                status_code=400,
-                detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta."
-            )
-
     # ======== Verifica se é usuário adicional ========
     usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if usuario_logado and usuario_logado.role.lower() == "corretor-adicional":
+    if usuario_logado and usuario_logado.role.lower() == "corretor-Adicional":
         usuario_adicional_id = payload.usuario_id  # mantém o adicional
 
-        # busca o usuário principal vinculado à corretora / assessoria / financeira
         usuario_principal = None
 
         if usuario_logado.corretora_id:
@@ -62,10 +42,9 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         elif usuario_logado.finance_id:
             usuario_principal = db.query(Usuario).filter(
                 Usuario.finance_id == usuario_logado.finance_id,
-                Usuario.role == "finance"
+                Usuario.role == "master"
             ).first()
 
-        # se achou o principal, substitui o usuario_id
         if usuario_principal:
             usuario_id = usuario_principal.id
 
@@ -85,7 +64,6 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
             status_code=422,
             detail=f"Limite insuficiente. Limite atual: {limite_disponivel}, valor da proposta: {payload.importancia_segurada}."
         )
-
     # ======== Criação da proposta ========
     nova = Proposta(
         numero=payload.numero,
@@ -111,11 +89,6 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
         tipo_emp=payload.tipo_emp,
         emitida_em=datetime.now(),
     )
-
-    # desconta o limite
-    tomador.limite_disponivel -= payload.importancia_segurada
-    db.add(tomador)
-
     # ======== Gerar XML ========
     import xml.etree.ElementTree as ET
     from io import BytesIO
@@ -157,11 +130,37 @@ def cancelar_proposta(proposta_id: int, db: Session = Depends(get_db)):
 ASAAS_API_KEY = os.getenv("ASAAS_API_KEY")
 ASAAS_BASE_URL = "https://sandbox.asaas.com/api/v3" 
 @router.patch("/propostas/{proposta_id}/emitir")
-def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
+def emitir_proposta(proposta_id: int, db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
+
     # Busca a proposta
     proposta = db.query(Proposta).filter(Proposta.id == proposta_id).first()
     if not proposta:
         raise HTTPException(404, "Proposta não encontrada")
+
+    # Só checa CCG se não for master
+    if current_user.role.lower() != "master":
+        ccg_assinado = (
+            db.query(CCG)
+            .filter(CCG.tomador_id == proposta.tomador_id)
+            .filter(CCG.status == "assinado")
+            .first()
+        )
+        if not ccg_assinado:
+            raise HTTPException(
+                status_code=400,
+                detail="CCG não assinada. É necessário assinar a CCG antes de emitir a proposta."
+            )
+
+    # Desconta o limite do tomador
+    tomador = db.query(Tomador).filter(Tomador.id == proposta.tomador_id).first()
+    if not tomador:
+        raise HTTPException(404, "Tomador não encontrado")
+    
+    if tomador.limite_disponivel < proposta.premio:
+        raise HTTPException(400, "Limite insuficiente para emitir a proposta")
+    
+    tomador.limite_disponivel -= proposta.premio
+    db.add(tomador)
 
     # Se já estiver emitida, retorna o link existente
     if proposta.status in ["emitida - pendente pagamento", "paga"]:
@@ -186,7 +185,7 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
         data = {
             "customer": cliente_asaas.customer_id,
             "billingType": "PIX",
-            "dueDate": (datetime.utcnow().date() + timedelta(days=5)).isoformat(),  # vencimento 5 dias
+            "dueDate": (datetime.utcnow().date() + timedelta(days=5)).isoformat(),
             "value": float(proposta.premio),
             "description": f"Pagamento da proposta {proposta.numero}",
             "externalReference": str(proposta.id)
@@ -218,7 +217,6 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
         "status": proposta.status,
         "link_pagamento": proposta.link_pagamento
     }
-
 
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(
