@@ -220,7 +220,7 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
     }
 
 
-@router.get("/propostas", response_model=List[PropostaResponse])
+@router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(db: Session = Depends(get_db)):
     propostas = db.query(Proposta).all()
     resultado = []
