@@ -220,68 +220,61 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
     }
 
 
-from sqlalchemy.orm import aliased
-from sqlalchemy import or_
-
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
-def listar_propostas(
-    db: Session = Depends(get_db),
-    current_user: Usuario = Depends(get_current_user)
-):
+def listar_propostas(db: Session = Depends(get_db), current_user: Usuario = Depends(get_current_user)):
     usuario = current_user
 
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
-    # Aliases para pegar os nomes
-    UsuarioPrincipal = aliased(Usuario)
-    UsuarioAdicional = aliased(Usuario)
-
-    # Base query com joins para pegar os nomes
-    query = (
-        db.query(
-            Proposta,
-            UsuarioPrincipal.nome.label("usuario_principal_nome"),
-            UsuarioAdicional.nome.label("usuario_adicional_nome")
-        )
-        .outerjoin(UsuarioPrincipal, Proposta.usuario_id == UsuarioPrincipal.id)
-        .outerjoin(UsuarioAdicional, Proposta.usuario_adicional_id == UsuarioAdicional.id)
-    )
-
-    # ===== Filtros por tipo de usuário =====
+    # Master vê tudo
     if usuario.role == "master":
-        propostas = query.all()
+        propostas = db.query(Proposta).all()
 
+    # Assessoria vê propostas dos usuários da mesma assessoria
     elif usuario.role == "assessoria":
         propostas = (
-            query.join(Usuario, Proposta.usuario_id == Usuario.id)
-                 .filter(Usuario.assessoria_id == usuario.assessoria_id)
-                 .all()
+            db.query(Proposta)
+            .join(Usuario, Proposta.usuario_id == Usuario.id)
+            .filter(Usuario.assessoria_id == usuario.assessoria_id)
+            .all()
         )
 
+    # Usuário adicional
     elif usuario.role and usuario.role.lower().endswith("-adicional"):
-        filtros = [Proposta.usuario_adicional_id == usuario.id]
+        propostas = (
+            db.query(Proposta)
+            .filter(Proposta.usuario_adicional_id == usuario.id)
+            .all()
+        )
 
-        if usuario.corretora_id:
-            filtros.append(Proposta.usuario_id == usuario.corretora_id)
-        if usuario.assessoria_id:
-            filtros.append(Proposta.usuario_id == usuario.assessoria_id)
-        if usuario.finance_id:
-            filtros.append(Proposta.usuario_id == usuario.finance_id)
-
-        filtros.append(Proposta.usuario_id == usuario.id)
-
-        propostas = query.filter(or_(*filtros)).all()
-
+    # Usuários normais (corretor, finance, etc.)
     else:
-        propostas = query.filter(Proposta.usuario_id == usuario.id).all()
+        propostas = db.query(Proposta).filter(Proposta.usuario_id == usuario.id).all()
 
-    # Transformar para lista de dicionários incluindo nomes
+    # Montar resposta com nomes e objetos tomador/segurado
     result = []
-    for p, nome_principal, nome_adicional in propostas:
+    for p in propostas:
         item = p.__dict__.copy()
-        item["usuario_principal_nome"] = nome_principal
-        item["usuario_adicional_nome"] = nome_adicional
+
+        # Nomes do usuário principal e adicional
+        item["usuario_principal_nome"] = p.usuario.nome if p.usuario else None
+        item["usuario_adicional_nome"] = p.usuario_adicional.nome if p.usuario_adicional else None
+
+        # Objeto tomador
+        item["tomador"] = {
+            "id": p.tomador.id if p.tomador else None,
+            "nome": p.tomador.nome if p.tomador else None,
+            "email": p.tomador.email if p.tomador else None,
+        }
+
+        # Objeto segurado
+        item["segurado"] = {
+            "id": p.segurado.id if p.segurado else None,
+            "nome": p.segurado.nome if p.segurado else None,
+            "email": p.segurado.email if p.segurado else None,
+        }
+
         result.append(item)
 
     return result

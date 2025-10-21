@@ -80,8 +80,8 @@ class PropostaResponse(BaseModel):
     inicio_vigencia: date
     termino_vigencia: date
     premio: Decimal
-    tomador: Optional[TomadorBase]
-    segurado: Optional[SeguradoBase]
+    tomador: Optional[TomadorSchema] = None
+    segurado: Optional[SeguradoSchema] = None
     status: Optional[str]
     importancia_segurada: Optional[condecimal(max_digits=12, decimal_places=2)] = None
     dias_vigencia: Optional[int]
@@ -96,9 +96,12 @@ class PropostaResponse(BaseModel):
     valor_pago: Optional[condecimal(max_digits=12, decimal_places=2)] = None
     tipo_emp: Optional[str]
     usuario_adicional_id: Optional[int] = None
-    model_config = {
-        "from_attributes": True 
-    }
+    usuario_principal_nome: Optional[str] = None
+    usuario_adicional_nome: Optional[str] = None
+
+    class Config:
+        orm_mode = True
+
 
 class PropostaRead(PropostaCreate):
     tomador: Optional[TomadorSchema]
