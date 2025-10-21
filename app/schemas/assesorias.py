@@ -13,7 +13,6 @@ class UsuarioSimples(BaseModel):
         orm_mode = True
 
 class AssesoriaBase(BaseModel):
-    id: Optional[int]
     cnpj: str
     razao_social: str
     comissao: Optional[float] = 0.0
