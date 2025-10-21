@@ -175,11 +175,11 @@ def listar_tomador(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # 🟢 MASTER: vê todos
+    # MASTER vê todos
     if current_user.role == "master":
         return db.query(Tomador).all()
 
-    # 🟣 ASSESSORIA: vê todos os tomadores de todos os corretores vinculados à assessoria
+    # ASSESSORIA vê tomadores de todos os usuários vinculados à assessoria
     if current_user.role == "assessoria":
         return (
             db.query(Tomador)
@@ -188,23 +188,22 @@ def listar_tomador(
             .all()
         )
 
-    # 🔵 CORRETOR: vê os próprios tomadores
+    # CORRETOR vê seus próprios tomadores + tomadores de usuários adicionais vinculados à sua corretora
     if current_user.role == "corretor":
         return (
             db.query(Tomador)
-            .filter(Tomador.usuario_id == current_user.id)
+            .join(Usuario, Usuario.id == Tomador.usuario_id)
+            .filter(
+                (Tomador.usuario_id == current_user.id) | 
+                (Usuario.corretora_id == current_user.id)
+            )
             .all()
         )
 
-    # 🟠 USUÁRIO ADICIONAL: vê apenas os tomadores criados por ele mesmo
-    if current_user.role == "usuario_adicional":
-        return (
-            db.query(Tomador)
-            .filter(Tomador.usuario_id == current_user.id)
-            .all()
-        )
+    # CORRETOR-ADICIONAL vê apenas seus próprios tomadores
+    if current_user.role == "corretor-Adicional":
+        return db.query(Tomador).filter(Tomador.usuario_id == current_user.id).all()
 
-    # Caso o tipo de usuário não seja reconhecido
     raise HTTPException(status_code=403, detail="Tipo de usuário inválido.")
 
 
