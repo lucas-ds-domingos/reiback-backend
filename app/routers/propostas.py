@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session, joinedload, aliased
 from ..database import get_db
 from ..schemas.proposta import PropostaCreate, PropostaResponse
 import xml.etree.ElementTree as ET
@@ -19,6 +19,25 @@ router = APIRouter()
 def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
     usuario_id = payload.usuario_id  # vem do front
     usuario_adicional_id = None       # padrão
+
+    # ======== Verificação de CCG assinado ========
+    usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario_logado:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # só checa CCG se não for master
+    if usuario_logado.role.lower() != "master":
+        ccg_assinado = (
+            db.query(CCG)
+            .filter(CCG.tomador_id == payload.tomador_id)
+            .filter(CCG.status == "assinado")
+            .first()
+        )
+        if not ccg_assinado:
+            raise HTTPException(
+                status_code=400,
+                detail="CCG não assinada. É necessário assinar a CCG antes de criar a proposta."
+            )
 
     # ======== Verifica se é usuário adicional ========
     usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
@@ -200,6 +219,7 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
         "link_pagamento": proposta.link_pagamento
     }
 
+
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
 def listar_propostas(
     db: Session = Depends(get_db),
@@ -210,38 +230,52 @@ def listar_propostas(
     if not usuario:
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
+    # cria aliases para as duas relações
+    UsuarioPrincipal = aliased(Usuario)
+    UsuarioAdicional = aliased(Usuario)
+
+    query = db.query(
+        Proposta,
+        UsuarioPrincipal.nome.label("usuario_principal_nome"),
+        UsuarioAdicional.nome.label("usuario_adicional_nome")
+    ).outerjoin(
+        UsuarioPrincipal, Proposta.usuario_id == UsuarioPrincipal.id
+    ).outerjoin(
+        UsuarioAdicional, Proposta.usuario_adicional_id == UsuarioAdicional.id
+    )
+
     # master vê tudo
     if usuario.role == "master":
-        propostas = db.query(Proposta).all()
+        propostas = query.all()
 
     # assessoria vê propostas dos usuários vinculados à mesma assessoria
     elif usuario.role == "assessoria":
-        propostas = (
-            db.query(Proposta)
-            .join(Usuario, Proposta.usuario_id == Usuario.id)
-            .filter(Usuario.assessoria_id == usuario.assessoria_id)
-            .all()
-        )
+        propostas = query.join(UsuarioPrincipal).filter(
+            UsuarioPrincipal.assessoria_id == usuario.assessoria_id
+        ).all()
 
     # usuário adicional (ex: corretor-adicional, assessoria-adicional, finance-adicional)
     elif usuario.role and usuario.role.lower().endswith("-adicional"):
-        # vê apenas as propostas que ele criou
-        propostas = (
-            db.query(Proposta)
-            .filter(Proposta.usuario_adicional_id == usuario.id)
-            .all()
-        )
+        propostas = query.filter(
+            Proposta.usuario_adicional_id == usuario.id
+        ).all()
 
     # demais usuários (corretor, finance, etc.)
     else:
-        propostas = (
-            db.query(Proposta)
-            .filter(Proposta.usuario_id == usuario.id)
-            .all()
-        )
+        propostas = query.filter(
+            Proposta.usuario_id == usuario.id
+        ).all()
 
-    return propostas
+    # retorna lista de dicts combinando proposta + nomes
+    resultado = []
+    for p, nome_principal, nome_adicional in propostas:
+        resultado.append({
+            **p.__dict__,
+            "usuario_principal_nome": nome_principal,
+            "usuario_adicional_nome": nome_adicional
+        })
 
+    return resultado
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
 def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
