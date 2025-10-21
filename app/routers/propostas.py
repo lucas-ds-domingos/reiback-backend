@@ -221,21 +221,52 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db)):
 
 
 @router.get("/propostas-buscar", response_model=List[PropostaResponse])
-def listar_propostas(db: Session = Depends(get_db)):
-    propostas = db.query(Proposta).all()
+def listar_propostas(
+    db: Session = Depends(get_db),
+    current_user: Usuario = Depends(get_current_user)
+):
+    # Filtro de acesso baseado no papel do usuário
+    if current_user.role == "master":
+        propostas = db.query(Proposta).all()
+
+    elif current_user.role == "assessoria":
+        # Supervisor vê propostas de todos corretores da mesma assessoria (exceto comissão)
+        propostas = (
+            db.query(Proposta)
+            .join(Usuario, Usuario.id == Proposta.usuario_id)
+            .filter(Usuario.assessoria_id == current_user.assessoria_id)
+            .all()
+        )
+
+    elif current_user.role == "corretor":
+        # Corretor vê apenas as suas propostas
+        propostas = db.query(Proposta).filter(Proposta.usuario_id == current_user.id).all()
+
+    elif current_user.role == "corretor-adicional":
+        # Corretor adicional vê propostas criadas pelo corretor principal ou onde ele é adicional
+        propostas = (
+            db.query(Proposta)
+            .filter(
+                (Proposta.usuario_id == current_user.usuario_principal_id)
+                | (Proposta.usuario_adicional_id == current_user.id)
+            )
+            .all()
+        )
+
+    else:
+        propostas = []
+
     resultado = []
 
     for p in propostas:
-        # Buscar Tomador
+        # Buscar Tomador e Segurado
         tomador = db.query(Tomador).filter(Tomador.id == p.tomador_id).first()
-        # Buscar Segurado
         segurado = db.query(Segurado).filter(Segurado.id == p.segurado_id).first()
 
-        # Buscar usuário principal
+        # Buscar nomes dos usuários
         usuario = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
         usuario_nome = usuario.nome if usuario else None
 
-        # Buscar usuário adicional
         usuario_adicional_nome = None
         if p.usuario_adicional_id:
             usuario_adicional = db.query(Usuario).filter(Usuario.id == p.usuario_adicional_id).first()
@@ -269,6 +300,7 @@ def listar_propostas(db: Session = Depends(get_db)):
         })
 
     return resultado
+
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
 def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
