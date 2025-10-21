@@ -225,12 +225,12 @@ def listar_propostas(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
-    # Filtro de acesso baseado no papel do usuário
+    # MASTER → vê tudo
     if current_user.role == "master":
         propostas = db.query(Proposta).all()
 
-    elif current_user.role == "assessoria":
-        # Supervisor vê propostas de todos corretores da mesma assessoria (exceto comissão)
+    # SUPERVISOR → vê tudo da assessoria dele
+    elif current_user.role == "supervisor":
         propostas = (
             db.query(Proposta)
             .join(Usuario, Usuario.id == Proposta.usuario_id)
@@ -238,17 +238,23 @@ def listar_propostas(
             .all()
         )
 
+    # CORRETOR → vê apenas as suas próprias propostas
     elif current_user.role == "corretor":
-        # Corretor vê apenas as suas propostas
         propostas = db.query(Proposta).filter(Proposta.usuario_id == current_user.id).all()
 
+    # CORRETOR-ADICIONAL → vê:
+    # - propostas onde ele é o adicional
+    # - propostas cujo usuario_id (corretor dono) é o mesmo usuario_id vinculado a ele
     elif current_user.role == "corretor-adicional":
-        # Corretor adicional vê propostas criadas pelo corretor principal ou onde ele é adicional
+        # Descobrir o corretor principal (dono) que ele representa
+        # -> o adicional sempre tem um usuario_id que indica o corretor principal dele
+        corretor_principal_id = current_user.usuario_id
+
         propostas = (
             db.query(Proposta)
             .filter(
-                (Proposta.usuario_id == current_user.usuario_principal_id)
-                | (Proposta.usuario_adicional_id == current_user.id)
+                (Proposta.usuario_adicional_id == current_user.id)
+                | (Proposta.usuario_id == corretor_principal_id)
             )
             .all()
         )
@@ -259,11 +265,9 @@ def listar_propostas(
     resultado = []
 
     for p in propostas:
-        # Buscar Tomador e Segurado
         tomador = db.query(Tomador).filter(Tomador.id == p.tomador_id).first()
         segurado = db.query(Segurado).filter(Segurado.id == p.segurado_id).first()
 
-        # Buscar nomes dos usuários
         usuario = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
         usuario_nome = usuario.nome if usuario else None
 
@@ -300,6 +304,7 @@ def listar_propostas(
         })
 
     return resultado
+
 
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
