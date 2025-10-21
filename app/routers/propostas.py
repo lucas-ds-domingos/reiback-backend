@@ -225,12 +225,15 @@ def listar_propostas(
     db: Session = Depends(get_db),
     current_user: Usuario = Depends(get_current_user)
 ):
+    if not current_user:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
     # MASTER → vê tudo
     if current_user.role == "master":
         propostas = db.query(Proposta).all()
 
-    # SUPERVISOR → vê tudo da assessoria dele
-    elif current_user.role == "supervisor":
+    # ASSESSORIA → vê propostas dos usuários da mesma assessoria
+    elif current_user.role == "assessoria":
         propostas = (
             db.query(Proposta)
             .join(Usuario, Usuario.id == Proposta.usuario_id)
@@ -238,39 +241,38 @@ def listar_propostas(
             .all()
         )
 
-    # CORRETOR → vê apenas as suas próprias propostas
-    elif current_user.role == "corretor":
-        propostas = db.query(Proposta).filter(Proposta.usuario_id == current_user.id).all()
-
-    # CORRETOR-ADICIONAL → vê:
-    # - propostas onde ele é o adicional
-    # - propostas cujo usuario_id (corretor dono) é o mesmo usuario_id vinculado a ele
+    # CORRETOR-ADICIONAL → vê apenas propostas onde ele é o adicional
     elif current_user.role == "corretor-adicional":
-        # Descobrir o corretor principal (dono) que ele representa
-        # -> o adicional sempre tem um usuario_id que indica o corretor principal dele
-        corretor_principal_id = current_user.usuario_id
-
         propostas = (
             db.query(Proposta)
-            .filter(
-                (Proposta.usuario_adicional_id == current_user.id)
-                | (Proposta.usuario_id == corretor_principal_id)
-            )
+            .filter(Proposta.usuario_adicional_id == current_user.id)
             .all()
         )
 
+    # CORRETOR → vê apenas propostas criadas por ele
+    elif current_user.role == "corretor":
+        propostas = (
+            db.query(Proposta)
+            .filter(Proposta.usuario_id == current_user.id)
+            .all()
+        )
+
+    # Caso não entre em nenhum dos papéis
     else:
         propostas = []
 
     resultado = []
 
     for p in propostas:
+        # Buscar dados relacionados
         tomador = db.query(Tomador).filter(Tomador.id == p.tomador_id).first()
         segurado = db.query(Segurado).filter(Segurado.id == p.segurado_id).first()
 
+        # Buscar nome do usuário principal
         usuario = db.query(Usuario).filter(Usuario.id == p.usuario_id).first()
         usuario_nome = usuario.nome if usuario else None
 
+        # Buscar nome do usuário adicional (se houver)
         usuario_adicional_nome = None
         if p.usuario_adicional_id:
             usuario_adicional = db.query(Usuario).filter(Usuario.id == p.usuario_adicional_id).first()
@@ -304,8 +306,6 @@ def listar_propostas(
         })
 
     return resultado
-
-
 
 @router.get("/propostas/{proposta_id}/link-pagamento")
 def obter_link_pagamento(proposta_id: int, db: Session = Depends(get_db)):
