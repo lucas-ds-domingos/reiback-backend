@@ -38,7 +38,7 @@ async def enviar_para_d4sign(pdf_bytes: bytes, data: dict, ccg_id: int, db: Sess
         # 2️⃣ Adicionar signatários
         signers = data.get("fiadores", []) + data.get("representantes_legais", [])
         fixed_signers = [
-            {"email": "fabio.brambila@reibacksolar.com.br", "act": "4", "foreign": "1"},
+            {"email": "fabio.brambila@reibacknegocios.com.br", "act": "4", "foreign": "1"},
             {"email": "carol.zanardelli09@gmail.com", "act": "4", "foreign": "1"},
             {"email": "finance@financeassurance.com.br", "act": "1", "foreign": "1", "certified": "1"},
         ]

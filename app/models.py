@@ -165,7 +165,7 @@ class Proposta(Base):
 
     # Dados da etapa de risco
     numero_contrato = Column(String(50), nullable=True)
-    edital_processo = Column(String(100), nullable=True)
+    edital_processo = Column(String(300), nullable=True)
     percentual = Column(Numeric(5, 2), nullable=True)
     text_modelo = Column(String(700), nullable=True)
     link_pagamento = Column(String, nullable=True)  

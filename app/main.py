@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import tomador,documentos,segurado,propostas,gerarpdf, webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal, fiador, ccg, webhokD4sing,dashbord
+from .routers import tomador,documentos,segurado,propostas,gerarpdf,webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal, fiador, ccg, webhokD4sing,dashbord,propostaAtualizarTaxa
 from fastapi.staticfiles import StaticFiles
 import asyncio
 import sys
@@ -30,6 +30,7 @@ app.include_router(ccg.router, prefix="/api/ccg", tags=["CCG"])
 app.include_router(webhokD4sing.router) 
 app.include_router(dashbord.router, prefix="/api")
 app.include_router(documentos.router)
+app.include_router(propostaAtualizarTaxa.router, prefix="/api")
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 

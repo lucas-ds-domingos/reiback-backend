@@ -39,7 +39,7 @@ def normalizar_cnpj(cnpj: str) -> str:
 def normalizar_telefone(numero: str) -> str:
     """Remove tudo que não for dígito"""
     return "".join(filter(str.isdigit, numero or "")) or "11999999999"
-
+                                                         
 def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
     """Cria cliente no Asaas sandbox e salva referência no banco"""
     cliente_existente = db.query(ClienteAsaas).filter(ClienteAsaas.tomador_id == tomador.id).first()
@@ -157,7 +157,7 @@ def atualizar_tomador(
     tomador.uf = data.get("uf") or "SP"
     tomador.cep = data.get("cep") or "01001000"
     tomador.email = data.get("email") or "teste@teste.com"
-    tomador.telefone = data.get("telefone") or "11999999999"
+    tomador.telefone = data.get("telefone") or "11297919397"
     tomador.capital_social = float(data.get("capital_social", 0))
     tomador.usuario_id = current_user.id
 
