@@ -22,7 +22,7 @@ def criar_proposta(payload: PropostaCreate, db: Session = Depends(get_db)):
 
     # ======== Verifica se é usuário adicional ========
     usuario_logado = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if usuario_logado and usuario_logado.role.lower() == "corretor-Adicional":
+    if usuario_logado and usuario_logado.role.lower() == "corretor-adicional":
         usuario_adicional_id = payload.usuario_id  # mantém o adicional
 
         usuario_principal = None
