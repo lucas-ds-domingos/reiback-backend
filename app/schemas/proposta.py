@@ -34,6 +34,14 @@ class SeguradoSchema(BaseModel):
     nome: str
     email: Optional[str]
     telefone: Optional[str]
+    logradouro :Optional[str]
+    numero :Optional[str]
+    complemento :Optional[str]
+    bairro :Optional[str]
+    municipio :Optional[str]
+    uf :Optional[str]
+    cep :Optional[str]
+    email :Optional[str]
 
     class Config:
         orm_mode = True
