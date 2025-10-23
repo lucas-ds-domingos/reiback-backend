@@ -29,9 +29,22 @@ class Usuario(Base):
 
     propostas = relationship("Proposta", back_populates="usuario")
     tomadores = relationship("Tomador", back_populates="usuario")
+    password_resets = relationship("PasswordReset", back_populates="usuario")
 
 
 
+
+
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("usuarios.id"), nullable=False)
+    token = Column(String, unique=True, nullable=False, index=True)
+    expires_at = Column(DateTime, nullable=False, default=lambda: datetime.utcnow())
+    created_at = Column(DateTime, nullable=False, default=lambda: datetime.utcnow())
+
+    usuario = relationship("Usuario", back_populates="password_resets")
 
 class Tomador(Base):
     __tablename__ = "tomadores"
