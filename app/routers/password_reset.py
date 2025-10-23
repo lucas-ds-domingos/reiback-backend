@@ -86,7 +86,7 @@ def reset_password(payload: PasswordResetCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
     # Atualiza a senha com hash seguro
-    usuario.senha = hash_password(payload.nova_senha)
+    usuario.senha_hash = hash_password(payload.nova_senha)
     db.add(usuario)
 
     # Remove o token usado
