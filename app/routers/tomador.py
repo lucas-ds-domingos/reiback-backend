@@ -77,6 +77,36 @@ def criar_cliente_asaas(tomador: Tomador, db: Session) -> ClienteAsaas:
     db.commit()
     db.refresh(cliente)
     return cliente
+# =========================================
+# função de verificação de permissão
+# =========================================
+def pode_usar_tomador(tomador: Tomador, current_user: Usuario, db: Session):
+    """Verifica se o current_user pode usar este tomador"""
+    if not tomador.usuario_id or tomador.usuario_id == current_user.id:
+        return True  # livre ou próprio
+
+    usuario_dono = db.query(Usuario).filter(Usuario.id == tomador.usuario_id).first()
+
+    if current_user.role == "master":
+        return True
+
+    if current_user.role == "assessoria":
+        return usuario_dono.assessoria_id == current_user.assessoria_id
+
+    if current_user.role == "corretor":
+        return (
+            usuario_dono.id == current_user.id or  # próprio
+            usuario_dono.corretora_id == current_user.id  # corretor-adicional vinculado
+        )
+
+    if current_user.role == "corretor-Adicional":
+        return (
+            usuario_dono.id == current_user.id or
+            usuario_dono.corretora_id == current_user.corretora_id or  # corretor principal
+            usuario_dono.assessoria_id == current_user.assessoria_id  # assessoria vinculada
+        )
+
+    return False
 
 # =========================================
 # endpoints
@@ -92,20 +122,11 @@ def get_tomador(
     # busca no banco
     tomador = db.query(Tomador).filter(Tomador.cnpj == cnpj).first()
     if tomador:
-        if tomador.usuario_id and tomador.usuario_id != current_user.id:
-            # regra especial para corretor-adicional
-            if current_user.role == "corretor-Adicional":
-                # busca o usuário dono do tomador
-                usuario_dono = db.query(Usuario).filter(Usuario.id == tomador.usuario_id).first()
-                # verifica se o tomador pertence à assessoria ou corretor vinculado
-                if not (
-                    usuario_dono.assessoria_id == current_user.assessoria_id or
-                    usuario_dono.corretora_id == current_user.corretora_id
-                ):
-                    raise HTTPException(status_code=403, detail="❌ Este tomador não está vinculado ao seu corretor ou assessoria.")
-            else:
-                raise HTTPException(status_code=403, detail="❌ Este tomador já está vinculado a outro usuário.")
-
+        if not pode_usar_tomador(tomador, current_user, db):
+            raise HTTPException(
+                status_code=403,
+                detail="❌ Você não tem permissão para usar este tomador."
+            )
         
         # criar cliente Asaas apenas se for chamado diretamente
         if not tomador.asaas_cliente:
