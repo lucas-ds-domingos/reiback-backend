@@ -1,35 +1,36 @@
-import os
 import smtplib
-import ssl
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+import os
 from dotenv import load_dotenv
+import ssl
 
 load_dotenv()
 
 def enviar_email(para: str, assunto: str, corpo: str):
+    host = os.getenv("EMAIL_HOST")
+    port = int(os.getenv("EMAIL_PORT"))
+    user = os.getenv("EMAIL_USER")
+    password = os.getenv("EMAIL_PASS")
+    remetente = os.getenv("EMAIL_FROM")
+
+    msg = MIMEMultipart()
+    msg["From"] = remetente
+    msg["To"] = para
+    msg["Subject"] = assunto
+    msg.attach(MIMEText(corpo, "html"))
+
     try:
-        smtp_server = os.getenv("EMAIL_HOST", "smtp.mailersend.net")
-        port = int(os.getenv("EMAIL_PORT", 587))
-        login = os.getenv("EMAIL_HOST_USER")
-        senha = os.getenv("EMAIL_HOST_PASSWORD")
-        remetente = os.getenv("EMAIL_FROM", login)
-
-        # Monta o e-mail (HTML + texto alternativo)
-        msg = MIMEMultipart("alternative")
-        msg["Subject"] = assunto
-        msg["From"] = remetente
-        msg["To"] = para
-        msg.attach(MIMEText(corpo, "html"))
-
-        # Conecta ao servidor e envia
+        # Cria contexto SSL ignorando verificação de certificado
         context = ssl.create_default_context()
-        with smtplib.SMTP(smtp_server, port) as server:
-            server.starttls(context=context)
-            server.login(login, senha)
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        with smtplib.SMTP(host, port) as server:
+            server.starttls(context=context)  # TLS com verificação ignorada
+            server.login(user, password)
             server.send_message(msg)
 
-        print("✅ Email enviado com sucesso")
-
+        print("✅ Email enviado")
     except Exception as e:
-        print(f"❌ Erro ao enviar e-mail: {e}")
+        print("❌ Erro ao enviar e-mail:", e)
