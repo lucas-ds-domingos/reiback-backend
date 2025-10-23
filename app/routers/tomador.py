@@ -93,7 +93,19 @@ def get_tomador(
     tomador = db.query(Tomador).filter(Tomador.cnpj == cnpj).first()
     if tomador:
         if tomador.usuario_id and tomador.usuario_id != current_user.id:
-            raise HTTPException(status_code=403, detail="❌ Este tomador já está vinculado a outro usuário.")
+            # regra especial para corretor-adicional
+            if current_user.role == "corretor-Adicional":
+                # busca o usuário dono do tomador
+                usuario_dono = db.query(Usuario).filter(Usuario.id == tomador.usuario_id).first()
+                # verifica se o tomador pertence à assessoria ou corretor vinculado
+                if not (
+                    usuario_dono.assessoria_id == current_user.assessoria_id or
+                    usuario_dono.corretora_id == current_user.corretora_id
+                ):
+                    raise HTTPException(status_code=403, detail="❌ Este tomador não está vinculado ao seu corretor ou assessoria.")
+            else:
+                raise HTTPException(status_code=403, detail="❌ Este tomador já está vinculado a outro usuário.")
+
         
         # criar cliente Asaas apenas se for chamado diretamente
         if not tomador.asaas_cliente:
@@ -189,16 +201,17 @@ def listar_tomador(
         )
 
     # CORRETOR vê seus próprios tomadores + tomadores de usuários adicionais vinculados à sua corretora
-    if current_user.role == "corretor":
+    if current_user.role == "corretor-Adicional":
         return (
             db.query(Tomador)
             .join(Usuario, Usuario.id == Tomador.usuario_id)
             .filter(
-                (Tomador.usuario_id == current_user.id) | 
-                (Usuario.corretora_id == current_user.id)
+                (Tomador.usuario_id == current_user.id) |
+                (Usuario.assessoria_id == current_user.assessoria_id) |  
+                (Usuario.corretora_id == current_user.corretora_id)  
             )
             .all()
-        )
+    )
 
     # CORRETOR-ADICIONAL vê apenas seus próprios tomadores
     if current_user.role == "corretor-Adicional":
