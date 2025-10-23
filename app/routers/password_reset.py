@@ -2,7 +2,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 import secrets
-
 from ..database import get_db
 from ..models import Usuario, PasswordReset
 from ..schemas.password_reset import PasswordResetRequest, PasswordResetCreate, PasswordResetResponse
@@ -88,7 +87,8 @@ def reset_password(payload: PasswordResetCreate, db: Session = Depends(get_db)):
 
     # Atualiza a senha com hash seguro
     usuario.senha = hash_password(payload.nova_senha)
-    
+    db.add(usuario)
+
     # Remove o token usado
     db.delete(reset)
 
