@@ -1,7 +1,8 @@
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, validator, condecimal
 from typing import Optional
 from datetime import date
 from typing import List, Optional
+from decimal import Decimal
 
 class UsuarioSimples(BaseModel):
     id: int
@@ -37,6 +38,7 @@ class AssesoriaCreate(AssesoriaBase):
 
 class AssesoriaResponse(AssesoriaBase):
     id: int
+    comissao: Optional[condecimal(max_digits=5, decimal_places=2)] = None
 
     model_config = {
         "from_attributes": True
