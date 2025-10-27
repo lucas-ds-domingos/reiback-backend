@@ -27,22 +27,33 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
 
     # Atualiza status da proposta
     proposta.status = "paga"
-    proposta.valor_pago = Decimal(str(payment.get("netValue", payment.get("value"))))
+    proposta.valor_pago = Decimal(str(payment.get("netValue", payment.get("value", 0))))
     if payment.get("paymentDate"):
         proposta.pago_em = datetime.strptime(payment["paymentDate"], "%Y-%m-%d")
     db.commit()
     db.refresh(proposta)
 
-    # Cria apólice
-    apolice = Apolice(
-        proposta_id=proposta.id,
-        numero=f"FIN-{proposta.id:05d}",
-        data_criacao=datetime.utcnow(),
-        status_assinatura="pendente"
-    )
-    db.add(apolice)
-    db.commit()
-    db.refresh(apolice)
+    # Verifica se já existe uma apólice para essa proposta
+    apolice = db.query(Apolice).filter(Apolice.proposta_id == proposta.id).first()
+
+    if not apolice:
+        # Gera próximo número único da apólice
+        ultimo = db.query(Apolice).order_by(Apolice.id.desc()).first()
+        next_number = int(ultimo.numero.split("-")[1]) + 1 if ultimo else 1
+
+        # Cria a apólice
+        apolice = Apolice(
+            proposta_id=proposta.id,
+            numero=f"FIN-{next_number:05d}",
+            data_criacao=datetime.utcnow(),
+            status_assinatura="pendente"
+        )
+        db.add(apolice)
+        db.commit()
+        db.refresh(apolice)
+
+        # Chama função em background para gerar PDF e enviar ao D4Sign
+        background_tasks.add_task(enviar_para_d4sign_e_salvar, apolice.id)
 
     # Calcula comissões
     usuario = proposta.usuario
@@ -59,10 +70,15 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
     elif usuario.role == "assessoria":
         # Assesoria que gera: recebe 20% + % dela própria
         comissao_corretor = comissao_padrao
-        comissao_assessoria = comissao_padrao * (usuario.comissao / 100)  # % própria da assessoria
+        comissao_assessoria = comissao_padrao * (usuario.comissao / 100)
+
+    # Verifica se comissões já existem para essa apólice
+    existing_comissoes = db.query(Comissao).filter(Comissao.apolice_id == apolice.id).all()
+    usuarios_existentes = [c.usuario_id for c in existing_comissoes if c.usuario_id]
+    assessorias_existentes = [c.assessoria_id for c in existing_comissoes if c.assessoria_id]
 
     # Salva comissões na tabela
-    if comissao_corretor > 0:
+    if comissao_corretor > 0 and (usuario.role == "corretor" and usuario.id not in usuarios_existentes or usuario.role == "assessoria" and usuario.id not in assessorias_existentes):
         comissao = Comissao(
             apolice_id=apolice.id,
             usuario_id=usuario.id if usuario.role == "corretor" else None,
@@ -72,7 +88,7 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
         )
         db.add(comissao)
 
-    if comissao_assessoria > 0 and usuario.assessoria:
+    if comissao_assessoria > 0 and usuario.assessoria and usuario.assessoria.id not in assessorias_existentes:
         comissao = Comissao(
             apolice_id=apolice.id,
             usuario_id=None,
@@ -83,8 +99,5 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
         db.add(comissao)
 
     db.commit()
-
-    # Chama função em background para gerar PDF e enviar ao D4Sign
-    background_tasks.add_task(enviar_para_d4sign_e_salvar, apolice.id)
 
     return {"status": "ok"}
