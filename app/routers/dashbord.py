@@ -1,23 +1,24 @@
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from datetime import datetime
-from app.database import get_db
-from app.models import Proposta, Apolice, Usuario
+import calendar
+
+from ..database import get_db
+from ..models import Proposta, Apolice, Usuario
 
 router = APIRouter()
+
 
 def get_user_filter(user: Usuario):
     """Retorna um filtro SQLAlchemy para aplicar de acordo com a role"""
     if user.role == "master":
-        # Master vê tudo
         return True
     elif user.role == "assessoria":
-        # Assessoria vê todos os corretores vinculados à mesma assessoria
         return Proposta.usuario.has(Usuario.assessoria_id == user.assessoria_id)
     else:
-        # Corretor vê apenas suas próprias propostas
         return Proposta.usuario_id == user.id
+
 
 def get_current_user(
     x_user_id: int = Header(...),
@@ -30,77 +31,91 @@ def get_current_user(
     user.role = x_user_role
     return user
 
+
 @router.get("/dashboard")
 def get_dashboard(
     current_user: Usuario = Depends(get_current_user),
     db: Session = Depends(get_db)
 ):
     now = datetime.now()
-    start_month = datetime(now.year, now.month, 1)
-
+    start_of_year = datetime(now.year, 1, 1)
     filtro = get_user_filter(current_user)
 
-    # Contagem de propostas
+    # ---------------------------
+    # Contagens gerais
+    # ---------------------------
     total_proposals = db.query(Proposta).filter(filtro).count()
     proposals_paid = db.query(Proposta).filter(filtro, Proposta.pago_em != None).count()
     proposals_draft = db.query(Proposta).filter(filtro, Proposta.status == "rascunho").count()
     proposals_rejected = db.query(Proposta).filter(filtro, Proposta.status == "rejeitada").count()
-    
-    # Propostas emitidas / aguardando pagamento
     proposals_pending_payment = db.query(Proposta).filter(
         filtro, Proposta.status == "aprovada", Proposta.pago_em == None
     ).count()
-    
-    # Canceladas
     proposals_canceled = db.query(Proposta).filter(filtro, Proposta.status == "cancelada").count()
-
-    # Apólices geradas
     policies_total = db.query(Apolice).filter(Apolice.proposta.has(filtro)).count()
 
-    # Valores e comissão do mês atual
+    # ---------------------------
+    # Receita e comissão do mês atual
+    # ---------------------------
+    start_month = datetime(now.year, now.month, 1)
     revenue_this_month = db.query(func.sum(Proposta.premio)).filter(
         filtro,
         Proposta.pago_em != None,
         Proposta.pago_em >= start_month
     ).scalar() or 0
 
-    # Comissão do mês (apenas para quem não é assessoria)
+    commission_to_pay = 0
     if current_user.role != "assessoria":
         commission_to_pay = db.query(func.sum(Proposta.comissao_valor)).filter(
             filtro,
             Proposta.pago_em != None,
             Proposta.pago_em >= start_month
         ).scalar() or 0
-    else:
-        commission_to_pay = 0
 
-    # Série mensal para gráfico
+    # ---------------------------
+    # Série mensal otimizada (uma query)
+    # ---------------------------
+    monthly_data = (
+        db.query(
+            extract("month", Proposta.data_criacao).label("month"),
+            func.count(Proposta.id).label("proposals"),
+            func.coalesce(func.sum(Proposta.premio), 0).label("revenue")
+        )
+        .filter(filtro, Proposta.data_criacao >= start_of_year)
+        .group_by("month")
+        .all()
+    )
+
+    # Montando a lista de 12 meses
     monthly_series = []
     for month in range(1, 13):
-        start = datetime(now.year, month, 1)
-        end = datetime(now.year, month, 28)
-        month_revenue = db.query(func.sum(Proposta.premio)).filter(
-            filtro,
-            Proposta.pago_em != None,
-            Proposta.pago_em >= start,
-            Proposta.pago_em <= end
-        ).scalar() or 0
-        month_proposals = db.query(Proposta).filter(
-            filtro,
-            Proposta.data_criacao >= start,
-            Proposta.data_criacao <= end
-        ).count()
-        monthly_series.append({"month": start.strftime("%b"), "revenue": month_revenue, "proposals": month_proposals})
+        month_info = next((m for m in monthly_data if int(m.month) == month), None)
+        monthly_series.append({
+            "month": datetime(now.year, month, 1).strftime("%b"),
+            "revenue": float(month_info.revenue) if month_info else 0,
+            "proposals": month_info.proposals if month_info else 0,
+        })
 
-    # Distribuição por status
+    # ---------------------------
+    # Distribuição por status (uma query)
+    # ---------------------------
+    status_counts = (
+        db.query(Proposta.status, func.count(Proposta.id))
+        .filter(filtro)
+        .group_by(Proposta.status)
+        .all()
+    )
+    status_map = {status: count for status, count in status_counts}
     status_distribution = [
-        {"name": "Rascunho", "value": proposals_draft},
-        {"name": "Emitida / Aguardando pagamento", "value": proposals_pending_payment},
-        {"name": "Paga", "value": proposals_paid},
-        {"name": "Cancelada", "value": proposals_canceled},
+        {"name": "Rascunho", "value": status_map.get("rascunho", 0)},
+        {"name": "Emitida / Aguardando pagamento", "value": status_map.get("aprovada", 0)},
+        {"name": "Paga", "value": status_map.get("pago", 0) or proposals_paid},  # fallback
+        {"name": "Cancelada", "value": status_map.get("cancelada", 0)},
     ]
 
-    # Retorno ajustado para o frontend
+    # ---------------------------
+    # Retorno
+    # ---------------------------
     return {
         "totalProposals": total_proposals,
         "proposalsDraft": proposals_draft,
@@ -108,8 +123,8 @@ def get_dashboard(
         "proposalsPaid": proposals_paid,
         "proposalsCancelled": proposals_canceled,
         "policiesTotal": policies_total,
-        "revenueThisMonth": revenue_this_month,
-        "commissionToPay": commission_to_pay,
+        "revenueThisMonth": float(revenue_this_month),
+        "commissionToPay": float(commission_to_pay),
         "monthlySeries": monthly_series,
         "statusDistribution": status_distribution,
     }

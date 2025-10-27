@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Comisão</title>
+    <link rel="stylesheet" href="{{ base_path }}/css/comisao.css">
+</head>
+<body>
+    <div class="Container-geral">
+        <div class="containerLogo">
+            <img src="data:image/jpeg;base64,{{ logo_base64 }}"/>
+            <p>Demonstrativo N° {{numeroDesmontrativo}}</p>
+        </div>
+        <div>
+            <div class="divisao">
+                <p>Dados Da Empresa</p>
+            </div>
+            <div class="containerIn">
+                <div>
+                    <p><strong>Empresa</strong></p>
+                </div>
+                <div class="divRandL">
+                    <p>FINANCE ASSURANCE GARANTIA LTDA</p>
+                </div>
+                <div class="divL">
+                    <p><strong>CPF/CNPJ</strong></p>
+                </div>
+                <div>
+                    <p>13.105.681/0001-02</p>
+                </div>
+            </div>
+            <div>
+            <div class="containerIn">
+                <div><p><strong>Endereço</strong></p></div>
+                <div class="divRandL"><p class="pnome">Avenida Brasília 2121 SL 1722</p></div>
+                <div class="divL"><p><strong>CEP</strong></p></div>
+                <div><p>16018-000</p></div>
+                <div class="divRandL"><p><strong>Cidade</strong></p></div>
+                <div><p>Araçatuba</p></div>
+                <div class="divRandL"><p><strong>UF</strong></p></div>
+                <div><p>SP</p></div>
+            </div>
+
+            <div class="containerFim">
+                <div class="divL"> <p class="spaceemail"><strong>Email</strong></p></div>
+                <div><p class="spaceNomeemail">financeiro@financeassurance.com.br</p></div>
+            </div>
+
+            <div class="divisao">
+                <p>Dados Do Corretor</p>
+            </div>
+            <div class="containerIn">
+                <div><p><strong>Nome</strong></p></div>
+                <div class="divRandL"><p>{{nomeCorretor}}</p></div>
+                <div><p><strong>Cód. SUSEP</strong></p></div>
+                <div class="divRandL"><p>{{codigoSusep}}</p></div>
+                <div class="divL"><p>CPF/CNPJ</p></div>
+                <div><p>{{cnpjCpf}}</p></div>
+            </div>
+            <div class="containerIn">
+                <div><p><strong>Nome</strong></p></div>
+                <div class="divRandL"><p>{{Endeereco}}</p></div>
+                <div ><p><strong>CEP</strong></p></div>
+                <div class="divRandL"><p>{{cep}}</p></div>
+                <div><p><strong>Cidade</strong></p></div>
+                <div class="divRandL"><p>{{cidade}}</p></div>
+                <div class="divL"><p><strong>UF</strong></p></div>
+                <div><p>{{uf}}</p></div>
+            </div>
+            <div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Apólice</th>
+                            <th>Tomador</th>
+                            <th>Segurado</th>
+                            <th>Prêmio</th>
+                            <th>% Comisão</th>
+                            <th>Valor da Comisão</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for item in dados %}
+                    <tr>
+                        <td>{{ item.numero_apolice }}</td>
+                        <td>{{ item.tomador_nome }}</td>
+                        <td>{{ item.segurado_nome }}</td>
+                        <td>R$ {{ "{:,.2f}".format(item.premio) }}</td>
+                        <td>{{ "{:.2f}".format(item.percentual) }}%</td>
+                        <td>R$ {{ "{:,.2f}".format(item.comissao_valor) }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

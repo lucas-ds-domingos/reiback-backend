@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric, LargeBinary, JSON
+from sqlalchemy import Column, Integer, String, ForeignKey, Date, Float, DateTime, Boolean, Text, Numeric, LargeBinary, JSON, TIMESTAMP,CheckConstraint
 from sqlalchemy.orm import relationship
 from .database import Base
 from datetime import datetime
@@ -373,3 +373,47 @@ class DocumentosTomador(Base):
     status = Column(String(50), nullable=False, default="pendente")
 
     data_upload = Column(DateTime(timezone=True), default=func.now())
+
+
+class Comissao(Base):
+    __tablename__ = "comissoes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    apolice_id = Column(Integer, ForeignKey("apolices.id", ondelete="CASCADE"), nullable=False)
+    corretor_id = Column(Integer, ForeignKey("usuarios.id", ondelete="SET NULL"))
+    assessoria_id = Column(Integer, ForeignKey("assessorias.id", ondelete="SET NULL"))
+
+    valor_premio = Column(Numeric(12, 2), default=0)
+    percentual_corretor = Column(Numeric(5, 2), default=0)
+    valor_corretor = Column(Numeric(12, 2), default=0)
+    percentual_assessoria = Column(Numeric(5, 2), default=0)
+    valor_assessoria = Column(Numeric(12, 2), default=0)
+
+    status_pagamento_corretor = Column(String(20), default="pendente")
+    status_pagamento_assessoria = Column(String(20), default="pendente")
+    data_pagamento_corretor = Column(Date)
+    data_pagamento_assessoria = Column(Date)
+
+    observacao = Column(Text)
+    created_at = Column(TIMESTAMP, server_default=func.now())
+    updated_at = Column(TIMESTAMP, server_default=func.now(), onupdate=func.now())
+
+    # Relações
+    apolice = relationship("Apolice", back_populates="comissoes")
+    corretor = relationship("Usuario", foreign_keys=[corretor_id])
+    assessoria = relationship("Assessoria", foreign_keys=[assessoria_id])
+    pagamentos = relationship("PagamentoComissao", back_populates="comissao", cascade="all, delete-orphan")
+
+
+class PagamentoComissao(Base):
+    __tablename__ = "pagamentos_comissao"
+
+    id = Column(Integer, primary_key=True, index=True)
+    comissao_id = Column(Integer, ForeignKey("comissoes.id", ondelete="CASCADE"), nullable=False)
+    tipo = Column(String(20), CheckConstraint("tipo IN ('corretor', 'assessoria')"))
+    valor_pago = Column(Numeric(12, 2), nullable=False)
+    data_pagamento = Column(Date, server_default=func.now())
+    comprovante_url = Column(Text)
+    observacao = Column(Text)
+
+    comissao = relationship("Comissao", back_populates="pagamentos")
