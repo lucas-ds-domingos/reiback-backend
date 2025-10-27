@@ -215,6 +215,7 @@ class Apolice(Base):
     # Relacionamento com proposta
     proposta_id = Column(Integer, ForeignKey("propostas.id"))
     proposta = relationship("Proposta", back_populates="apolice")
+    comissoes = relationship("Comissao", back_populates="apolice")
 
 
 
