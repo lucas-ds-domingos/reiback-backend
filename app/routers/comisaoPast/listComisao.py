@@ -4,10 +4,12 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
+from ..gerar_pdf_assessoria import preparar_html_assessoria  # novo import
 from ...database import get_db
-from ...models import Comissao, Apolice, Proposta
+from ...models import Comissao, Apolice, Proposta, Usuario
 import tempfile
 from pathlib import Path
+import asyncio
 
 router = APIRouter()
 
@@ -36,27 +38,93 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
         })
     return resultados
 
+
+# ---------------------------
+# PDF da ASSESSORIA
+# ---------------------------
+@router.get("/pdf/assessoria/{usuario_id}")
+async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario or not usuario.assessoria_id:
+        return {"detail": "Usuário não vinculado a assessoria"}
+
+    # Pegar todas as comissões dos corretores da assessoria
+    sete_dias_atras = datetime.utcnow() - timedelta(days=7)
+    comissoes = (
+        db.query(Comissao)
+        .join(Usuario, Comissao.corretor_id == Usuario.id)
+        .filter(
+            Usuario.assessoria_id == usuario.assessoria_id,
+            Comissao.status_pagamento_assessoria == "pendente",
+            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+        )
+        .all()
+    )
+
+    if not comissoes:
+        raise HTTPException(status_code=404, detail="Nenhuma comissão pendente")
+
+    # Dados das comissões
+    dados = []
+    for c in comissoes:
+        dados.append({
+            "numero_apolice": c.apolice.numero,
+            "tomador_nome": c.apolice.proposta.tomador.nome,
+            "segurado_nome": c.apolice.proposta.segurado.nome,
+            "corretor_nome": c.corretor.nome if c.corretor else "-",
+            "premio": float(c.valor_premio),
+            "percentual": float(c.percentual_assessoria),
+            "comissao_valor": float(c.valor_assessoria),
+        })
+
+    # Dados da assessoria
+    dados_assessoria = {
+        "id": usuario.assessoria_id,
+        "nome_assessoria": usuario.assessoria.razao_social if usuario.assessoria else "",
+        "cnpj": usuario.assessoria.cnpj if usuario.assessoria else "",
+        "endereco": usuario.assessoria.endereco if usuario.assessoria else "",
+        "cidade": usuario.assessoria.cidade if usuario.assessoria else "",
+        "uf": usuario.assessoria.uf if usuario.assessoria else "",
+    }
+
+    numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"
+    html = preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria)
+
+    # Caminho temporário seguro
+    tmpdir = tempfile.gettempdir()
+    output_path = Path(tmpdir) / f"comissao_assessoria_{usuario.assessoria_id}_{int(datetime.utcnow().timestamp())}.pdf"
+
+    await gerar_pdf(html, str(output_path))
+
+    return FileResponse(
+        str(output_path),
+        filename=f"comissao_assessoria_{usuario.assessoria_id}.pdf",
+        media_type="application/pdf"
+    )
+
+
+# ---------------------------
+# PDF do CORRETOR
+# ---------------------------
 @router.get("/pdf/corretor/{usuario_id}")
 async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
 
-    # JOIN seguro e legível
     comissoes = (
         db.query(Comissao)
-          .join(Comissao.apolice)        # join Apolice
-          .join(Apolice.proposta)        # join Proposta
-          .filter(
-              Comissao.corretor_id == usuario_id,
-              Comissao.status_pagamento_corretor == "pendente",
-              Proposta.data_criacao >= sete_dias_atras
-          )
-          .all()
+        .join(Comissao.apolice)
+        .join(Apolice.proposta)
+        .filter(
+            Comissao.corretor_id == usuario_id,
+            Comissao.status_pagamento_corretor == "pendente",
+            Proposta.data_criacao >= sete_dias_atras
+        )
+        .all()
     )
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
 
-    # Monta dados para o template conforme seu HTML
     dados = []
     for c in comissoes:
         apol = c.apolice
@@ -76,18 +144,27 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
     html = preparar_html(dados, numero_demonstrativo)
 
-    # gera PDF em arquivo temporário e retorna como FileResponse
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
+
     await gerar_pdf(html, str(output_path))
 
-    return FileResponse(str(output_path), filename=f"comissao_{usuario_id}.pdf", media_type="application/pdf")
+    return FileResponse(
+        str(output_path),
+        filename=f"comissao_{usuario_id}.pdf",
+        media_type="application/pdf"
+    )
 
+
+# ---------------------------
+# Marcar comissão como paga
+# ---------------------------
 @router.post("/comissoes/marcar_pago/{comissao_id}")
 def marcar_pago(comissao_id: int, tipo: str, db: Session = Depends(get_db)):
     comissao = db.query(Comissao).filter(Comissao.id == comissao_id).first()
     if not comissao:
         return {"error": "Comissão não encontrada"}
+
     if tipo == "corretor":
         comissao.status_pagamento_corretor = "pago"
         comissao.data_pagamento_corretor = datetime.utcnow()
@@ -96,5 +173,6 @@ def marcar_pago(comissao_id: int, tipo: str, db: Session = Depends(get_db)):
         comissao.data_pagamento_assessoria = datetime.utcnow()
     else:
         return {"error": "Tipo inválido"}
+
     db.commit()
     return {"status": "ok"}
