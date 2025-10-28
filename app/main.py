@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .routers import tomador,documentos,segurado,propostas,gerarpdf,webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal, fiador, ccg, webhokD4sing,dashbord,propostaAtualizarTaxa,password_reset,welcomeEmail,assCadastroComisao
 from fastapi.staticfiles import StaticFiles
+from .routers import listCorretor
 import asyncio
 import sys
 
@@ -34,6 +35,7 @@ app.include_router(propostaAtualizarTaxa.router, prefix="/api")
 app.include_router(password_reset.router, prefix="/api")
 app.include_router(welcomeEmail.router, prefix="/api")
 app.include_router(assCadastroComisao.router, prefix="/api")
+app.include_router(listCorretor.router , prefix="/api")
 
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
