@@ -4,6 +4,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from pathlib import Path
 import base64
 from playwright.async_api import async_playwright
+import os
+
+
+BROWSERLESS_URL = os.environ.get("BROWSER_WS_ENDPOINT")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
@@ -56,7 +60,7 @@ def preparar_html(dados, numero_demonstrativo):
 
 async def gerar_pdf(html_content: str, output_path="comissao.pdf"):
     async with async_playwright() as p:
-        browser = await p.chromium.launch()
+        browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
         page = await browser.new_page()
         await page.set_content(html_content, wait_until="networkidle")
         await page.pdf(path=output_path, format="A4", print_background=True)

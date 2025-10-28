@@ -1,10 +1,13 @@
 # app/routers/comissoes.py
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
 from ...database import get_db
-from ...models import Comissao
+from ...models import Comissao, Apolice, Proposta
+import tempfile
+from pathlib import Path
 
 router = APIRouter()
 
@@ -35,24 +38,50 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
 
 @router.get("/pdf/corretor/{usuario_id}")
 async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
-    comissoes = db.query(Comissao).filter(
-        Comissao.corretor_id == usuario_id,
-        Comissao.status_pagamento_corretor == "pendente",
-        Comissao.apolice.has(Comissao.apolice.proposta.has(Comissao.apolice.proposta.data_criacao >= datetime.utcnow() - timedelta(days=7)))
-    ).all()
-    dados = [{
-        "numero_apolice": c.apolice.numero,
-        "tomador_nome": c.apolice.proposta.tomador.nome,
-        "segurado_nome": c.apolice.proposta.segurado.nome,
-        "premio": float(c.valor_premio),
-        "percentual": float(c.percentual_corretor),
-        "comissao_valor": float(c.valor_corretor)
-    } for c in comissoes]
+    sete_dias_atras = datetime.utcnow() - timedelta(days=7)
+
+    # JOIN seguro e legível
+    comissoes = (
+        db.query(Comissao)
+          .join(Comissao.apolice)        # join Apolice
+          .join(Apolice.proposta)        # join Proposta
+          .filter(
+              Comissao.corretor_id == usuario_id,
+              Comissao.status_pagamento_corretor == "pendente",
+              Proposta.data_criacao >= sete_dias_atras
+          )
+          .all()
+    )
+
+    if not comissoes:
+        raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
+
+    # Monta dados para o template conforme seu HTML
+    dados = []
+    for c in comissoes:
+        apol = c.apolice
+        prop = apol.proposta if apol else None
+        tomador_nome = prop.tomador.nome if prop and prop.tomador else ""
+        segurado_nome = prop.segurado.nome if prop and prop.segurado else ""
+
+        dados.append({
+            "numero_apolice": apol.numero if apol else "",
+            "tomador_nome": tomador_nome,
+            "segurado_nome": segurado_nome,
+            "premio": float(c.valor_premio or 0),
+            "percentual": float(c.percentual_corretor or 0),
+            "comissao_valor": float(c.valor_corretor or 0),
+        })
+
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
     html = preparar_html(dados, numero_demonstrativo)
-    output_path = f"pdfs/comissao_corretor_{usuario_id}.pdf"
-    await gerar_pdf(html, output_path)
-    return {"pdf_path": output_path}
+
+    # gera PDF em arquivo temporário e retorna como FileResponse
+    tmpdir = tempfile.gettempdir()
+    output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
+    await gerar_pdf(html, str(output_path))
+
+    return FileResponse(str(output_path), filename=f"comissao_{usuario_id}.pdf", media_type="application/pdf")
 
 @router.post("/comissoes/marcar_pago/{comissao_id}")
 def marcar_pago(comissao_id: int, tipo: str, db: Session = Depends(get_db)):

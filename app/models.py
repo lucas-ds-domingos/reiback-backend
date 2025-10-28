@@ -31,10 +31,6 @@ class Usuario(Base):
     tomadores = relationship("Tomador", back_populates="usuario")
     password_resets = relationship("PasswordReset", back_populates="usuario")
 
-
-
-
-
 class PasswordReset(Base):
     __tablename__ = "password_resets"
 
@@ -79,8 +75,6 @@ class RepresentanteLegal(Base):
     nome_completo = Column(String, nullable=False)
     cpf = Column(String, nullable=False)
     email = Column(String, nullable=False)
-
-    # ✅ Novos campos
     endereco = Column(String, nullable=True)
     cidade = Column(String(100), nullable=True)
     uf = Column(String(2), nullable=True)
@@ -217,8 +211,6 @@ class Apolice(Base):
     proposta = relationship("Proposta", back_populates="apolice")
     comissoes = relationship("Comissao", back_populates="apolice")
 
-
-
 class ClienteAsaas(Base):
     __tablename__ = "clientes_asaas"
 
@@ -269,8 +261,6 @@ class Corretora(Base):
     bairro = Column(String(100), nullable=True)
     uf = Column(String(2), nullable=True)
     cidade = Column(String(100), nullable=True)
-
-    # Dados bancários
     banco = Column(String(100), nullable=True)
     tipo_conta = Column(String(50), nullable=True)
     agencia = Column(String(20), nullable=True)
@@ -285,8 +275,6 @@ class Corretora(Base):
     socios = relationship("SocioCorretora", back_populates="corretora")
     responsavel = relationship("ResponsavelFinanceiroCorretora", back_populates="corretora", uselist=False)
     documentos = relationship("DocumentoCorretora", back_populates="corretora")
-
-
 
 class Assessoria(Base):
     __tablename__ = "assessorias"
@@ -416,5 +404,4 @@ class PagamentoComissao(Base):
     data_pagamento = Column(Date, server_default=func.now())
     comprovante_url = Column(Text)
     observacao = Column(Text)
-
     comissao = relationship("Comissao", back_populates="pagamentos")
