@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
-from database import get_db
+from ...database import get_db
 from ...models import Comissao
 
 router = APIRouter()
