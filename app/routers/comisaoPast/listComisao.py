@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
-from ..gerar_pdf_assessoria import preparar_html_assessoria  # novo import
+from ..gerar_pdf_assessoria import preparar_html_assessoria
 from ...database import get_db
 from ...models import Comissao, Apolice, Proposta, Usuario
 import tempfile
@@ -13,14 +13,17 @@ import asyncio
 
 router = APIRouter()
 
+
+# ---------------------------
+# Listar comissões pendentes
+# ---------------------------
 @router.get("/comissoes/pendentes")
 def listar_comissoes_pendentes(db: Session = Depends(get_db)):
-    # retorna todas as comissões pendentes
-    sete_dias_atras = datetime.utcnow() - timedelta(days=7)
     comissoes = db.query(Comissao).filter(
         (Comissao.status_pagamento_corretor == "pendente") |
         (Comissao.status_pagamento_assessoria == "pendente")
     ).all()
+
     resultados = []
     for c in comissoes:
         resultados.append({
@@ -46,25 +49,25 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
 async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario or not usuario.assessoria_id:
-        return {"detail": "Usuário não vinculado a assessoria"}
+        raise HTTPException(status_code=404, detail="Usuário não vinculado a assessoria")
 
-    # Pegar todas as comissões dos corretores da assessoria
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
+
+    # Pegar todas as comissões pendentes dos últimos 7 dias dos corretores da assessoria
     comissoes = (
         db.query(Comissao)
         .join(Usuario, Comissao.corretor_id == Usuario.id)
         .filter(
             Usuario.assessoria_id == usuario.assessoria_id,
             Comissao.status_pagamento_assessoria == "pendente",
-            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+            Comissao.data_criacao >= sete_dias_atras
         )
         .all()
     )
 
     if not comissoes:
-        raise HTTPException(status_code=404, detail="Nenhuma comissão pendente")
+        raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
 
-    # Dados das comissões
     dados = []
     for c in comissoes:
         dados.append({
@@ -77,7 +80,6 @@ async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
             "comissao_valor": float(c.valor_assessoria),
         })
 
-    # Dados da assessoria
     dados_assessoria = {
         "id": usuario.assessoria_id,
         "nome_assessoria": usuario.assessoria.razao_social if usuario.assessoria else "",
@@ -90,7 +92,6 @@ async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
     numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"
     html = preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria)
 
-    # Caminho temporário seguro
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissao_assessoria_{usuario.assessoria_id}_{int(datetime.utcnow().timestamp())}.pdf"
 
@@ -117,7 +118,7 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
         .filter(
             Comissao.corretor_id == usuario_id,
             Comissao.status_pagamento_corretor == "pendente",
-            Proposta.data_criacao >= sete_dias_atras
+            Comissao.data_criacao >= sete_dias_atras
         )
         .all()
     )
