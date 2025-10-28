@@ -112,16 +112,16 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
 
     comissoes = (
-        db.query(Comissao)
-        .join(Comissao.apolice)
-        .join(Apolice.proposta)
-        .filter(
-            Comissao.corretor_id == usuario_id,
-            Comissao.status_pagamento_corretor == "pendente",
-            Comissao.data_criacao >= sete_dias_atras
+        db.query(Comissao)  
+            .join(Usuario, Comissao.corretor_id == Usuario.id)
+            .filter(
+                Usuario.assessoria_id == Usuario.assessoria_id,
+                Comissao.status_pagamento_assessoria == "pendente",
+                Comissao.data_criacao >= sete_dias_atras  # FILTRO CORRETO
+            )
+            .all()
         )
-        .all()
-    )
+
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
