@@ -9,6 +9,7 @@ from .d4sign_tasks import enviar_para_d4sign_e_salvar
 
 router = APIRouter()
 
+
 def gerar_numero_apolice(db: Session) -> str:
     """
     Gera um número único de apólice: FIN-{prefixo aleatório de 3 dígitos}{sequência 5 dígitos}
@@ -95,10 +96,18 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
                 )
             )
 
-        # Comissão da assessoria (somando percentual da proposta + percentual da assessoria)
+        # Comissão da assessoria (ajustada conforme quem criou a proposta)
         if usuario.assessoria:
-            percentual_assessoria_total = proposta.comissao_percentual + (usuario.assessoria.comissao or Decimal("0.00"))
-            valor_assessoria = valor_premio * (percentual_assessoria_total / 100)
+            if usuario.role == "corretor":
+                # Corretor criou → assessoria ganha só a porcentagem dela
+                percentual_assessoria = usuario.assessoria.comissao or Decimal("0.00")
+            else:
+                # Assessoria criou → soma a porcentagem dela + da proposta
+                percentual_assessoria = (proposta.comissao_percentual or Decimal("0.00")) + (
+                    usuario.assessoria.comissao or Decimal("0.00")
+                )
+
+            valor_assessoria = valor_premio * (percentual_assessoria / 100)
             comissoes.append(
                 Comissao(
                     apolice_id=apolice.id,
@@ -106,7 +115,7 @@ def asaas_webhook(payload: dict, background_tasks: BackgroundTasks, db: Session 
                     valor_corretor=Decimal("0.00"),
                     percentual_corretor=Decimal("0.00"),
                     valor_assessoria=valor_assessoria,
-                    percentual_assessoria=percentual_assessoria_total,
+                    percentual_assessoria=percentual_assessoria,
                     valor_premio=valor_premio
                 )
             )
