@@ -16,6 +16,13 @@ body {
     height: 80%;
 }
 
+.divisao2{
+    background-color: #d9d9d9;
+    text-align: center;
+    border-bottom: 0.5mm solid black;
+    width: 100%;
+    height: 80%;
+}
 .Container-geral {
     width: 100%;
     max-width: 800px;
