@@ -22,7 +22,7 @@ def preparar_html(dados, numero_demonstrativo):
     template = env.get_template("comisaoCorretor.html")
     # Logo base64
     try:
-        with open(STATIC_DIR / "images" / "logo3.png", "rb") as f:
+        with open(STATIC_DIR / "images" / "Logo3.png", "rb") as f:
             logo_base64 = base64.b64encode(f.read()).decode()
     except:
         logo_base64 = ""

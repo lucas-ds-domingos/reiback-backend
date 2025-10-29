@@ -99,13 +99,24 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
 
-    dados = []
+    # 🔹 Busca dados do corretor
+    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+
+    # 🔹 Busca assessoria (se tiver)
+    assessoria = None
+    if usuario.assessoria_id:
+        assessoria = db.query(Assessoria).filter(Assessoria.id == usuario.assessoria_id).first()
+
+    # 🔹 Monta as comissões do corretor
+    comissoes_dados = []
     for c in comissoes:
         apol = c.apolice
         prop = apol.proposta if apol else None
         tomador_nome = prop.tomador.nome if prop and prop.tomador else ""
         segurado_nome = prop.segurado.nome if prop and prop.segurado else ""
-        dados.append({
+        comissoes_dados.append({
             "numero_apolice": apol.numero if apol else "",
             "tomador_nome": tomador_nome,
             "segurado_nome": segurado_nome,
@@ -114,17 +125,23 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
             "comissao_valor": float(c.valor_corretor or 0)
         })
 
-    usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if not usuario:
-        raise HTTPException(status_code=404, detail="Usuário não encontrado")
+    # 🔹 Dados completos que vão pro PDF
+    dados = {
+        "corretor_nome": usuario.nome,
+        "corretor_email": usuario.email,
+        "corretor_telefone": getattr(usuario, "telefone", ""),
+        "assessoria_nome": assessoria.razao_social if assessoria else "",
+        "assessoria_cnpj": assessoria.cnpj if assessoria else "",
+        "comissoes": comissoes_dados
+    }
 
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
-    html_content = preparar_html_corretor(dados, numero_demonstrativo)
+    html_content = preparar_html(dados, numero_demonstrativo)
 
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
 
-    await gerar_pdf_corretor(html_content, str(output_path)) 
+    await gerar_pdf(html_content, str(output_path))
 
     return FileResponse(
         str(output_path),

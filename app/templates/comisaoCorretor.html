@@ -34,53 +34,41 @@
             <div class="divL"><p class="spaceemail"><strong>Email</strong></p></div>
             <div><p class="spaceNomeemail">financeiro@financeassurance.com.br</p></div>
         </div>
+        <h2>Dados do Corretor</h2>
+        <p><strong>Nome:</strong> {{ dados.corretor_nome }}</p>
+        <p><strong>Email:</strong> {{ dados.corretor_email }}</p>
+        <p><strong>Telefone:</strong> {{ dados.corretor_telefone }}</p>
+        <p><strong>Assessoria:</strong> {{ dados.assessoria_nome }}</p>
+        <p><strong>CNPJ Assessoria:</strong> {{ dados.assessoria_cnpj }}</p>
 
-        <div class="divisao"><p>Dados Do Corretor</p></div>
-        <div class="containerIn">
-            <div><p><strong>Nome</strong></p></div>
-            <div class="divRandL"><p>{{ nomeCorretor }}</p></div>
-            <div><p><strong>Cód. SUSEP</strong></p></div>
-            <div class="divRandL"><p>{{ codigoSusep }}</p></div>
-            <div class="divL"><p>CPF/CNPJ</p></div>
-            <div><p>{{ cnpjCpf }}</p></div>
-        </div>
-        <div class="containerIn">
-            <div><p><strong>Endereço</strong></p></div>
-            <div class="divRandL"><p>{{ endereco }}</p></div>
-            <div><p><strong>CEP</strong></p></div>
-            <div class="divRandL"><p>{{ cep }}</p></div>
-            <div><p><strong>Cidade</strong></p></div>
-            <div class="divRandL"><p>{{ cidade }}</p></div>
-            <div class="divL"><p><strong>UF</strong></p></div>
-            <div><p>{{ uf }}</p></div>
-        </div>
+        <hr>
 
-        <div class="divisao"><p>Comissões</p></div>
-        <div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Apólice</th>
-                        <th>Tomador</th>
-                        <th>Segurado</th>
-                        <th>Prêmio</th>
-                        <th>%</th>
-                        <th>Comissão</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for item in dados %}
-                    <tr>
-                        <td>{{ item.numero_apolice }}</td>
-                        <td>{{ item.tomador_nome }}</td>
-                        <td>{{ item.segurado_nome }}</td>
-                        <td>R$ {{ "{:,.2f}".format(item.premio) }}</td>
-                        <td>{{ "{:.2f}".format(item.percentual) }}%</td>
-                        <td>R$ {{ "{:,.2f}".format(item.comissao_valor) }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <h2>Comissões Pendentes</h2>
+        <table>
+        <thead>
+            <tr>
+            <th>Apólice</th>
+            <th>Tomador</th>
+            <th>Segurado</th>
+            <th>Prêmio</th>
+            <th>% Comissão</th>
+            <th>Valor da Comissão</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in dados.comissoes %}
+            <tr>
+                <td>{{ item.numero_apolice }}</td>
+                <td>{{ item.tomador_nome }}</td>
+                <td>{{ item.segurado_nome }}</td>
+                <td>R$ {{ "%.2f"|format(item.premio) }}</td>
+                <td>{{ "%.2f"|format(item.percentual) }}%</td>
+                <td>R$ {{ "%.2f"|format(item.comissao_valor) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+        </table>
+
         </div>
     </div>
 </body>
