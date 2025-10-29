@@ -63,6 +63,7 @@
                         <th>Apólice</th>
                         <th>Tomador</th>
                         <th>Segurado</th>
+                        <th>Corretor</th>
                         <th>Prêmio</th>
                         <th>% Comissão</th>
                         <th>Valor da Comissão</th>
@@ -74,6 +75,7 @@
                         <td>{{ item.numero_apolice }}</td>
                         <td>{{ item.tomador_nome }}</td>
                         <td>{{ item.segurado_nome }}</td>
+                        <td>{{item.corretor_nome}}</td>
                         <td>R$ {{ "{:,.2f}".format(item.premio) }}</td>
                         <td>{{ "{:.2f}".format(item.percentual) }}%</td>
                         <td>R$ {{ "{:,.2f}".format(item.comissao_valor) }}</td>

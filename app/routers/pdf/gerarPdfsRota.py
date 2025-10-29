@@ -49,7 +49,8 @@ async def pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
             "segurado_nome": c.apolice.proposta.segurado.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.segurado else "",
             "premio": float(c.valor_premio or 0),
             "percentual": float(c.percentual_assessoria or 0),
-            "comissao_valor": float(c.valor_assessoria or 0)
+            "comissao_valor": float(c.valor_assessoria or 0),
+            "corretor_nome": c.apolice.proposta.usuario.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.usuario else ""
         })
 
     dados_assessoria = {
