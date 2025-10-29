@@ -73,7 +73,7 @@ async def gerar_pdf_assessoria_interno(usuario, db: Session):
         .filter(
             Usuario.assessoria_id == usuario.assessoria_id,
             Comissao.status_pagamento_assessoria == "pendente",
-            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+            #Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
         )
         .all()
     )
