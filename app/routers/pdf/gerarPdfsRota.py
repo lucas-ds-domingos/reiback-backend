@@ -136,8 +136,8 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
             "comissoes": comissoes_dados
         }
 
-    numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
-    html_content = preparar_html_corretor(dados, numero_demonstrativo)
+    numeroDemonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
+    html_content = preparar_html_corretor(dados, numeroDemonstrativo)
 
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
