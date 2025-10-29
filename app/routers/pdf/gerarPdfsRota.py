@@ -132,9 +132,10 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
             "corretor_telefone": corretora.telefone if corretora else "",
             "corretor_cnpj": corretora.cnpj if corretora else "",
             "assessoria_nome": assessoria.razao_social if assessoria else "",
+            "assessoria_cnpj":assessoria.cnpj if assessoria else "",
             "comissoes": comissoes_dados
         }
-        
+
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
     html_content = preparar_html_corretor(dados, numero_demonstrativo)
 
