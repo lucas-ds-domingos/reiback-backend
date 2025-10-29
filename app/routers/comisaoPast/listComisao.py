@@ -53,17 +53,19 @@ async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
 
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
 
-    # Pegar todas as comissões pendentes dos últimos 7 dias dos corretores da assessoria
+
     comissoes = (
         db.query(Comissao)
-        .join(Usuario, Comissao.corretor_id == Usuario.id)
+        .join(Comissao.apolice)
+        .join(Apolice.proposta)
         .filter(
-            Usuario.assessoria_id == usuario.assessoria_id,
-            Comissao.status_pagamento_assessoria == "pendente",
-            Comissao.data_criacao >= sete_dias_atras
+            Comissao.corretor_id == usuario_id,
+            Comissao.status_pagamento_corretor == "pendente",
+            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
         )
         .all()
     )
+
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
