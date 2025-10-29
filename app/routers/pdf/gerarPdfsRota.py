@@ -125,16 +125,16 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
             "comissao_valor": float(c.valor_corretor or 0)
         })
 
-    # 🔹 Dados completos que vão pro PDF
-    dados = {
-        "corretor_nome": usuario.nome,
-        "corretor_email": usuario.email,
-        "corretor_telefone": getattr(usuario, "telefone", ""),
-        "assessoria_nome": assessoria.razao_social if assessoria else "",
-        "assessoria_cnpj": assessoria.cnpj if assessoria else "",
-        "comissoes": comissoes_dados
-    }
-
+        corretora = usuario.corretora  # pega a corretora vinculada ao usuário
+        dados = {
+            "corretor_nome": usuario.nome,
+            "corretor_email": usuario.email,
+            "corretor_telefone": corretora.telefone if corretora else "",
+            "corretor_cnpj": corretora.cnpj if corretora else "",
+            "assessoria_nome": assessoria.razao_social if assessoria else "",
+            "comissoes": comissoes_dados
+        }
+        
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
     html_content = preparar_html_corretor(dados, numero_demonstrativo)
 

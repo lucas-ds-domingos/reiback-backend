@@ -34,45 +34,51 @@
             <div class="divL"><p class="spaceemail"><strong>Email</strong></p></div>
             <div><p class="spaceNomeemail">financeiro@financeassurance.com.br</p></div>
         </div>
-        <div class="divisao2"><p>Dados do Corretor</p></div> 
-        <div class="containerIn">
-        <div><p><strong>Nome:</strong></p></div>
-        <div class="divRandL"><p>{{ dados.corretor_nome }}</p></div>
-        <div><p><strong>Email:</strong></p></div>
-        <div class="divRandL"><p>{{ dados.corretor_email }}</p></div>
-        <div><p><strong>Telefone:</strong></p></div>
-        <div class="divRandL"><p>{{ dados.corretor_telefone }}</p></div>
-        <div><p><strong>Assessoria:</strong></p></div>
-        <div class="divRandL"><p>{{ dados.assessoria_nome }}</p></div>
-        <div class="divL"><p><strong>CNPJ Assessoria:</strong></p></div>
-        <div><p>{{ dados.assessoria_cnpj }}</p></div>
-        </div>
-        <h2>Comissões Pendentes</h2>
-        <table>
-        <thead>
-            <tr>
-            <th>Apólice</th>
-            <th>Tomador</th>
-            <th>Segurado</th>
-            <th>Prêmio</th>
-            <th>% Comissão</th>
-            <th>Valor da Comissão</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in dados.comissoes %}
-            <tr>
-                <td>{{ item.numero_apolice }}</td>
-                <td>{{ item.tomador_nome }}</td>
-                <td>{{ item.segurado_nome }}</td>
-                <td>R$ {{ "%.2f"|format(item.premio) }}</td>
-                <td>{{ "%.2f"|format(item.percentual) }}%</td>
-                <td>R$ {{ "%.2f"|format(item.comissao_valor) }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        </table>
 
+        <div class="divisao"><p>Dados do Corretor</p></div>
+        <div class="containerIn">
+            <div><p><strong>Nome</strong></p></div>
+            <div class="divRandL"><p>{{ dados.corretor_nome }}</p></div>
+            <div class="divL"><p><strong>CPF/CNPJ</strong></p></div>
+            <div><p>{{ dados.corretor_cnpj }}</p></div>
+        </div>
+        <div class="containerIn">
+            <div><p><strong>Email</strong></p></div>
+            <div class="divRandL"><p>{{ dados.corretor_email }}</p></div>
+            <div><p><strong>Telefone</strong></p></div>
+            <div class="divRandL"><p>{{ dados.corretor_telefone }}</p></div>
+            <div><p><strong>Assessoria</strong></p></div>
+            <div class="divRandL"><p>{{ dados.assessoria_nome }}</p></div>
+            <div><p><strong>CNPJ Assessoria</strong></p></div>
+            <div class="divRandL"><p>{{ dados.assessoria_cnpj }}</p></div>
+        </div>
+
+        <div class="divisao2"><p>Comissões Pendentes</p></div>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Apólice</th>
+                        <th>Tomador</th>
+                        <th>Segurado</th>
+                        <th>Prêmio</th>
+                        <th>% Comissão</th>
+                        <th>Valor da Comissão</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in dados.comissoes %}
+                    <tr>
+                        <td>{{ item.numero_apolice }}</td>
+                        <td>{{ item.tomador_nome }}</td>
+                        <td>{{ item.segurado_nome }}</td>
+                        <td>R$ {{ "%.2f"|format(item.premio) }}</td>
+                        <td>{{ "%.2f"|format(item.percentual) }}%</td>
+                        <td>R$ {{ "%.2f"|format(item.comissao_valor) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
