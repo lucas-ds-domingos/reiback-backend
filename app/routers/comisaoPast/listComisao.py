@@ -6,13 +6,11 @@ from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
 from ..gerar_pdf_assessoria import preparar_html_assessoria
 from ...database import get_db
-from ...models import Comissao, Apolice, Proposta, Usuario
+from ...models import Comissao, Apolice, Proposta, Usuario, Corretor, Assessoria
 import tempfile
 from pathlib import Path
-import asyncio
 
 router = APIRouter()
-
 
 # ---------------------------
 # Listar comissões pendentes
@@ -43,28 +41,42 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
 
 
 # ---------------------------
-# PDF da ASSESSORIA
+# NOVO: PDF automático (detecta tipo)
 # ---------------------------
-@router.get("/pdf/assessoria/{usuario_id}")
-async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
+@router.get("/pdf/{usuario_id}")
+async def gerar_pdf_unico(usuario_id: int, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
-    if not usuario or not usuario.assessoria_id:
-        raise HTTPException(status_code=404, detail="Usuário não vinculado a assessoria")
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Usuário não encontrado")
 
+    # Verifica se o usuário está vinculado a uma assessoria
+    if usuario.assessoria_id:
+        return await gerar_pdf_assessoria_interno(usuario, db)
+
+    # Verifica se é um corretor vinculado a uma assessoria
+    corretor = db.query(Corretor).filter(Corretor.user_id == usuario_id).first()
+    if corretor:
+        return await gerar_pdf_corretor_interno(corretor.id, db)
+
+    raise HTTPException(status_code=404, detail="Usuário não é corretor nem assessoria")
+
+
+# ---------------------------
+# Função interna: PDF da ASSESSORIA
+# ---------------------------
+async def gerar_pdf_assessoria_interno(usuario, db: Session):
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
 
-
     comissoes = (
-    db.query(Comissao)
-    .join(Usuario, Comissao.corretor_id == Usuario.id)
-    .filter(
-        Usuario.assessoria_id == usuario.assessoria_id,
-        Comissao.status_pagamento_assessoria == "pendente",
-        Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+        db.query(Comissao)
+        .join(Usuario, Comissao.corretor_id == Usuario.id)
+        .filter(
+            Usuario.assessoria_id == usuario.assessoria_id,
+            Comissao.status_pagamento_assessoria == "pendente",
+            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+        )
+        .all()
     )
-    .all()
-)
-
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
@@ -106,25 +118,22 @@ async def gerar_pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
 
 
 # ---------------------------
-# PDF do CORRETOR
+# Função interna: PDF do CORRETOR
 # ---------------------------
-@router.get("/pdf/corretor/{usuario_id}")
-async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
+async def gerar_pdf_corretor_interno(corretor_id: int, db: Session):
     sete_dias_atras = datetime.utcnow() - timedelta(days=7)
 
     comissoes = (
-    db.query(Comissao)
-    .join(Comissao.apolice)
-    .join(Apolice.proposta)
-    .filter(
-        Comissao.corretor_id == usuario_id,
-        Comissao.status_pagamento_corretor == "pendente",
-        Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+        db.query(Comissao)
+        .join(Comissao.apolice)
+        .join(Apolice.proposta)
+        .filter(
+            Comissao.corretor_id == corretor_id,
+            Comissao.status_pagamento_corretor == "pendente",
+            Comissao.apolice.has(Apolice.data_criacao >= sete_dias_atras)
+        )
+        .all()
     )
-    .all()
-)
-
-
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão pendente nos últimos 7 dias")
@@ -145,17 +154,17 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
             "comissao_valor": float(c.valor_corretor or 0),
         })
 
-    numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
+    numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{corretor_id}"
     html = preparar_html(dados, numero_demonstrativo)
 
     tmpdir = tempfile.gettempdir()
-    output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
+    output_path = Path(tmpdir) / f"comissao_corretor_{corretor_id}_{int(datetime.utcnow().timestamp())}.pdf"
 
     await gerar_pdf(html, str(output_path))
 
     return FileResponse(
         str(output_path),
-        filename=f"comissao_{usuario_id}.pdf",
+        filename=f"comissao_{corretor_id}.pdf",
         media_type="application/pdf"
     )
 
