@@ -8,7 +8,7 @@ import tempfile
 import asyncio
 
 from ...database import get_db
-from ...models import Comissao, Usuario, Corretora
+from ...models import Comissao, Usuario, Corretora, Assessoria
 from ..gerar_pdf_assessoria import preparar_html_assessoria, gerar_pdf as gerar_pdf_assessoria
 from ..gerarPdfComisao import preparar_html as preparar_html_corretor, gerar_pdf as gerar_pdf_corretor
 
@@ -136,12 +136,12 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
     }
 
     numero_demonstrativo = f"{datetime.utcnow().strftime('%d/%m/%Y')}-{usuario_id}"
-    html_content = preparar_html(dados, numero_demonstrativo)
+    html_content = preparar_html_corretor(dados, numero_demonstrativo)
 
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissao_corretor_{usuario_id}_{int(datetime.utcnow().timestamp())}.pdf"
 
-    await gerar_pdf(html_content, str(output_path))
+    await gerar_pdf_corretor(html_content, str(output_path))
 
     return FileResponse(
         str(output_path),
