@@ -4,7 +4,7 @@ from .routers import tomador,documentos,segurado,propostas,gerarpdf,webhokassas,
 from fastapi.staticfiles import StaticFiles
 from .routers import listCorretor
 from .routers.comisaoPast import listComisao
-from .routers.pdf import rotaComisaoPdf
+from .routers.pdf import rotaComisaoPdfAss
 import sys
 
 app = FastAPI()
@@ -38,7 +38,7 @@ app.include_router(welcomeEmail.router, prefix="/api")
 app.include_router(assCadastroComisao.router, prefix="/api")
 app.include_router(listCorretor.router , prefix="/api")
 app.include_router(listComisao.router , prefix="/api")
-app.include_router(rotaComisaoPdf.router, prefix="/api")
+app.include_router(rotaComisaoPdfAss.router, prefix="/api")
 
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

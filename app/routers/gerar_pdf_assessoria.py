@@ -26,18 +26,24 @@ def preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria):
         logo_base64 = ""
 
     # CSS inline
-    css_path = STATIC_DIR / "css" / "comisao.css"
+    css_path = STATIC_DIR / "css/comisao.css"
     try:
         with open(css_path, "r", encoding="utf-8") as f:
             css_content = f.read()
     except:
         css_content = ""
 
+    # Render do template com todas as variáveis
     body_html = template.render(
         dados=dados,
-        numeroDesmontrativo=numero_demonstrativo,
+        numeroDemonstrativo=numero_demonstrativo,
         logo_base64=logo_base64,
-        **dados_assessoria  # envia variáveis como nome, cnpj, endereço etc
+        nome_assessoria=dados_assessoria.get("nome_assessoria", ""),
+        cnpj=dados_assessoria.get("cnpj", ""),
+        endereco=dados_assessoria.get("endereco", ""),
+        cidade=dados_assessoria.get("cidade", ""),
+        uf=dados_assessoria.get("uf", ""),
+        email=dados_assessoria.get("email", "")
     )
 
     html_content = f"""
@@ -59,6 +65,7 @@ def preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria):
     </html>
     """
     return html_content
+
 
 
 async def gerar_pdf_assessoria(dados, dados_assessoria, output_path="comissao_assessoria.pdf"):
