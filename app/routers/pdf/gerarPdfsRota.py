@@ -59,7 +59,8 @@ async def pdf_assessoria(usuario_id: int, db: Session = Depends(get_db)):
         "endereco": usuario.assessoria.endereco if usuario.assessoria else "",
         "cidade": usuario.assessoria.cidade if usuario.assessoria else "",
         "uf": usuario.assessoria.uf if usuario.assessoria else "",
-        "email": "financeiro@financeassurance.com.br"
+        "cep": usuario.assessoria.cep if usuario.assessoria else "",
+        "email": usuario.assessoria.email if usuario.assessoria and usuario.assessoria.email else ""
     }
 
     numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"

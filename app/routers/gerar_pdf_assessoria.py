@@ -20,7 +20,7 @@ def preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria):
 
     # Logo base64
     try:
-        with open(STATIC_DIR / "images" / "logo3.png", "rb") as f:
+        with open(STATIC_DIR / "images" / "Logo3.png", "rb") as f:
             logo_base64 = base64.b64encode(f.read()).decode()
     except:
         logo_base64 = ""
@@ -43,7 +43,8 @@ def preparar_html_assessoria(dados, numero_demonstrativo, dados_assessoria):
         endereco=dados_assessoria.get("endereco", ""),
         cidade=dados_assessoria.get("cidade", ""),
         uf=dados_assessoria.get("uf", ""),
-        email=dados_assessoria.get("email", "")
+        email=dados_assessoria.get("email", ""),
+        cep=dados_assessoria.get("cep","")
     )
 
     html_content = f"""
