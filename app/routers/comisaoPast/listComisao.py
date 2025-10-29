@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from ..gerarPdfComisao import preparar_html, gerar_pdf
 from ..gerar_pdf_assessoria import preparar_html_assessoria
 from ...database import get_db
-from ...models import Comissao, Apolice, Proposta, Usuario, Corretor, Assessoria
+from ...models import Comissao, Apolice, Proposta, Usuario, Corretora, Assessoria
 import tempfile
 from pathlib import Path
 
@@ -54,7 +54,7 @@ async def gerar_pdf_unico(usuario_id: int, db: Session = Depends(get_db)):
         return await gerar_pdf_assessoria_interno(usuario, db)
 
     # Verifica se é um corretor vinculado a uma assessoria
-    corretor = db.query(Corretor).filter(Corretor.user_id == usuario_id).first()
+    corretor = db.query(Corretora).filter(Corretora.user_id == usuario_id).first()
     if corretor:
         return await gerar_pdf_corretor_interno(corretor.id, db)
 
