@@ -13,8 +13,6 @@ from ..gerar_pdf_assessoria import preparar_html_assessoria, gerar_pdf as gerar_
 from ..gerarPdfComisao import preparar_html as preparar_html_corretor, gerar_pdf as gerar_pdf_corretor
 from ..gerarPdfPagoAssessoria import preparar_htmlPago, gerar_pdfPago
 
-inicio: str = Query(default=None)   
-fim: str = Query(default=None)
 
 router = APIRouter()
 
@@ -157,8 +155,8 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
 @router.get("/api/comissoes/pdf/pago/assessoria/{usuario_id}")
 async def comissoes_pagas_assessoria(
     usuario_id: int,
-    inicio: str = Query(...),
-    fim: str = Query(...),
+    inicio: str = Query(..., min_length=10, max_length=10),  # obrigatório, formato YYYY-MM-DD
+    fim: str = Query(..., min_length=10, max_length=10),
     db: Session = Depends(get_db)
 ):
     # valida usuário
