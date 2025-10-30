@@ -1,7 +1,6 @@
 import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 import os
+from email.message import EmailMessage
 from dotenv import load_dotenv
 import ssl
 
@@ -12,25 +11,26 @@ def enviar_email(para: str, assunto: str, corpo: str):
     port = int(os.getenv("EMAIL_PORT"))
     user = os.getenv("EMAIL_USER")
     password = os.getenv("EMAIL_PASS")
-    remetente = os.getenv("EMAIL_FROM")
+    remetente = os.getenv("EMAIL_FROM").strip()  # remove espaços extras
 
-    msg = MIMEMultipart()
+    # Cria a mensagem
+    msg = EmailMessage()
     msg["From"] = remetente
     msg["To"] = para
     msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo, "html"))
+    msg.set_content("Este e-mail precisa ser visto em HTML")  # fallback para texto
+    msg.add_alternative(corpo, subtype="html")  # corpo HTML
 
     try:
-        # Cria contexto SSL ignorando verificação de certificado
+        # Cria contexto SSL seguro
         context = ssl.create_default_context()
-        context.check_hostname = False
-        context.verify_mode = ssl.CERT_NONE
 
+        # Conecta no servidor SMTP
         with smtplib.SMTP(host, port) as server:
-            server.starttls(context=context)  # TLS com verificação ignorada
+            server.starttls(context=context)  # TLS seguro
             server.login(user, password)
             server.send_message(msg)
 
-        print("✅ Email enviado")
+        print("✅ Email enviado com sucesso!")
     except Exception as e:
         print("❌ Erro ao enviar e-mail:", e)
