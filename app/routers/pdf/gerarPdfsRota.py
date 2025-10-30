@@ -1,7 +1,7 @@
 # app/routers/comissoes.py
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import FileResponse
-from sqlalchemy.orm import Session, Query
+from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from pathlib import Path
 import tempfile
@@ -155,8 +155,8 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
 @router.get("/api/comissoes/pdf/pago/assessoria/{usuario_id}")
 async def comissoes_pagas_assessoria(
     usuario_id: int,
-    inicio: str = Query(..., min_length=10, max_length=10),  # obrigatório, formato YYYY-MM-DD
-    fim: str = Query(..., min_length=10, max_length=10),
+    inicio: str = Query(..., description="Data inicial no formato YYYY-MM-DD"),
+    fim: str = Query(..., description="Data final no formato YYYY-MM-DD"),
     db: Session = Depends(get_db)
 ):
     # valida usuário
