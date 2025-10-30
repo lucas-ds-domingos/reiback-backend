@@ -1,36 +1,34 @@
 import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 import os
-from email.message import EmailMessage
 from dotenv import load_dotenv
 import ssl
 
 load_dotenv()
 
 def enviar_email(para: str, assunto: str, corpo: str):
-    host = os.getenv("EMAIL_HOST")
-    port = int(os.getenv("EMAIL_PORT"))
-    user = os.getenv("EMAIL_USER")
+    host = os.getenv("EMAIL_HOST")  # mail.financeassurance.com.br
+    port = int(os.getenv("EMAIL_PORT"))  # 587
+    user = os.getenv("EMAIL_USER")  # finance@financeassurance.com.br
     password = os.getenv("EMAIL_PASS")
-    remetente = os.getenv("EMAIL_FROM").strip()  # remove espaços extras
+    remetente = os.getenv("EMAIL_FROM")
 
-    # Cria a mensagem
-    msg = EmailMessage()
+    msg = MIMEMultipart()
     msg["From"] = remetente
     msg["To"] = para
     msg["Subject"] = assunto
-    msg.set_content("Este e-mail precisa ser visto em HTML")  # fallback para texto
-    msg.add_alternative(corpo, subtype="html")  # corpo HTML
+    msg.attach(MIMEText(corpo, "html"))
 
     try:
-        # Cria contexto SSL seguro
+        # Cria contexto TLS seguro
         context = ssl.create_default_context()
 
-        # Conecta no servidor SMTP
         with smtplib.SMTP(host, port) as server:
-            server.starttls(context=context)  # TLS seguro
+            server.starttls(context=context)  # STARTTLS na porta 587
             server.login(user, password)
             server.send_message(msg)
 
-        print("✅ Email enviado com sucesso!")
+        print("✅ Email enviado")
     except Exception as e:
         print("❌ Erro ao enviar e-mail:", e)
