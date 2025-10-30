@@ -59,3 +59,30 @@ def marcar_pago(comissao_id: int, tipo: str, db: Session = Depends(get_db)):
 
     db.commit()
     return {"status": "ok"}
+
+
+@router.post("/comissoes/marcar_todas")
+def marcar_todas(tipo: str, usuario_id: int, db: Session = Depends(get_db)):
+
+    if tipo not in ["corretor", "assessoria"]:
+        return {"error": "Tipo inválido"}
+
+    if tipo == "corretor":
+        comissoes = db.query(Comissao).filter(
+            Comissao.corretor_id == usuario_id,
+            Comissao.status_pagamento_corretor != "pago"
+        ).all()
+        for c in comissoes:
+            c.status_pagamento_corretor = "pago"
+            c.data_pagamento_corretor = datetime.utcnow()
+    else:  # assessoria
+        comissoes = db.query(Comissao).filter(
+            Comissao.assessoria_id == usuario_id,
+            Comissao.status_pagamento_assessoria != "pago"
+        ).all()
+        for c in comissoes:
+            c.status_pagamento_assessoria = "pago"
+            c.data_pagamento_assessoria = datetime.utcnow()
+
+    db.commit()
+    return {"status": "ok", "total": len(comissoes)}
