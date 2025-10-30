@@ -214,7 +214,11 @@ async def comissoes_pagas_assessoria(
     }
 
     numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"
-    html_content = preparar_htmlPago(dados_por_dia, numero_demonstrativo, dados_assessoria)
+    html_content = preparar_htmlPago(
+    dados={"dados_por_dia": dados_por_dia, **dados_assessoria},
+    numero_demonstrativo=numero_demonstrativo,
+    tipo="assessoria"
+)
 
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissoes_pagas_{usuario.assessoria_id}_{int(datetime.utcnow().timestamp())}.pdf"
