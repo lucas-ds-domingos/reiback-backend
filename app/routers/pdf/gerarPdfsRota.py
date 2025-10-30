@@ -189,7 +189,7 @@ async def comissoes_pagas_assessoria(
     # organizar por dia de pagamento
     dados_por_dia = {}
     for c in comissoes:
-        dia = c.data_pagamento_assessoria.date()
+        dia = c.data_pagamento_assessoria.strftime("%d/%m/%Y")
         if dia not in dados_por_dia:
             dados_por_dia[dia] = []
         dados_por_dia[dia].append({
