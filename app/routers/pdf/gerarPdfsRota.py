@@ -155,8 +155,8 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
 @router.get("/api/comissoes/pdf/pago/assessoria/{usuario_id}")
 async def comissoes_pagas_assessoria(
     usuario_id: int,
-    inicio: str = Query(..., description="Data inicial no formato YYYY-MM-DD"),
-    fim: str = Query(..., description="Data final no formato YYYY-MM-DD"),
+    inicio: str = Query(...),
+    fim: str = Query(...),
     db: Session = Depends(get_db)
 ):
     # valida usuário
