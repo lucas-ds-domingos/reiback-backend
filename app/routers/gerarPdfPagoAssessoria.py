@@ -5,8 +5,9 @@ from pathlib import Path
 import base64
 from playwright.async_api import async_playwright
 import os
+from datetime import datetime
 
-# Se quiser usar browserless em produção, setar a variável BROWSER_WS_ENDPOINT
+# Browserless (produção) ou Chromium local (dev)
 BROWSERLESS_URL = os.environ.get("BROWSER_WS_ENDPOINT")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,10 +20,11 @@ env = Environment(
 )
 
 
-def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "assessoria") -> str:
+def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "assessoria", dados_assessoria: dict = None) -> str:
     """
     Prepara o HTML do PDF.
     tipo: "assessoria" ou "corretor"
+    dados_assessoria: informações fixas da assessoria
     """
     template_name = "comisaoPagaAssessoria.html" if tipo == "assessoria" else "comisaoPagaCorretor.html"
     template = env.get_template(template_name)
@@ -43,15 +45,15 @@ def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "asses
 
     # Renderizando o template
     body_html = template.render(
-        dados_por_dia=dados.get("dados_por_dia", {}),
-        nome_assessoria=dados.get("nome_assessoria", ""),
-        cnpj=dados.get("cnpj", ""),
-        endereco=dados.get("endereco", ""),
-        cidade=dados.get("cidade", ""),
-        uf=dados.get("uf", ""),
-        cep=dados.get("cep", ""),
-        email=dados.get("email", ""),
-        corretor_nome=dados.get("corretor_nome", ""),
+        dados_por_dia=dados.get("dados_por_dia", dados),
+        nome_assessoria=dados_assessoria.get("nome_assessoria", "") if dados_assessoria else "",
+        cnpj=dados_assessoria.get("cnpj", "") if dados_assessoria else "",
+        endereco=dados_assessoria.get("endereco", "") if dados_assessoria else "",
+        cidade=dados_assessoria.get("cidade", "") if dados_assessoria else "",
+        uf=dados_assessoria.get("uf", "") if dados_assessoria else "",
+        cep=dados_assessoria.get("cep", "") if dados_assessoria else "",
+        email=dados_assessoria.get("email", "") if dados_assessoria else "",
+        corretor_nome="",  # vazio para assessoria
         numeroDemonstrativo=numero_demonstrativo,
         logo_base64=logo_base64
     )
@@ -79,16 +81,14 @@ def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "asses
 
 async def gerar_pdfPago(html_content: str, output_path="comissao.pdf") -> str:
     """
-    Gera o PDF a partir do HTML.
-    Tenta conectar ao Browserless se a variável de ambiente estiver setada,
-    senão usa o Chromium local.
+    Gera o PDF a partir do HTML usando Playwright.
     """
     async with async_playwright() as p:
         if BROWSERLESS_URL:
-            # Conecta ao Browserless (produção)
+            # Produção
             browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
         else:
-            # Chromium local (desenvolvimento)
+            # Dev
             browser = await p.chromium.launch(headless=True)
 
         page = await browser.new_page()
@@ -97,3 +97,8 @@ async def gerar_pdfPago(html_content: str, output_path="comissao.pdf") -> str:
 
         await browser.close()
     return output_path
+
+
+# Função auxiliar para converter datas para exibição no template
+def formatar_data(data: datetime) -> str:
+    return data.strftime("%d/%m/%Y") if isinstance(data, datetime) else str(data)
