@@ -96,3 +96,34 @@ def reset_password(payload: PasswordResetCreate, db: Session = Depends(get_db)):
     db.commit()
 
     return {"message": "Senha redefinida com sucesso!"}
+
+
+# =========================
+# 🔹 Gerar link de reset manual (sem enviar e-mail)
+# =========================
+@router.post("/password/forgot/manual", response_model=PasswordResetResponse)
+def forgot_password_manual(payload: PasswordResetRequest, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.email == payload.email).first()
+    if not usuario:
+        raise HTTPException(status_code=404, detail="Email não encontrado")
+
+    # Remove tokens anteriores do mesmo usuário
+    db.query(PasswordReset).filter(PasswordReset.user_id == usuario.id).delete()
+    db.commit()
+
+    # Cria token único e define expiração (15 min)
+    token = secrets.token_urlsafe(32)
+    expires_at = datetime.utcnow() + timedelta(minutes=40)
+
+    # Salva novo token no banco
+    reset = PasswordReset(user_id=usuario.id, token=token, expires_at=expires_at)
+    db.add(reset)
+    db.commit()
+    db.refresh(reset)
+
+    # Link de redefinição para o frontend
+    frontend_url = "https://financeassurance.up.railway.app/reset-password"
+    link = f"{frontend_url}?token={token}"
+
+    # Retorna o link diretamente
+    return {"message": f"Link de recuperação gerado manualmente: {link}"}
