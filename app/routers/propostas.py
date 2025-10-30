@@ -137,20 +137,8 @@ def emitir_proposta(proposta_id: int, db: Session = Depends(get_db), current_use
     if not proposta:
         raise HTTPException(404, "Proposta não encontrada")
 
-    # Só checa CCG se não for master
-    if current_user.role.lower() != "master":
-        ccg_assinado = (
-            db.query(CCG)
-            .filter(CCG.tomador_id == proposta.tomador_id)
-            .filter(CCG.status == "assinado")
-            .first()
-        )
-        if not ccg_assinado:
-            raise HTTPException(
-                status_code=400,
-                detail="CCG não assinada. É necessário assinar a CCG antes de emitir a proposta."
-            )
-
+    #aki ccg
+    
     # Desconta o limite do tomador
     tomador = db.query(Tomador).filter(Tomador.id == proposta.tomador_id).first()
     if not tomador:
