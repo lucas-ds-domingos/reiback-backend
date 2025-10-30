@@ -13,6 +13,8 @@ from ..gerar_pdf_assessoria import preparar_html_assessoria, gerar_pdf as gerar_
 from ..gerarPdfComisao import preparar_html as preparar_html_corretor, gerar_pdf as gerar_pdf_corretor
 from ..gerarPdfPagoAssessoria import preparar_htmlPago, gerar_pdfPago
 
+inicio: str = Query(default=None)   
+fim: str = Query(default=None)
 
 router = APIRouter()
 
