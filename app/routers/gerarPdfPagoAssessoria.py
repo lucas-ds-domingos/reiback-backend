@@ -7,25 +7,29 @@ from playwright.async_api import async_playwright
 import os
 from datetime import datetime
 
-# Browserless (produção) ou Chromium local (dev)
 BROWSERLESS_URL = os.environ.get("BROWSER_WS_ENDPOINT")
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 TEMPLATES_DIR = BASE_DIR / "templates"
 STATIC_DIR = BASE_DIR / "static"
 
+# Função para formatação de datas
+def formatar_data(data):
+    if isinstance(data, datetime):
+        return data.strftime("%d/%m/%Y")
+    return str(data)
+
+# Environment do Jinja
 env = Environment(
     loader=FileSystemLoader(str(TEMPLATES_DIR)),
     autoescape=select_autoescape(["html", "xml"])
 )
 
+# Registrando o filtro
+env.filters['formatar_data'] = formatar_data
 
+# --- Função para preparar HTML ---
 def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "assessoria", dados_assessoria: dict = None) -> str:
-    """
-    Prepara o HTML do PDF.
-    tipo: "assessoria" ou "corretor"
-    dados_assessoria: informações fixas da assessoria
-    """
     template_name = "comisaoPagaAssessoria.html" if tipo == "assessoria" else "comisaoPagaCorretor.html"
     template = env.get_template(template_name)
 
@@ -43,7 +47,6 @@ def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "asses
     except:
         css_content = ""
 
-    # Renderizando o template
     body_html = template.render(
         dados_por_dia=dados.get("dados_por_dia", dados),
         nome_assessoria=dados_assessoria.get("nome_assessoria", "") if dados_assessoria else "",
@@ -78,17 +81,12 @@ def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "asses
     """
     return html_content
 
-
+# --- Função para gerar PDF ---
 async def gerar_pdfPago(html_content: str, output_path="comissao.pdf") -> str:
-    """
-    Gera o PDF a partir do HTML usando Playwright.
-    """
     async with async_playwright() as p:
         if BROWSERLESS_URL:
-            # Produção
             browser = await p.chromium.connect_over_cdp(BROWSERLESS_URL)
         else:
-            # Dev
             browser = await p.chromium.launch(headless=True)
 
         page = await browser.new_page()
@@ -97,6 +95,7 @@ async def gerar_pdfPago(html_content: str, output_path="comissao.pdf") -> str:
 
         await browser.close()
     return output_path
+
 
 
 # Função auxiliar para converter datas para exibição no template
