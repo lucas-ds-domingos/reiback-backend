@@ -163,14 +163,13 @@ async def comissoes_pagas_assessoria(
     if not usuario or not usuario.assessoria_id:
         raise HTTPException(status_code=404, detail="Usuário não vinculado a assessoria")
 
-    # converte datas
     try:
         data_inicio = datetime.strptime(inicio, "%Y-%m-%d")
         data_fim = datetime.strptime(fim, "%Y-%m-%d")
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de data inválido. Use YYYY-MM-DD.")
 
-    # busca comissões pagas
+    # buscar comissões pagas no intervalo
     comissoes = (
         db.query(Comissao)
         .filter(
@@ -186,10 +185,12 @@ async def comissoes_pagas_assessoria(
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão paga encontrada neste período")
 
-    # organiza por dia de pagamento
+    # organizar por dia de pagamento
     dados_por_dia = {}
     for c in comissoes:
-        dia = c.data_pagamento_assessoria.strftime("%d/%m/%Y")
+        data_pagamento = c.data_pagamento_assessoria
+        dia = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Data desconhecida"
+
         if dia not in dados_por_dia:
             dados_por_dia[dia] = []
 
@@ -201,10 +202,9 @@ async def comissoes_pagas_assessoria(
             "percentual": float(c.percentual_assessoria or 0),
             "comissao_valor": float(c.valor_assessoria or 0),
             "corretor_nome": c.apolice.proposta.usuario.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.usuario else "",
-            "data_pagamento": c.data_pagamento_assessoria  # ⬅️ datetime real para o template
+            "data_pagamento": data_pagamento
         })
 
-    # dados da assessoria
     dados_assessoria = {
         "id": usuario.assessoria_id,
         "nome_assessoria": usuario.assessoria.razao_social if usuario.assessoria else "",
@@ -217,9 +217,15 @@ async def comissoes_pagas_assessoria(
     }
 
     numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"
-    html_content = preparar_htmlPago(dados_por_dia, numero_demonstrativo, tipo="assessoria", dados_assessoria=dados_assessoria)
 
-    # gera PDF
+    # chamar função que prepara o HTML
+    html_content = preparar_htmlPago(
+        dados={"dados_por_dia": dados_por_dia, **dados_assessoria},
+        numero_demonstrativo=numero_demonstrativo,
+        tipo="assessoria"
+    )
+
+    # gerar PDF temporário
     tmpdir = tempfile.gettempdir()
     output_path = Path(tmpdir) / f"comissoes_pagas_{usuario.assessoria_id}_{int(datetime.utcnow().timestamp())}.pdf"
     await gerar_pdfPago(html_content, str(output_path))

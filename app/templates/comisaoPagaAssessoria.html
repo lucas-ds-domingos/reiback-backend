@@ -16,7 +16,7 @@
 
             <div class="infoDemonstrativo">
                 <p>Demonstrativo N° {{ numeroDemonstrativo }}</p>
-                <p class="data-pagamento">Pago em {{ data_pagamento.strftime('%d/%m/%Y') }}</p>
+                <p class="data-pagamento">Pago em {{ data_pagamento | formatar_data }}</p>
             </div>
         </div>
 
@@ -123,7 +123,7 @@
         </div>
 
         <div class="divisao2">
-            <p>Comissões Pagas em {{ data_pagamento.strftime('%d/%m/%Y') }}</p>
+            <p>Comissões Pagas em {{ data_pagamento | formatar_data }}</p>
         </div>
         <div>
             <table>
@@ -141,13 +141,13 @@
                 <tbody>
                     {% for item in comissoes %}
                     <tr>
-                        <td>{{ item.apolice_numero }}</td>
+                        <td>{{ item.numero_apolice }}</td>
                         <td>{{ item.tomador_nome }}</td>
                         <td>{{ item.segurado_nome }}</td>
                         <td>{{ item.corretor_nome }}</td>
-                        <td>R$ {{ "{:,.2f}".format(item.valor_premio) }}</td>
-                        <td>{{ "{:.2f}".format(item.percentual_assessoria) }}%</td>
-                        <td>R$ {{ "{:,.2f}".format(item.valor_assessoria) }}</td>
+                        <td>R$ {{ "{:,.2f}".format(item.premio) }}</td>
+                        <td>{{ "{:.2f}".format(item.percentual) }}%</td>
+                        <td>R$ {{ "{:,.2f}".format(item.comissao_valor) }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -155,7 +155,7 @@
 
             <div class="totalDia">
                 <p><strong>Total Pago no Dia:</strong>
-                    R$ {{ "{:,.2f}".format(comissoes | sum(attribute='valor_assessoria')) }}</p>
+                    R$ {{ "{:,.2f}".format(comissoes | sum(attribute='comissao_valor')) }}</p>
             </div>
         </div>
     </div>
