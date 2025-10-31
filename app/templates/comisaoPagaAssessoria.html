@@ -141,13 +141,13 @@
                 <tbody>
                     {% for item in comissoes %}
                     <tr>
-                        <td>{{ item.numero_apolice }}</td>
+                        <td>{{ item.apolice_numero }}</td>
                         <td>{{ item.tomador_nome }}</td>
                         <td>{{ item.segurado_nome }}</td>
                         <td>{{ item.corretor_nome }}</td>
-                        {{ "{:,.2f}".format(item.valor_corretor or 0) }}
-                        {{ "{:,.2f}".format(item.valor_bruto or 0) }}
-                        {{ "{:,.2f}".format(item.valor_liquido or 0) }}
+                        <td>R$ {{ item.valor_premio | formatar_moeda }}</td>
+                        <td>{{ item.percentual_assessoria | formatar_moeda }}%</td>
+                        <td>R$ {{ item.valor_assessoria | formatar_moeda }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -155,7 +155,7 @@
 
             <div class="totalDia">
                 <p><strong>Total Pago no Dia:</strong>
-                    R$ {{ "{:,.2f}".format(comissoes | sum(attribute='comissao_valor')) }}</p>
+                    R$ {{ comissoes | sum(attribute='valor_assessoria') | formatar_moeda }}</p>
             </div>
         </div>
     </div>
