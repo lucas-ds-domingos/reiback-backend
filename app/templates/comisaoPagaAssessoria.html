@@ -145,9 +145,9 @@
                         <td>{{ item.tomador_nome }}</td>
                         <td>{{ item.segurado_nome }}</td>
                         <td>{{ item.corretor_nome }}</td>
-                        <td>R$ {{ "{:,.2f}".format(item.premio) }}</td>
-                        <td>{{ "{:.2f}".format(item.percentual) }}%</td>
-                        <td>R$ {{ "{:,.2f}".format(item.comissao_valor) }}</td>
+                        {{ "{:,.2f}".format(item.valor_corretor or 0) }}
+                        {{ "{:,.2f}".format(item.valor_bruto or 0) }}
+                        {{ "{:,.2f}".format(item.valor_liquido or 0) }}
                     </tr>
                     {% endfor %}
                 </tbody>
