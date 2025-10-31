@@ -33,19 +33,22 @@ env.filters["formatar_data"] = formatar_data  # <-- AQUI RESOLVE O ERRO
 # ======================
 # Restante do seu código igual
 # ======================
-def preparar_htmlPago(dados, dados_assessoria=None):
+def preparar_htmlPago(dados, numero_demonstrativo, tipo=None, dados_assessoria=None):
     """
-    Gera o HTML para o PDF de comissões pagas de uma assessoria.
+    Gera o HTML para o PDF de comissões pagas (assessoria).
     """
+
+    # Caminho da pasta templates
     base_dir = os.path.dirname(os.path.abspath(__file__))
     templates_dir = os.path.join(base_dir, "../templates")
 
+    # Ambiente Jinja2
     env = Environment(
         loader=FileSystemLoader(templates_dir),
         autoescape=select_autoescape(["html", "xml"])
     )
 
-    # 🔹 Adiciona filtro customizado para formatar data
+    # 🔹 Filtro para formatar data
     def formatar_data(value):
         if not value:
             return ""
@@ -56,24 +59,19 @@ def preparar_htmlPago(dados, dados_assessoria=None):
 
     env.filters["formatar_data"] = formatar_data
 
+    # 🔹 Seleciona o template
     template = env.get_template("comisaoPagaAssessoria.html")
 
+    # 🔹 Monta o HTML com todas as variáveis que a rota envia
     html_content = template.render(
         dados=dados,
-        dados_assessoria=dados_assessoria  # 🔹 Agora o template recebe os dados da assessoria
+        dados_assessoria=dados_assessoria or {},
+        numero_demonstrativo=numero_demonstrativo,
+        tipo=tipo,
+        data_geracao=datetime.now().strftime("%d/%m/%Y %H:%M")
     )
 
     return html_content
-
-
-async def gerar_pdfPago(html_content: str, output_path="comissao.pdf") -> str:
-    async with async_playwright() as p:
-        browser = await p.chromium.launch(headless=True)
-        page = await browser.new_page()
-        await page.set_content(html_content, wait_until="networkidle")
-        await page.pdf(path=output_path, format="A4", print_background=True)
-        await browser.close()
-    return output_path
 
 
 
