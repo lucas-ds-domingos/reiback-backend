@@ -38,7 +38,9 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
             "corretor": c.corretor.nome if c.corretor else None,
             "corretor_id": c.corretor.id if c.corretor else None,
             "assessoria": c.assessoria.razao_social if c.assessoria else None,
-            "assessoria_id": c.assessoria.id if c.assessoria else None
+            "assessoria_id": c.assessoria.id if c.assessoria else None,
+            "status_pagamento_corretor": c.status_pagamento_corretor,
+            "status_pagamento_assessoria": c.status_pagamento_assessoria
         })
     return resultados
 
