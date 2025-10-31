@@ -252,14 +252,14 @@ async def comissoes_pagas_corretor(
     Comissao.data_pagamento_corretor >= data_inicio,
     Comissao.data_pagamento_corretor <= data_fim
     ).order_by(Comissao.data_pagamento_corretor.asc()).all()
-    
+
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão paga encontrada neste período")
 
     # Organizar por dia de pagamento
     dados_por_dia = {}
     for c in comissoes:
-        dia = c.data_pagamento_assessoria.strftime("%d/%m/%Y") if c.data_pagamento_assessoria else "Data desconhecida"
+        dia = c.data_pagamento_corretor.strftime("%d/%m/%Y") if c.data_pagamento_corretor else "Data desconhecida"
         if dia not in dados_por_dia:
             dados_por_dia[dia] = []
 
