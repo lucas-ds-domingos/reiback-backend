@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import tomador,documentos,segurado,propostas,gerarpdf,webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal, fiador, ccg, webhokD4sing,dashbord,propostaAtualizarTaxa,password_reset,welcomeEmail,assCadastroComisao
+from .routers import tomador, upTrocaTomador ,documentos,segurado,propostas,gerarpdf,webhokassas, apolices, usuarios, corretor, assesoria, representanteLegal, fiador, ccg, webhokD4sing,dashbord,propostaAtualizarTaxa,password_reset,welcomeEmail,assCadastroComisao
 from fastapi.staticfiles import StaticFiles
 from .routers import listCorretor
 from .routers.comisaoPast import listComisao
@@ -39,6 +39,7 @@ app.include_router(assCadastroComisao.router, prefix="/api")
 app.include_router(listCorretor.router , prefix="/api")
 app.include_router(listComisao.router , prefix="/api")
 app.include_router(gerarPdfsRota.router, prefix="/api")
+app.include_router(upTrocaTomador.router, prefix="/api")
 
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
