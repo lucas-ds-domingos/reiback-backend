@@ -33,45 +33,36 @@ env.filters["formatar_data"] = formatar_data  # <-- AQUI RESOLVE O ERRO
 # ======================
 # Restante do seu código igual
 # ======================
-def preparar_htmlPago(dados: dict, numero_demonstrativo: str, tipo: str = "assessoria") -> str:
-    template_name = "comisaoPagaAssessoria.html" if tipo == "assessoria" else "comisaoPagaCorretor.html"
-    template = env.get_template(template_name)
+def preparar_htmlPago(dados, dados_assessoria=None):
+    """
+    Gera o HTML para o PDF de comissões pagas de uma assessoria.
+    """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+    templates_dir = os.path.join(base_dir, "../templates")
 
-    try:
-        with open(STATIC_DIR / "images" / "Logo3.png", "rb") as f:
-            logo_base64 = base64.b64encode(f.read()).decode()
-    except:
-        logo_base64 = ""
-
-    try:
-        with open(STATIC_DIR / "css" / "comisao.css", "r", encoding="utf-8") as f:
-            css_content = f.read()
-    except:
-        css_content = ""
-
-    body_html = template.render(
-        dados_por_dia=dados.get("dados_por_dia", {}),
-        nome_assessoria=dados.get("nome_assessoria", ""),
-        cnpj=dados.get("cnpj", ""),
-        endereco=dados.get("endereco", ""),
-        cidade=dados.get("cidade", ""),
-        uf=dados.get("uf", ""),
-        cep=dados.get("cep", ""),
-        email=dados.get("email", ""),
-        numeroDemonstrativo=numero_demonstrativo,
-        logo_base64=logo_base64
+    env = Environment(
+        loader=FileSystemLoader(templates_dir),
+        autoescape=select_autoescape(["html", "xml"])
     )
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html lang="pt-br">
-    <head>
-        <meta charset="UTF-8">
-        <style>{css_content}</style>
-    </head>
-    <body>{body_html}</body>
-    </html>
-    """
+    # 🔹 Adiciona filtro customizado para formatar data
+    def formatar_data(value):
+        if not value:
+            return ""
+        try:
+            return datetime.strptime(str(value), "%Y-%m-%d").strftime("%d/%m/%Y")
+        except Exception:
+            return str(value)
+
+    env.filters["formatar_data"] = formatar_data
+
+    template = env.get_template("comisaoPagaAssessoria.html")
+
+    html_content = template.render(
+        dados=dados,
+        dados_assessoria=dados_assessoria  # 🔹 Agora o template recebe os dados da assessoria
+    )
+
     return html_content
 
 
