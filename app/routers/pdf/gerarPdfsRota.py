@@ -154,11 +154,10 @@ async def pdf_corretor(usuario_id: int, db: Session = Depends(get_db)):
 @router.get("/api/comissoes/pdf/pago/assessoria/{usuario_id}")
 async def comissoes_pagas_assessoria(
     usuario_id: int,
-    inicio: str = Query(..., description="Data inicial no formato YYYY-MM-DD"),
-    fim: str = Query(..., description="Data final no formato YYYY-MM-DD"),
+    inicio: str,
+    fim: str,
     db: Session = Depends(get_db)
 ):
-    # valida usuário
     usuario = db.query(Usuario).filter(Usuario.id == usuario_id).first()
     if not usuario or not usuario.assessoria_id:
         raise HTTPException(status_code=404, detail="Usuário não vinculado a assessoria")
@@ -169,40 +168,31 @@ async def comissoes_pagas_assessoria(
     except ValueError:
         raise HTTPException(status_code=400, detail="Formato de data inválido. Use YYYY-MM-DD.")
 
-    # buscar comissões pagas no intervalo
-    comissoes = (
-        db.query(Comissao)
-        .filter(
-            Comissao.assessoria_id == usuario.assessoria_id,
-            Comissao.status_pagamento_assessoria == "pago",
-            Comissao.data_pagamento_assessoria >= data_inicio,
-            Comissao.data_pagamento_assessoria <= data_fim
-        )
-        .order_by(Comissao.data_pagamento_assessoria.asc())
-        .all()
-    )
+    comissoes = db.query(Comissao).filter(
+        Comissao.assessoria_id == usuario.assessoria_id,
+        Comissao.status_pagamento_assessoria == "pago",
+        Comissao.data_pagamento_assessoria >= data_inicio,
+        Comissao.data_pagamento_assessoria <= data_fim
+    ).order_by(Comissao.data_pagamento_assessoria.asc()).all()
 
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão paga encontrada neste período")
 
-    # organizar por dia de pagamento
+    # Organizar por dia de pagamento
     dados_por_dia = {}
     for c in comissoes:
-        data_pagamento = c.data_pagamento_assessoria
-        dia = data_pagamento.strftime("%d/%m/%Y") if data_pagamento else "Data desconhecida"
-
+        dia = c.data_pagamento_assessoria.strftime("%d/%m/%Y") if c.data_pagamento_assessoria else "Data desconhecida"
         if dia not in dados_por_dia:
             dados_por_dia[dia] = []
 
         dados_por_dia[dia].append({
-            "numero_apolice": c.apolice.numero if c.apolice else "",
+            "apolice_numero": c.apolice.numero if c.apolice else "",
             "tomador_nome": c.apolice.proposta.tomador.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.tomador else "",
             "segurado_nome": c.apolice.proposta.segurado.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.segurado else "",
-            "premio": float(c.valor_premio or 0),
-            "percentual": float(c.percentual_assessoria or 0),
-            "comissao_valor": float(c.valor_assessoria or 0),
             "corretor_nome": c.apolice.proposta.usuario.nome if c.apolice and c.apolice.proposta and c.apolice.proposta.usuario else "",
-            "data_pagamento": data_pagamento
+            "valor_premio": float(c.valor_premio or 0),
+            "percentual_assessoria": float(c.percentual_assessoria or 0),
+            "valor_assessoria": float(c.valor_assessoria or 0)
         })
 
     dados_assessoria = {
@@ -218,18 +208,21 @@ async def comissoes_pagas_assessoria(
 
     numero_demonstrativo = f"A-{usuario.assessoria_id}-{datetime.utcnow().strftime('%d%m%Y')}"
 
-    # chamar função que prepara o HTML
     html_content = preparar_htmlPago(
-        dados={"dados_por_dia": dados_por_dia, **dados_assessoria},
+        dados=dados_por_dia,
         numero_demonstrativo=numero_demonstrativo,
-        tipo="assessoria"
+        tipo="assessoria",
+        dados_assessoria=dados_assessoria
     )
 
-    # gerar PDF temporário
+    import tempfile
     tmpdir = tempfile.gettempdir()
+    from pathlib import Path
     output_path = Path(tmpdir) / f"comissoes_pagas_{usuario.assessoria_id}_{int(datetime.utcnow().timestamp())}.pdf"
+
     await gerar_pdfPago(html_content, str(output_path))
 
+    from fastapi.responses import FileResponse
     return FileResponse(
         str(output_path),
         filename=f"comissoes_pagas_{usuario.assessoria_id}.pdf",
