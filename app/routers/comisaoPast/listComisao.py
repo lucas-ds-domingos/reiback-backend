@@ -9,6 +9,7 @@ from ...database import get_db
 from ...models import Comissao, Apolice, Proposta, Usuario, Corretora, Assessoria
 import tempfile
 from pathlib import Path
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -63,8 +64,14 @@ def marcar_pago(comissao_id: int, tipo: str, db: Session = Depends(get_db)):
     return {"status": "ok"}
 
 
+class MarcarTodasRequest(BaseModel):
+    tipo: str
+    usuario_id: int
+
 @router.post("/comissoes/marcar_todas")
-def marcar_todas(tipo: str, usuario_id: int, db: Session = Depends(get_db)):
+def marcar_todas(request: MarcarTodasRequest, db: Session = Depends(get_db)):
+    tipo = request.tipo
+    usuario_id = request.usuario_id
 
     if tipo not in ["corretor", "assessoria"]:
         return {"error": "Tipo inválido"}
@@ -77,7 +84,7 @@ def marcar_todas(tipo: str, usuario_id: int, db: Session = Depends(get_db)):
         for c in comissoes:
             c.status_pagamento_corretor = "pago"
             c.data_pagamento_corretor = datetime.utcnow()
-    else:  # assessoria
+    else:
         comissoes = db.query(Comissao).filter(
             Comissao.assessoria_id == usuario_id,
             Comissao.status_pagamento_assessoria != "pago"
