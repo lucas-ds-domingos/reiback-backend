@@ -35,7 +35,9 @@ def listar_comissoes_pendentes(db: Session = Depends(get_db)):
             "percentual_assessoria": float(c.percentual_assessoria),
             "valor_assessoria": float(c.valor_assessoria),
             "corretor": c.corretor.nome if c.corretor else None,
-            "assessoria": c.assessoria.razao_social if c.assessoria else None
+            "corretor_id": c.corretor.id if c.corretor else None,
+            "assessoria": c.assessoria.razao_social if c.assessoria else None,
+            "assessoria_id": c.assessoria.id if c.assessoria else None
         })
     return resultados
 
