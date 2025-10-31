@@ -247,12 +247,12 @@ async def comissoes_pagas_corretor(
         raise HTTPException(status_code=400, detail="Formato de data inválido. Use YYYY-MM-DD.")
 
     comissoes = db.query(Comissao).filter(
-        Comissao.corretor_id == usuario.corretora_id,
-        Comissao.status_pagamento_corretor == "pago",
-        Comissao.data_pagamento_corretor >= data_inicio,
-        Comissao.data_pagamento_corretor <= data_fim
+    Comissao.corretor_id == usuario.id,  # ✅ corrigido
+    Comissao.status_pagamento_corretor == "pago",
+    Comissao.data_pagamento_corretor >= data_inicio,
+    Comissao.data_pagamento_corretor <= data_fim
     ).order_by(Comissao.data_pagamento_corretor.asc()).all()
-
+    
     if not comissoes:
         raise HTTPException(status_code=404, detail="Nenhuma comissão paga encontrada neste período")
 
